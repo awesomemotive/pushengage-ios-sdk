@@ -1,0 +1,38 @@
+
+disabled_rules:
+    - trailing_whitespace
+    - trailing_newline
+    - vertical_whitespace
+    - redundant_objc_attribute
+    - nesting
+excluded:
+  - Carthage
+  - Pods
+  
+type_body_length:
+  - 500 # warning
+  - 550 # error
+  
+file_length:
+  - 800 # warning
+  - 1000 # error
+    
+identifier_name:
+  min_length: # only min_length
+    error: 2
+    warning : 2
+    
+cyclomatic_complexity:
+  ignores_case_statements: true
+  
+function_body_length:
+  - 80 # warning
+  - 90 # error
+  
+line_length:
+  - 125 # warning
+  - 130 # error
+  
+function_parameter_count:
+  - 7 # warning
+  - 10 # error
