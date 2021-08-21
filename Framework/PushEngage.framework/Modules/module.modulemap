@@ -1,0 +1,11 @@
+framework module PushEngage {
+  umbrella header "PushEngage.h"
+
+  export *
+  module * { export * }
+}
+
+module PushEngage.Swift {
+    header "PushEngage-Swift.h"
+    requires objc
+}
