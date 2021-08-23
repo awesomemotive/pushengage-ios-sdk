@@ -8,6 +8,11 @@
 import Foundation
 import UIKit
 
+/*
+ * This class is PushEngageAppdelegate which is swizzlied with the UIApplicationDelegate so that we can reduce the
+ * the integartion step for the SDK integration for the host application.
+ */
+
 class PushEngageAppDelegate: NSObject {
     
     private static var delegateClass: AnyClass?
@@ -22,7 +27,12 @@ class PushEngageAppDelegate: NSObject {
         return delegateClass
     }
     
+    // Check Selector tag so the SDK would know that Swizzling happened already or not.
+    
     @objc dynamic public func pushEngageSELTag() {}
+    
+    /// this method selector do the first step by swizzlie the UIApplication Delegate selectors with the PushEngageAppDelegate selector.
+    /// - Parameter delegate: delegate is UIApplication Delegate type parameter signature should match for method swizzling.
 
      @objc dynamic public func setPushEngageDelegate(_ delegate: UIApplicationDelegate) {
         PELogger.debug(className: String(describing: PushEngageAppDelegate.self),
@@ -119,11 +129,6 @@ class PushEngageAppDelegate: NSObject {
                                        didReceiveRemoteNotification: userInfo,
                                        fetchCompletionHandler: completionHandler)
             return
-        }
-        
-        if self.responds(to: #selector(pushEngageReciveRemoteNotification(_:didReceiveRemoteNotification:)))
-            && !Self.viewModel.isAppColdStartedFromNotify {
-            self.pushEngageReciveRemoteNotification(application, didReceiveRemoteNotification: userInfo)
         }
         
         if !initiateBackgroundtask {

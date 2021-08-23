@@ -88,8 +88,12 @@ public typealias PENotificationWillShowInForground
     ///  to set the app push id to the SDK to register the subsciber to that app push id.
     /// - Parameter key: App push id.
     @objc public static func setAppId(key: String) {
-        Configuration.enviroment = .dev
+        
         viewModel.setAppId(key: key)
+    }
+    
+    @objc public static func setEnv(enviroment: Environment) {
+        Configuration.enviroment = enviroment
     }
     
     

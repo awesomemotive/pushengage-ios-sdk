@@ -1,0 +1,293 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.4 (swiftlang-1205.0.26.9 clang-1205.0.19.55)
+// swift-module-flags: -target armv7-apple-ios9.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name PushEngage
+import CoreLocation
+import Foundation
+import MachO
+@_exported import PushEngage
+import Swift
+import SystemConfiguration
+import UIKit
+import UserNotifications
+import WebKit
+public typealias PEnotificationOpenHandler = (PushEngage.PENotificationOpenResult) -> Swift.Void
+public typealias PEBackgroundTaskCompletionBlock = ((UIKit.UIBackgroundFetchResult) -> Swift.Void)
+public typealias PESilentPushBackgroundHandler = (PushEngage.PENotification, PushEngage.PEBackgroundTaskCompletionBlock?) -> Swift.Void
+public typealias PENotificationDisplayNotification = (PushEngage.PENotification?) -> Swift.Void
+public typealias PENotificationWillShowInForground = (PushEngage.PENotification, (PushEngage.PENotification?) -> Swift.Void) -> Swift.Void
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objcMembers @objc final public class PushEngage : ObjectiveC.NSObject {
+  @objc public static var enableLogs: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc public static func swizzleInjection(isEnabled: Swift.Bool)
+  @objc public static func setNotificationOpenHandler(block: PushEngage.PEnotificationOpenHandler?)
+  @objc public static func setNotificationWillShowInForgroundHandler(block: PushEngage.PENotificationWillShowInForground?)
+  @objc public static func setAppId(key: Swift.String)
+  @objc public static func startNotificationServices(for application: UIKit.UIApplication, with launchOptions: [UIKit.UIApplication.LaunchOptionsKey : Any]?)
+  @available(iOS 10.0, *)
+  @objc public static func didReceiveNotificationExtensionRequest(_ request: UserNotifications.UNNotificationRequest, bestContentHandler: UserNotifications.UNMutableNotificationContent)
+  @objc public static func update(attributes: PushEngage.Parameters, completionHandler: ((Swift.Bool, Swift.Error?) -> Swift.Void)?)
+  @objc public static func getAttribute(completionHandler: @escaping ([Swift.String : Any]?, Swift.Error?) -> Swift.Void)
+  @objc public static func addProfile(for id: Swift.String, completionHandler: ((Swift.Bool, Swift.Error?) -> Swift.Void)?)
+  @objc public static func deleteAttribute(values: [Swift.String], completionHandler: ((Swift.Bool, Swift.Error?) -> Swift.Void)?)
+  @objc public static func update(segments: [Swift.String], with action: PushEngage.SegmentActions, completionHandler: ((Swift.Bool, Swift.Error?) -> Swift.Void)?)
+  @objc public static func update(dynamic segments: [[Swift.String : Any]], completionHandler: ((Swift.Bool, Swift.Error?) -> Swift.Void)?)
+  @objc public static func updateTrigger(status: Swift.Bool, completionHandler: ((Swift.Bool, Swift.Error?) -> Swift.Void)?)
+  @objc public static func getSubscriberDetails(for fields: [Swift.String]?, completionHandler: ((PushEngage.SubscriberDetailsData?, Swift.Error?) -> Swift.Void)?)
+  @objc public static func createTriggerCampaign(for details: PushEngage.TriggerCampaign, completionHandler: ((Swift.Bool) -> Swift.Void)?)
+  @available(iOS 10.0, *)
+  @objc public static func serviceExtensionTimeWillExpire(_ request: UserNotifications.UNNotificationRequest, content: UserNotifications.UNMutableNotificationContent?) -> UserNotifications.UNMutableNotificationContent?
+  @objc public static func silentPushHandler(_ completion: PushEngage.PESilentPushBackgroundHandler?)
+  @available(iOS 10.0, *)
+  @objc public static func getCustomUIPayLoad(for request: UserNotifications.UNNotificationRequest) -> PushEngage.CustomUIModel
+  @objc public static func registerDeviceToServer(with deviceToken: Foundation.Data)
+  @discardableResult
+  @objc public static func recivedRemoteNotification(application: UIKit.UIApplication, userInfo: [Swift.AnyHashable : Any], completionHandler: ((UIKit.UIBackgroundFetchResult) -> Swift.Void)?) -> Swift.Bool
+  @available(iOS 10.0, *)
+  @objc public static func didRecivedRemoteNotification(with notification: UserNotifications.UNNotificationResponse)
+  @objc deinit
+}
+@objc @_hasMissingDesignatedInitializers public class CustomUIModel : ObjectiveC.NSObject {
+  public var title: Swift.String
+  public var body: Swift.String
+  public var image: UIKit.UIImage?
+  public var buttons: [PushEngage.CustomUIButtons]?
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objc @_hasMissingDesignatedInitializers public class CustomUIButtons : ObjectiveC.NSObject {
+  public var text: Swift.String
+  public var id: Swift.String
+  @objc override dynamic public init()
+  @objc deinit
+}
+public enum DeepLinkingTypes {
+  case screens
+  case websites
+  public static func == (a: PushEngage.DeepLinkingTypes, b: PushEngage.DeepLinkingTypes) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public enum PermissonStatus : Swift.String {
+  case granted
+  case denied
+  case notYetRequested
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+@objc public enum SegmentActions : Swift.Int {
+  case update
+  case remove
+  case none
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@objcMembers @objc public class TriggerCampaign : ObjectiveC.NSObject {
+  @objc public init(campaignName: Swift.String, eventName: Swift.String, notificationDetails: [PushEngage.TriggerNotification]?, data: [Swift.String : Swift.String]?)
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objcMembers @objc public class TriggerNotification : ObjectiveC.NSObject {
+  @objc public init(notificationURL: PushEngage.Input, title: PushEngage.Input?, message: PushEngage.Input?, notificationImage: PushEngage.Input?, bigImage: PushEngage.Input?, actions: PushEngage.Input?)
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objcMembers @objc public class Input : ObjectiveC.NSObject {
+  @objc public init(key: Swift.String, value: Swift.String)
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objcMembers @objc final public class CheckSubscriberResponse : ObjectiveC.NSObject, Swift.Codable {
+  final public let errorCode: Swift.Int?
+  @objc final public let data: PushEngage.CheckSubscriberData?
+  @objc final public let errorMessage: Swift.String?
+  @objc final public let error: PushEngage.ObjcErrorResponse?
+  @objc deinit
+  final public func encode(to encoder: Swift.Encoder) throws
+  public init(from decoder: Swift.Decoder) throws
+}
+@objcMembers @objc final public class CheckSubscriberData : ObjectiveC.NSObject, Swift.Codable {
+  @objc final public let deviceToken: Swift.String?
+  @objc deinit
+  final public func encode(to encoder: Swift.Encoder) throws
+  public init(from decoder: Swift.Decoder) throws
+}
+@objcMembers @objc final public class ObjcErrorResponse : ObjectiveC.NSObject, Swift.Codable {
+  @objc final public let message: Swift.String?
+  final public let code: Swift.Int?
+  @objc deinit
+  final public func encode(to encoder: Swift.Encoder) throws
+  public init(from decoder: Swift.Decoder) throws
+}
+public typealias HTTPHeaders = [Swift.String : Swift.String]
+public enum HTTPMethod : Swift.String {
+  case get
+  case post
+  case patch
+  case delete
+  case put
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+@objc public enum ActionType : Swift.Int {
+  case opened
+  case taken
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@_hasMissingDesignatedInitializers @objcMembers @objc public class PENotification : ObjectiveC.NSObject {
+  @objc public var completionBlock: PushEngage.PENotificationDisplayNotification?
+  @objc public var title: Swift.String? {
+    get
+  }
+  @objc public var body: Swift.String? {
+    get
+  }
+  public var badge: Swift.Int? {
+    get
+  }
+  @objc public var sound: Swift.String? {
+    get
+  }
+  @objc public var mutableContent: Swift.Int {
+    get
+  }
+  @objc public var contentAvailable: Swift.Int {
+    get
+  }
+  @objc public var category: Swift.String? {
+    get
+  }
+  @objc public var threadId: Swift.String? {
+    get
+  }
+  @objc public var targetContentId: Swift.String? {
+    get
+  }
+  @objc public var tag: Swift.String {
+    get
+  }
+  @objc public var attachmentURL: Swift.String? {
+    get
+  }
+  @objc public var launchURL: Swift.String? {
+    get
+  }
+  @objc public var isSponsered: Swift.Int {
+    get
+  }
+  public var badgeIncrement: Swift.Int? {
+    get
+  }
+  @objc public var additionalData: [Swift.String : Swift.String]? {
+    get
+  }
+  public var actionButtons: [PushEngage.PENotification.PEActionButton]? {
+    get
+  }
+  @objc public var subtitle: Swift.String? {
+    get
+  }
+  @objc public var rawPayload: [Swift.AnyHashable : Any] {
+    get
+  }
+  @objc public var deeplinking: Swift.String? {
+    get
+  }
+  @_hasMissingDesignatedInitializers public class PEActionButton {
+    @objc deinit
+  }
+  @objc deinit
+  @objc override dynamic public init()
+}
+@objcMembers @objc public class PENotificationOpenResult : ObjectiveC.NSObject {
+  @objc public var notification: PushEngage.PENotification
+  @objc public var notificationAction: PushEngage.PEnotificationAction
+  @objc public init(notification: PushEngage.PENotification, notficationAction: PushEngage.PEnotificationAction)
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objcMembers @objc public class PEnotificationAction : ObjectiveC.NSObject {
+  @objc public var actionID: Swift.String? {
+    get
+  }
+  @objc public var actionType: PushEngage.ActionType
+  @objc public init(actionID: Swift.String?, actionType: PushEngage.ActionType)
+  @objc override dynamic public init()
+  @objc deinit
+}
+public typealias Parameters = [Swift.String : Any]
+@objc @_inheritsConvenienceInitializers open class AsyncOperation : Foundation.Operation {
+  @objc override dynamic open var isAsynchronous: Swift.Bool {
+    @objc get
+  }
+  @objc override dynamic open var isExecuting: Swift.Bool {
+    @objc get
+  }
+  @objc override dynamic open var isFinished: Swift.Bool {
+    @objc get
+  }
+  @objc override dynamic open func start()
+  @objc override dynamic open func main()
+  open func finish()
+  @objc override dynamic public init()
+  @objc deinit
+}
+extension Operation {
+  @discardableResult
+  public func observeStateChanges() -> [Foundation.NSKeyValueObservation]
+}
+@_inheritsConvenienceInitializers @objcMembers @objc public class SubsciberDetailsResponse : ObjectiveC.NSObject, Swift.Codable {
+  public var errorCode: Swift.Int?
+  @objc public var data: PushEngage.SubscriberDetailsData?
+  @objc public var error: PushEngage.ObjcErrorResponse?
+  @objc public var errorMessage: Swift.String?
+  @objc override dynamic public init()
+  @objc deinit
+  public func encode(to encoder: Swift.Encoder) throws
+  required public init(from decoder: Swift.Decoder) throws
+}
+@_inheritsConvenienceInitializers @objcMembers @objc public class SubscriberDetailsData : ObjectiveC.NSObject, Swift.Codable {
+  @objc public var city: Swift.String?, device: Swift.String?, host: Swift.String?, userAgent: Swift.String?
+  @objc public var deviceType: Swift.String?
+  @objc public var segments: [Swift.String]?
+  @objc public var timezone: Swift.String?, country: Swift.String?, tsCreated: Swift.String?, state: Swift.String?
+  @objc public var subscriptionURL: Swift.String?
+  @objc override dynamic public init()
+  @objc deinit
+  public func encode(to encoder: Swift.Encoder) throws
+  required public init(from decoder: Swift.Decoder) throws
+}
+public struct JSONParameterEncoder {
+  public static func encode<T>(urlRequest: inout Foundation.URLRequest, with object: T) throws where T : Swift.Decodable, T : Swift.Encodable
+  public static func encode(urlRequest: inout Foundation.URLRequest, for parameter: PushEngage.Parameters) throws
+}
+extension PushEngage.DeepLinkingTypes : Swift.Equatable {}
+extension PushEngage.DeepLinkingTypes : Swift.Hashable {}
+extension PushEngage.PermissonStatus : Swift.Equatable {}
+extension PushEngage.PermissonStatus : Swift.Hashable {}
+extension PushEngage.PermissonStatus : Swift.RawRepresentable {}
+extension PushEngage.SegmentActions : Swift.Equatable {}
+extension PushEngage.SegmentActions : Swift.Hashable {}
+extension PushEngage.SegmentActions : Swift.RawRepresentable {}
+extension PushEngage.HTTPMethod : Swift.Equatable {}
+extension PushEngage.HTTPMethod : Swift.Hashable {}
+extension PushEngage.HTTPMethod : Swift.RawRepresentable {}
+extension PushEngage.ActionType : Swift.Equatable {}
+extension PushEngage.ActionType : Swift.Hashable {}
+extension PushEngage.ActionType : Swift.RawRepresentable {}

@@ -8,10 +8,10 @@
 import Foundation
 
 struct Configuration {
-    static var enviroment: Environment = .dev
+    static var enviroment: Environment = .prod
 }
 
-enum Environment: String {
+@objc public enum Environment: Int {
     case dev
     case prod
 }
@@ -32,7 +32,7 @@ struct PENetworkURLs {
     static var cdStaging: String {
         switch Configuration.enviroment {
         case .dev:
-            return stagingcdnBaseURL
+            return syncapiObject?.api?.backendCloud ?? stagingcdnBaseURL
         case .prod:
             return  syncapiObject?.api?.backendCloud ?? defaultsubscriberBaseURL
         }
@@ -41,7 +41,7 @@ struct PENetworkURLs {
     static var subscriberbaseURL: String {
         switch Configuration.enviroment {
         case .dev:
-            return stagingBaseURL
+            return syncapiObject?.api?.backend ?? stagingBaseURL
         case .prod:
             return  syncapiObject?.api?.backend ?? defaultsubscriberBaseURL
         }
@@ -50,7 +50,7 @@ struct PENetworkURLs {
     static var notifyAnalyticsBaseURL: String {
         switch Configuration.enviroment {
         case .dev:
-            return stagingBaseURL
+            return syncapiObject?.api?.backend ?? stagingBaseURL
         case .prod:
             return syncapiObject?.api?.analytics ?? defaultNotifyAnalyticBaseURL
         }
@@ -59,7 +59,7 @@ struct PENetworkURLs {
     static var triggerBaseURL: String {
         switch Configuration.enviroment {
         case .dev:
-            return defaultTriggerBaseURL
+            return syncapiObject?.api?.trigger ?? defaultTriggerBaseURL
         case .prod:
             return syncapiObject?.api?.trigger ?? defaultTriggerBaseURL
         }
@@ -68,7 +68,7 @@ struct PENetworkURLs {
     static var loggingBaseURL: String {
         switch Configuration.enviroment {
         case .dev:
-            return stagingLoggerBaseURL
+            return syncapiObject?.api?.log  ?? stagingLoggerBaseURL
         case .prod:
             return syncapiObject?.api?.log ?? defaultLoggingBaseURL
         }

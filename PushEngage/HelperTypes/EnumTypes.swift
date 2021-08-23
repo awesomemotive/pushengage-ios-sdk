@@ -7,12 +7,6 @@
 
 import Foundation
 
-public enum DeepLinkingTypes {
-    case screens
-    case websites
-}
-
-
 public enum PermissonStatus: String {
     
     /// The application is authorized to post user notifications.
@@ -59,29 +53,6 @@ enum StatusKey: String {
     case notificationStatusKey
 }
 
-
-enum RegistraionStatus {
-    case registered
-    case notRegistered(String, NotRegisteredType)
-}
-
-enum NotRegisteredType {
-    case notificationDisable
-    case both
-    case siteKeyissue
-    
-    var value: String {
-        switch self {
-        case .notificationDisable:
-            return "notification id disable or denied"
-        case .both:
-            return "site key is not valid and notification disabled"
-        case .siteKeyissue:
-            return "siteKey is not valid or verified"
-        }
-    }
-}
-
 enum SiteStatus: String {
     case active
     case inactive
@@ -89,26 +60,4 @@ enum SiteStatus: String {
     case delete
     case none 
     
-}
-
-
-enum  PayloadKey: String {
-    case attachmentKey = "att"
-    case launchUrlKey = "u"
-    case custom = "pe"
-    case deeplinking = "dl"
-    case actionSelected = "actionSelected"
-    case additionalData = "ad"
-    case tag = "tag"
-    case duplicate = "duplicate"
-    case title = "t"
-    case aps = "aps"
-    case alert = "alert"
-    case sound = "sound"
-    case badge = "badge"
-    case custombadge = "ba"
-    case customSound = "s"
-    case actionButton = "ab"
-    case customsubtitle = "sb"
-    case customBody = "b"
 }

@@ -32,17 +32,9 @@ class PEViewModel {
     private var lastNonActiveNotifyRecivedId: String?
     private var lastNotifyIdFromAction: String?
     private var unprocessedNotification: [PENotificationOpenResult]?
-    private var coldStartOfAppFromNotification: Bool = false
     private var silentPushNotificationHandler: PESilentPushBackgroundHandler?
     private var silentCompletionTask: PEBackgroundTaskCompletionBlock?
     private var timer: Timer?
-    
-    var isAppColdStartedFromNotify: Bool {
-        let value = coldStartOfAppFromNotification
-        coldStartOfAppFromNotification = false
-        return value
-    }
-    
     
     init(applicationService: ApplicationProtocol,
          notificationService: NotificationProtocol,

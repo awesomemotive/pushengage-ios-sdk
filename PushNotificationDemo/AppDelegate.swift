@@ -39,6 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
         
         application.applicationIconBadgeNumber = 0
+        PushEngage.setEnv(enviroment: .dev)
         PushEngage.setAppId(key: "2d1b475e-cc73-42a1-8f13-58c944e3")
         PushEngage.startNotificationServices(for: application,
                                              with: launchOptions)
