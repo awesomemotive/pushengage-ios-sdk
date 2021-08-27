@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 @objc public enum SegmentActions: Int {
-    case update
+    case add
     case remove
     case none
 }
@@ -313,7 +313,7 @@ class SubscriberServiceManager: SubscriberService {
         switch action {
         case .remove:
             route = .removeSegment(subscriberInfo)
-        case .update:
+        case .add:
             route = .addSegments(subscriberInfo)
         default:
             break
@@ -485,7 +485,7 @@ extension SubscriberServiceManager {
                     if Utility.retryCheck(error: error) == .allow {
                         BackgroundTaskExpirationHandler.run(application: UIApplication.shared) { background in
                             DispatchQueue.global(qos: .background).async {
-                                self?.retry(3, delay: 60) { [weak self] result in
+                                self?.retry(3, delay: 300) { [weak self] result in
                                     self?.addSubscriberToServer(completion: result)
                                 } completion: { error in
                                     PELogger.debug(className: String(describing: SubscriberServiceManager.self),

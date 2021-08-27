@@ -83,13 +83,11 @@ struct AddSubscriberData: Codable {
     public let errorCode: Int?
     public let data: CheckSubscriberData?
     public let errorMessage: String?
-    public let error: ObjcErrorResponse?
     
     enum CodingKeys: String, CodingKey {
         case errorCode = "error_code"
         case data = "data"
         case errorMessage = "error_message"
-        case error
     }
 }
 
@@ -101,18 +99,6 @@ struct AddSubscriberData: Codable {
     
     enum CodingKeys: String, CodingKey {
         case deviceToken = "gateway_endpoint"
-    }
-}
-
-// MARK: - Error Message
-@objcMembers
-@objc final public class ObjcErrorResponse: NSObject, Codable {
-    public let message: String?
-    public let code: Int?
-    
-    enum CodingKeys: String, CodingKey {
-        case message
-        case code
     }
 }
 

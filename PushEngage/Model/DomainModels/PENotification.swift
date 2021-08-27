@@ -36,7 +36,7 @@ import Foundation
     internal(set)public var subtitle: String?
     internal(set)public var rawPayload: [AnyHashable: Any]
     internal(set)public var deeplinking: String?
-    var postback: Postback?
+    var postback: AnyCodable?
     
     init(userInfo: [AnyHashable: Any]) {
         var parsedValue: PEPayload? = Utility.parse(typeof: PEPayload.self,

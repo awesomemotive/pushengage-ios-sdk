@@ -26,6 +26,19 @@ class PEUNUserNotificationCenterDelegate: NSObject, UNUserNotificationCenterDele
 @available(iOS 10.0, *)
 typealias PENotificationCenterCompletionHandler = (UNNotificationPresentationOptions) -> Void
 
+// This class hooks into the following iSO 10 UNUserNotificationCenterDelegate selectors:
+// - userNotificationCenter:willPresentNotification:withCompletionHandler:
+//   - Reads PushEngage inFocusDisplayType to respect it's setting.
+// - userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:
+//   - Used to process opening notifications.
+//
+// NOTE: On iOS 10, when a UNUserNotificationCenterDelegate is set,
+//       UIApplicationDelegate notification selectors no longer fire.
+//       However, this class maintains firing of UIApplicationDelegate selectors if the app did not setup it's
+//       own UNUserNotificationCenterDelegate.
+//       This ensures we don't produce any side effects to standard iOS API selectors.
+//       The callLegacyAppDeletegateSelector selector below takes care of this backwards compatibility handling.
+
 @available(iOS 10.0, *)
 class PushEngageUNUserNotificationCenter: NSObject {
     
@@ -36,8 +49,14 @@ class PushEngageUNUserNotificationCenter: NSObject {
     
     private static var delegateUNClass: AnyClass?
     
+    // Store an array of all UNUserNotificationCenterDelegate subclasses to iterate over in cases
+    // where UNUserNotificationCenterDelegate swizzled methods are not overriden in main AppDelegate
+    // But rather in one of the subclasses
     private static var delegateUNSubClasses: [AnyClass]?
     
+    // ensures setDelegate: swizzles will never get executed
+    // twice for the same delegate object
+    // weak reference to avoid retain cycles
     private weak static var previousDelegate: UNUserNotificationCenterDelegate?
     
     private static let selector = PESelectorHelper.shared
@@ -70,9 +89,22 @@ class PushEngageUNUserNotificationCenter: NSObject {
     private static func registerDelegate() {
         let currentNotificationCenter = UNUserNotificationCenter.current()
         if currentNotificationCenter.delegate == nil {
+            
+              // Set PEUNUserNotificationCenterDelegate.sharedInstance as a
+              // UNUserNotificationCenterDelegate.
+              // Note that PEUNUserNotificationCenterDelegate does not contain the methods such as
+              // "willPresentNotification" as this assigment triggers setPEUNDelegate which
+              //  will attach the selectors to the class at runtime.
+             
             currentNotificationCenter.delegate = PEUNUserNotificationCenterDelegate
                                                 .sharedInstance()
         } else {
+            
+             // This handles the case where a delegate may have already been assigned before
+             // PushEngage is loaded into memory.
+             // This re-assignment triggers setPEUNDelegate providing it with the
+             //  existing delegate instance so PushEngage can swizzle in its logic.
+            
             let oldDelegate = currentNotificationCenter.delegate
             currentNotificationCenter.delegate = oldDelegate
         }
@@ -99,13 +131,11 @@ class PushEngageUNUserNotificationCenter: NSObject {
         self.pushEngageRequestAuthorizationWithOptions(options: options, completionHandler: block)
     }
     
-    // if developer haven't set  UNUserNotificationCenterDelegate in the
-    // application below method will call once
-    
-    // if developer have set UNUserNotificationCenterDelegate below method will call twice
-    // this is the expected behaviour of this delegate swizzling. because of this only
-    // developer implementation will called after SDK's implementation.
-    
+    /// if developer haven't set  UNUserNotificationCenterDelegate in the
+    /// application below method will call once
+    /// if developer have set UNUserNotificationCenterDelegate below method will call twice
+    /// this is the expected behaviour of this delegate swizzling. because of this only
+    /// developer implementation will called after SDK's implementation.
     @objc dynamic func setPEUNDelegate(delegate: UNUserNotificationCenterDelegate) {
         PELogger.debug(className: String(describing: PushEngageUNUserNotificationCenter.self),
                        message: "PushEngageUNDelegate called: \(delegate)")
@@ -118,6 +148,9 @@ class PushEngageUNUserNotificationCenter: NSObject {
         self.setPEUNDelegate(delegate: delegate)
     }
     
+    
+    /// This selector hooks and swizzle the implementation of the UNNotificationSettings and update the setting status of the
+    /// for the notifications.
     @objc dynamic func pushEngageGetNotificationSettings(completionHandler: @escaping (UNNotificationSettings) -> Void) {
         if Self.cachedUNNotificationSettings != nil
             && Self.useCachedUNNotificationSettings
@@ -133,6 +166,8 @@ class PushEngageUNUserNotificationCenter: NSObject {
         self.pushEngageGetNotificationSettings(completionHandler: block)
     }
     
+    /// This function handles to hook all the selector of PushEngageUNUserNotificationCenter
+    ///  with the UNUserNotificationCenterDelegate
     private func hookSelectorToDelegate(for delegate: UNUserNotificationCenterDelegate) {
         PELogger.debug(className: String(describing: PushEngageUNUserNotificationCenter.self),
                        message: "\(delegate)")
@@ -167,6 +202,8 @@ class PushEngageUNUserNotificationCenter: NSObject {
         }
     }
     
+    /// This method invokes when notifications delivered in foreground mode only.
+    /// And provide the implementaion to handle the foreground handler of PushEngage.
     @objc dynamic func pushEngageUserNotificationCenter(_ center: UNUserNotificationCenter,
                                                         willPresent notification: UNNotification,
                                                         withCompletionHandler
@@ -230,6 +267,9 @@ class PushEngageUNUserNotificationCenter: NSObject {
         completionHandler(completionHandlerOptions)
     }
     
+    
+    /// This method or selector invokes when notification has some action on it like
+    /// some one clicked the notification or action buttons. And used to process opening notification
     @objc dynamic func pushEngageUserNotificationCenter(_ center: UNUserNotificationCenter,
                                                         didReceive response: UNNotificationResponse,
                                                         withCompletionHandler

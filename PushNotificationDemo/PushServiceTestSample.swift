@@ -70,7 +70,7 @@ extension PushServiceTestSample : UITableViewDelegate , UITableViewDataSource {
         let action = ApiAction(rawValue: indexPath.row)
         switch action {
         case .addAttribute:
-            PushEngage.update(attributes: ["name" : "Abhishek",
+            PushEngage.add(attributes: ["name" : "Abhishek",
                                            "gender" : "male",
                                            "place" : "banglore",
                                            "phoneNo" : 91231114]) { [weak self] (response, error) in
@@ -83,7 +83,7 @@ extension PushServiceTestSample : UITableViewDelegate , UITableViewDataSource {
                 }
             }
         case .addDynamicSegement:
-            PushEngage.update(dynamic:  [
+            PushEngage.add(dynamic:  [
                 ["name" : "Android" , "duration" : 7],
             ]) {
                 [weak self] (response, error) in
@@ -96,7 +96,7 @@ extension PushServiceTestSample : UITableViewDelegate , UITableViewDataSource {
                     }
             }
         case .addSegment:
-            PushEngage.update(segments: ["newTestSegment","segmentTest1"], with: .update) { [weak self] (result , error) in
+            PushEngage.add(segments: ["newTestSegment","segmentTest1"]) { [weak self] (result , error) in
                 DispatchQueue.main.async {
                     if result {
                         self?.textView.text = "added segment successfully"
@@ -116,7 +116,7 @@ extension PushServiceTestSample : UITableViewDelegate , UITableViewDataSource {
                 }
             }
         case .removeSegment:
-            PushEngage.update(segments: ["segmentTest1"], with: .remove) { [weak self] (result , error) in
+            PushEngage.remove(segments: ["segmentTest1"]) { [weak self] (result , error) in
                 DispatchQueue.main.async {
                     if result {
                         self?.textView.text = "remove segment successfully"

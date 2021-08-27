@@ -32,17 +32,9 @@ class PEViewModel {
     private var lastNonActiveNotifyRecivedId: String?
     private var lastNotifyIdFromAction: String?
     private var unprocessedNotification: [PENotificationOpenResult]?
-    private var coldStartOfAppFromNotification: Bool = false
     private var silentPushNotificationHandler: PESilentPushBackgroundHandler?
     private var silentCompletionTask: PEBackgroundTaskCompletionBlock?
     private var timer: Timer?
-    
-    var isAppColdStartedFromNotify: Bool {
-        let value = coldStartOfAppFromNotification
-        coldStartOfAppFromNotification = false
-        return value
-    }
-    
     
     init(applicationService: ApplicationProtocol,
          notificationService: NotificationProtocol,
@@ -344,9 +336,9 @@ class PEViewModel {
                                                                             bestContentHandler: bestContentHandler)
     }
     
-    // MARK: - update Subsciber Attributes
+    // MARK: - add Subsciber Attributes
     
-    func update(attributes: Parameters, completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
+    func add(attributes: Parameters, completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
         let error = prerequesiteNetworkCallCheck {
             subscriberService.update(attributes: attributes, completionHandler: completionHandler)
         }
@@ -403,9 +395,9 @@ class PEViewModel {
         }
     }
     
-    // MARK: - update dynamic segments
-    func update(dynamic segments: [[String: Any]],
-                completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
+    // MARK: - add dynamic segments
+    func add(dynamic segments: [[String: Any]],
+             completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
         let error = prerequesiteNetworkCallCheck {
             subscriberService.update(dynamic: segments,
                                      completionHandler: completionHandler)
@@ -614,7 +606,7 @@ extension PEViewModel {
            notification.isSponsered == 0 {
             for (index, button) in buttons.enumerated()
                 where button.id == id {
-                clickedButton = "click\(index + 1)"
+                clickedButton = "action\(index + 1)"
             }
         }
         notificationLifeCycleService.withRetrynotificationLifecycleUpdate(with: .clicked,
@@ -703,7 +695,7 @@ extension PEViewModel: LastNotificationSetDelagate {
             if let block = completionHandler {
                 setSilentNotificationTaskBlock(block)
                 if silentPushNotificationHandler != nil {
-                     timer = Timer.init(timeInterval: 25.0, target: self,
+                     timer = Timer.init(timeInterval: 29.0, target: self,
                                                    selector: #selector(completeTaskBacgroundSilentTask),
                                                    userInfo: nil, repeats: false)
                     startTimerForSilentPush()

@@ -58,7 +58,8 @@ open class AsyncOperation: Operation {
     }
 
     override open func main() {
-        print("main execution")
+        PELogger.debug(className: String(describing: AsyncOperation.self),
+                       message: "AsyncOperation main.")
         finish()
     }
 

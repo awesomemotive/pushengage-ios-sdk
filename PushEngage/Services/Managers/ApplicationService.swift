@@ -35,6 +35,8 @@ class ApplicationService: ApplicationProtocol {
         self.operationQueue = OperationQueue()
     }
     
+    /// This function make sure that device token is register to pushengage server A.K.A (add Subscriber.)
+    /// And also responsible to update the device token to server also.
     func registerDeviceToServer(with deviceToken: Data) {
         let token = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
         let existingDeviceToken = userDefault.deviceToken
@@ -123,6 +125,8 @@ class ApplicationService: ApplicationProtocol {
         }
     }
     
+    /// func take care for the sponsered notification as  sponsered notification is recognised as silent notification in SDK.
+    /// And then create notification with data available from postback call the 0.25 second sponsered notfication is fired.
     @available(iOS 10.0, *)
     private func createSponseredNotification(notification: PENotification) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()

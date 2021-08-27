@@ -97,11 +97,10 @@ class NotificationSettingsManageriOS9: NotificationProtocol {
             
             switch self?.notificationPermissionStatus.value {
             case .notYetRequested :
-                let block = { [weak self] (response: Bool) -> Void in
+                self?.promptForNotification(application) { [weak self] (response: Bool) -> Void in
                     self?.notificationPermissionStatus.value = response ? .granted : .denied
                     self?.registerToApns(for: application)
                 }
-                self?.promptForNotification(application, completionHandler: block)
                 self?.userDefaultService.ispermissionAlerted = true
                 PELogger.debug(className: String(describing: NotificationSettingsManageriOS9.self),
                                message: "promtedNotification authorization request.")

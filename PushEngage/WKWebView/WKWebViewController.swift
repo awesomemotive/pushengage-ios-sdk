@@ -38,6 +38,7 @@ class WKWebViewController: UIViewController {
         return next
     }()
     
+    // if serach bar is not match the criteria the just remove from Stackview.
     private lazy var stackview: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [back, serachBar, nextButton])
         stackView.alignment = .center

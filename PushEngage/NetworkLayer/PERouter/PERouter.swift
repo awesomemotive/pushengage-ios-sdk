@@ -229,8 +229,7 @@ enum PERouter {
         
         switch self {
         case .triggerCampaigning:
-            var url = URL(string: NetworkConstants.triggerCampaignBaseURL)!
-            url.appendPathComponent(NetworkConstants.triggerRecords)
+            let url = URL(string: NetworkConstants.triggerCampaignBaseURL)!
             return url
         case .getImage(let path):
             do {
