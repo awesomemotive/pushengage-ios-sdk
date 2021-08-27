@@ -29,6 +29,13 @@ class NotificationExtensionManager: NotificationExtensionProtocol {
     @available(iOS 10.0, *)
     func didReceiveNotificationExtensionRequest(_ request: UNNotificationRequest,
                                                 bestContentHandler: UNMutableNotificationContent) {
+        
+        if Utility.isPEPayload(userInfo: request.content.userInfo) == false {
+            PELogger.debug(className: String(describing: NotificationExtensionManager.self),
+                           message: "payload is not pushengage.")
+            return
+        }
+        
         let notificationObj = PENotification(userInfo: request.content.userInfo)
         self.addButtonTo(extension: request,
                          withNotification: notificationObj,
@@ -68,6 +75,11 @@ class NotificationExtensionManager: NotificationExtensionProtocol {
     @available(iOS 10.0, *)
     func serviceExtensionTimeWillExpire(_ request: UNNotificationRequest,
                                         content: UNMutableNotificationContent?) -> UNMutableNotificationContent? {
+        if Utility.isPEPayload(userInfo: request.content.userInfo) == false {
+            PELogger.debug(className: String(describing: NotificationExtensionManager.self),
+                           message: "payload is not pushengage.")
+            return nil
+        }
         let notification = PENotification(userInfo: request.content.userInfo)
         guard let updateContent = content else {
             return nil

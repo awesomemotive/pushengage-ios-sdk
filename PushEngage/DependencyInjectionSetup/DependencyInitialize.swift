@@ -9,6 +9,14 @@ import Foundation
 
 // Custom Dependency Initializer to inject dependencies to the Class.
 
+/*
+ 1. First register you manager with its protocol name.
+ 2. if your manager has some dependencies resolve it and provide the dependency
+    and make sure before resolving the dependency. That protocol which you are trying to resolve
+    is registered to the container.
+ 3. This container is place where you have to manages dependencies for your code.
+ */
+
 // MARK: - private class for Dependency Initialization
 internal final class DependencyInitialize {
     
@@ -21,7 +29,9 @@ internal final class DependencyInitialize {
         container = Container()
             
             // MARK: - LocationProtocol
-            
+            // this locationInfoProtocol is beign registered with its manager
+            // which is location manager. As you can see there is no dependency to initialize the
+            // location manager. So no need to resolve the dependencies
             .register(LocationInfoProtocol.self) { _  in
                 LocationManager()
             }
@@ -55,6 +65,15 @@ internal final class DependencyInitialize {
             }
             
             // MARK: - SubscriberService
+            // Here we are registering SubscriberService to the SubscriberServiceManager
+            // We find out that SubscriberServiceManager is having dependency of
+            // 1. DataSourceProtocol
+            // 2. NetworkRouter
+            // 3. UserDefaultProtocol
+            // so before initializing SubscriberServiceManager we need to reslove these dependencies.
+            // So we are resolving it and you and notice this that DataSourceProtocol and other dependencies
+            // are already registered with the container.
+            
             .register(SubscriberService.self) { resolver in
                 let datasource = resolver.resolve(DataSourceProtocol.self)
                 let networkRouter = resolver.resolve(NetworkRouter.self)

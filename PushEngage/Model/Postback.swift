@@ -11,31 +11,30 @@ import Foundation
 
 struct SponsoredPush: Codable {
     var tag: String
-    var postback: Postback?
+    var postback: AnyCodable?
 }
 
-// MARK: - Postback
-struct Postback: Codable {
-    var isSponsored: Int?
-    var network, publisher, siteSubdomain: String?
-    var siteURL: String?
-    var deviceType, device, tid: String?
-    var siteID: Int?
-    var country, city, ipAddress, userAgent: String?
-
-    enum CodingKeys: String, CodingKey {
-        case isSponsored = "is_sponsored"
-        case network, publisher
-        case siteSubdomain = "site_subdomain"
-        case siteURL = "site_url"
-        case deviceType = "device_type"
-        case device, tid
-        case siteID = "site_id"
-        case country, city
-        case ipAddress = "ip_address"
-        case userAgent = "user_agent"
-    }
-}
+// struct Postback: Codable {
+//    var isSponsored: Int?
+//    var network, publisher, siteSubdomain: String?
+//    var siteURL: String?
+//    var deviceType, device, tid: String?
+//    var siteID: Int?
+//    var country, city, ipAddress, userAgent: String?
+//
+//    enum CodingKeys: String, CodingKey {
+//        case isSponsored = "is_sponsored"
+//        case network, publisher
+//        case siteSubdomain = "site_subdomain"
+//        case siteURL = "site_url"
+//        case deviceType = "device_type"
+//        case device, tid
+//        case siteID = "site_id"
+//        case country, city
+//        case ipAddress = "ip_address"
+//        case userAgent = "user_agent"
+//    }
+// }
 
 // MARK: - SponsoredResponse
 struct SponsoredResponse: Codable {

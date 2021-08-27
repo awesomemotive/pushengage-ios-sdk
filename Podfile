@@ -8,12 +8,16 @@ target 'PushEngage' do
   pod 'SwiftLint'
   
   target 'PushEngageTests' do
-    pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+    # uncomment this line to use the local SDK dependency and comment out next line
+    # pod 'PushEngage', :path => "<>/pushengage-ios-sdk"
+    pod 'PushEngage'
   end
 end
     
 target 'PushNotificationDemo' do
-      pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+      # uncomment this line to use the local SDK dependency and comment out next line
+      # pod 'PushEngage', :path => "<>/pushengage-ios-sdk"
+      pod 'PushEngage'
       
       post_install do |installer|
           installer.pods_project.targets.each do |target|
@@ -24,19 +28,33 @@ target 'PushNotificationDemo' do
       end
       
       target 'PushEngageNotificationExtension' do
-              pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+        # uncomment this line to use the local SDK dependency and comment out next line
+        # pod 'PushEngage', :path => "<>/pushengage-ios-sdk"
+        pod 'PushEngage'
       end
         
       target 'PushEngageNotificationContentExtenstion' do
-              pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+        # uncomment this line to use the local SDK dependency and comment out next line
+        # pod 'PushEngage', :path => "<>/pushengage-ios-sdk"
+        pod 'PushEngage'
       end
 end
 
 target 'PushNotificationObjcSample' do
-  pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+      # uncomment this line to use the local SDK dependency and comment out next line
+      # pod 'PushEngage', :path => "<>/pushengage-ios-sdk"
+      pod 'PushEngage'
   
   target 'PushEngageObjcNotificationExtension' do
-    pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+      # uncomment this line to use the local SDK dependency and comment out next line
+      # pod 'PushEngage', :path => "<>/pushengage-ios-sdk"
+      pod 'PushEngage'
+  end
+  
+  target 'NotificationContentExtensionObjcSample' do
+      # uncomment this line to use the local SDK dependency and comment out next line
+      # pod 'PushEngage', :path => "<>/pushengage-ios-sdk"
+      pod 'PushEngage'
   end
 end
 

@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
                       our product will make this very easy for you to integrate with you new or existing applications."
   spec.homepage     = "https://github.com/awesomemotive/pushengage-ios-sdk"
   spec.license =  { :type => "MIT", :file => "LICENSE" }
-  spec.author             = { "Abhishek Kumar" => "abkumar@awesomemotive.com" }
+  spec.author             = { "PushEngage" => "care@pushengage.com" }
   spec.platform = :ios
   spec.ios.deployment_target  = '9.0'
   spec.requires_arc = true

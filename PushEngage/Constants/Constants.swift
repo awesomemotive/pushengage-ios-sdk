@@ -34,7 +34,7 @@ internal struct NetworkConstants {
 
     // MARK: - BASE URL
     
-    static let baseURL = PENetworkURLs.subscriberbaseURL
+    static let baseURL = PENetworkURLs.backendBaseURL
     
     static var notifAnalyticURL = PENetworkURLs.notifyAnalyticsBaseURL
     
@@ -42,7 +42,7 @@ internal struct NetworkConstants {
     
     static let errorLoggingBaseURL = PENetworkURLs.loggingBaseURL
     
-    static let cdnurl = PENetworkURLs.cdStaging
+    static let cdnurl = PENetworkURLs.backendCdnBaseURL
     
     // MARK: - SDK version
     
@@ -71,9 +71,6 @@ internal struct NetworkConstants {
     static let notificationView = "notification/view"
     static let notificationClicked = "notification/click"
     static let sponsoreFetch = "notification/fetch"
-    
-    // MARK: - Trigger Campaign relative path
-    static let triggerRecords = "/beta/streams/staging-trigger/records"
     
     // MARK: - Error logging relative path
     static let logs = "logs"
@@ -186,6 +183,9 @@ struct ParsingConstants {
     static let permissionNotDetermine = "Notification Permission is not Determined."
     static let notificationUserActionFailed = "Notification user action failed which is not retry able message: - %@."
     static let defaultActionIdentifer = "com.apple.UNNotificationDefaultActionIdentifier"
+    static let viewCountTrackingFailed = "viewCountTrackingFailed"
+    static let clickCountTrackingFailed = "clickCountTrackingFailed"
+    static let notificationRefetchFailed = "notificationRefetchFailed"
 }
 
 // MARK: - Registration Messages.

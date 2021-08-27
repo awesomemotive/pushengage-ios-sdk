@@ -46,7 +46,7 @@ struct Alert: Codable {
 struct Custom: Codable {
     var tag, attachmentURL, launchURL: String?
     var isSponsered: Int?
-    var postback: Postback?
+    var postback: AnyCodable?
     var badgeIncrement: Int?
     var title, body: String?
     var badge: Int?
@@ -83,7 +83,7 @@ struct ActionButtonInfo: Codable {
     }
 }
 
-
+@objcMembers
 public class CustomUIModel: NSObject {
     
     public var title: String
@@ -103,6 +103,7 @@ public class CustomUIModel: NSObject {
     
 }
 
+@objcMembers
 public class CustomUIButtons: NSObject {
     
     public var text: String

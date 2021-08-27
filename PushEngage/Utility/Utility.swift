@@ -179,8 +179,8 @@ struct Utility {
     
     static func isPEPayload(userInfo: [AnyHashable: Any]) -> Bool {
         if let customInfo = userInfo[userInfo: PayloadConstants.custom],
-           let tag = customInfo[string: PayloadConstants.tag] {
-            return tag.hasPrefix("N") || tag.hasPrefix("S") ?  true : false
+           customInfo[string: PayloadConstants.tag] != nil {
+            return true
         } else {
             return false
         }
@@ -355,11 +355,6 @@ struct Utility {
         let backgroundModeStatus = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? NSArray
         let isEnableRemoteNotification = backgroundModeStatus?.contains("remote-notification")
         return isEnableRemoteNotification ?? false
-    }
-    
-    static func decode<T: Codable>(ofType: T.Type, from data: Data) throws -> T {
-        let object = try JSONDecoder().decode(ofType, from: data)
-        return object
     }
     
     static var getDevice: String? {
