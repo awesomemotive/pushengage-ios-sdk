@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "PushEngage"
-  spec.version      = "0.0.1"
+  spec.version      = "0.0.1-beta"
   spec.summary      = "iOS Framework which provides easy way to start with Push
                        notification in you native iOS Applications."
   spec.description  = "To make your users interact your application even they are not using you application. Push Notifications plays most important role
