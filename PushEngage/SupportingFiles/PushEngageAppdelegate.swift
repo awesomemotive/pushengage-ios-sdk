@@ -39,8 +39,10 @@ class PushEngageAppDelegate: NSObject {
     
     @objc dynamic public func pushEngageSELTag() {}
     
-    /// this method selector do the first step by swizzlie the UIApplication Delegate selectors with the PushEngageAppDelegate selector.
-    /// - Parameter delegate: provide the delegate you want to swizzil the methods and as this is specifc designed for the UIApplicationDelegate only.
+    /// this method selector do the first step by swizzlie the UIApplication
+    /// Delegate selectors with the PushEngageAppDelegate selector.
+    /// - Parameter delegate: provide the delegate
+    /// you want to swizzil the methods and as this is specifc designed for the UIApplicationDelegate only.
 
      @objc dynamic public func setPushEngageDelegate(_ delegate: UIApplicationDelegate) {
         PELogger.debug(className: String(describing: PushEngageAppDelegate.self),

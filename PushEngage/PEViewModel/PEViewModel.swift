@@ -397,7 +397,7 @@ class PEViewModel {
     
     // MARK: - add dynamic segments
     func add(dynamic segments: [[String: Any]],
-                completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
+             completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
         let error = prerequesiteNetworkCallCheck {
             subscriberService.update(dynamic: segments,
                                      completionHandler: completionHandler)

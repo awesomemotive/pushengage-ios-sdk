@@ -108,10 +108,12 @@ struct AnyCodable: Decodable {
             } else if let stringVal = try? container.decode(String.self) {
                 value = stringVal
             } else {
-                throw DecodingError.dataCorruptedError(in: container, debugDescription: "the container contains nothing serialisable")
+                throw DecodingError.dataCorruptedError(in: container,
+                      debugDescription: "the container contains nothing serialisable")
             }
         } else {
-            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Could not serialise"))
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath,
+                  debugDescription: "Could not serialise"))
         }
     }
 }
@@ -142,7 +144,8 @@ extension AnyCodable: Encodable {
       } else if let stringVal = value as? String {
         try container.encode(stringVal)
       } else {
-        throw EncodingError.invalidValue(value, EncodingError.Context.init(codingPath: [], debugDescription: "The value is not encodable"))
+        throw EncodingError.invalidValue(value, EncodingError.Context.init(codingPath: [],
+              debugDescription: "The value is not encodable"))
       }
 
     }

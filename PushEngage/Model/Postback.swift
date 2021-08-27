@@ -14,8 +14,7 @@ struct SponsoredPush: Codable {
     var postback: AnyCodable?
 }
 
-//// MARK: - Postback
-//struct Postback: Codable {
+// struct Postback: Codable {
 //    var isSponsored: Int?
 //    var network, publisher, siteSubdomain: String?
 //    var siteURL: String?
@@ -35,7 +34,7 @@ struct SponsoredPush: Codable {
 //        case ipAddress = "ip_address"
 //        case userAgent = "user_agent"
 //    }
-//}
+// }
 
 // MARK: - SponsoredResponse
 struct SponsoredResponse: Codable {

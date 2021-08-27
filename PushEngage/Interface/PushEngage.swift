@@ -124,7 +124,7 @@ public typealias PENotificationWillShowInForground
     ///   - attributes: attribute supports [String: Any] type. eg.(["name": "bob"]) like that
     ///   - completionHandler: call back response which provide the response as bool true and false with error.
     @objc public static  func add(attributes: Parameters,
-                                     completionHandler: ((_ response: Bool,
+                                  completionHandler: ((_ response: Bool,
                                                           _ error: Error?) -> Void)?) {
         viewModel.add(attributes: attributes, completionHandler: completionHandler)
     }

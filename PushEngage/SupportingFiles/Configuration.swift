@@ -23,21 +23,24 @@ struct PENetworkURLs {
     
     // MARK: - Default Staging BaseURL
     
-    static let stagingTriggerURL = "https://x9dlvh1zcg.execute-api.us-east-1.amazonaws.com/beta/streams/staging-trigger/records"
+    static let stagingTriggerURL
+    = "https://x9dlvh1zcg.execute-api.us-east-1.amazonaws.com/beta/streams/staging-trigger/records"
     static let stagingBackendURL = "https://staging-dexter.pushengage.com/p/v1/"
     static let stagingBackendCdnURL = "https://staging-dexter1.pushengage.com/p/v1/"
     static let stagingNotifAnalyticURL = "https://staging-dexter1.pushengage.com/p/v1/"
     static let stagingLoggerURL = "https://cwlvm0dw8e.execute-api.us-east-1.amazonaws.com/staging/v1/"
     
     // not using currently for future.
-    static let stagingOptinBaseURL = "https://xgmlyjovsg.execute-api.us-east-1.amazonaws.com/beta/streams/staging-optin/records"
+    static let stagingOptinBaseURL
+    = "https://xgmlyjovsg.execute-api.us-east-1.amazonaws.com/beta/streams/staging-optin/records"
     
     
     // MARK: - Default prod BaseURL
     
     static let productionBackendURL = "https://clients-api.pushengage.com/p/v1/"
     static let productionNotifyAnalyticURL = "https://noti-analytics.pushengage.com/p/v1/"
-    static let productionTriggerURL = "https://m4xrk918t5.execute-api.us-east-1.amazonaws.com/beta/streams/production_triggers/records"
+    static let productionTriggerURL
+    = "https://m4xrk918t5.execute-api.us-east-1.amazonaws.com/beta/streams/production_triggers/records"
     static let productionBackendCdnURL = "https://dexter-cdn.pushengage.com/p/v1/"
     static let productionLoggingURL = "https://notify.pushengage.com/v1/"
     

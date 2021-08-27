@@ -177,8 +177,6 @@ struct Utility {
         return Self.getCurrentDeviceVersion.compare(version, options: .numeric) != .orderedAscending
     }
     
-    // TODO: - Update isPEPayload(userInfo: [AnyHashable: Any])
-    
     static func isPEPayload(userInfo: [AnyHashable: Any]) -> Bool {
         if let customInfo = userInfo[userInfo: PayloadConstants.custom],
            customInfo[string: PayloadConstants.tag] != nil {

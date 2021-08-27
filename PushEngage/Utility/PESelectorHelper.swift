@@ -27,14 +27,19 @@ final class PESelectorHelper {
         return instance.instanceMethod(for: selector) != instSuperClass?.instanceMethod(for: selector)
     }
 
-    /// method check weather the passed class conforms (means class has extended the protocol and override the protocol methods.)
-    /// if passed searchClass does not conforms the passed protocol then check weather class has super class if super class is nil then return nil
-    /// because class must have the super class then check recurcively weather it has super class or not if you got super class the return that class.
+    /// method check weather the passed class
+    /// conforms (means class has extended the protocol and override the protocol methods.)
+    /// if passed searchClass does not conforms the passed protocol then check weather
+    /// class has super class if super class is nil then return nil
+    /// because class must have the super class then check recurcively weather it has
+    /// super class or not if you got super class the return that class.
     /// and if class conform the protocol then return the search class.
     /// - Parameters:
     ///   - searchClass: Any class type.
-    ///   - protocolToFind: pass  protocol to find the the hierarcy of the passed class instance has conformed protocol or not.
-    /// - Returns: AnyClass. if seached class has conformed the protocol then return the same class otherwise check recurcively.
+    ///   - protocolToFind: pass  protocol to find the the hierarcy of the passed class
+    ///                     instance has conformed protocol or not.
+    /// - Returns: AnyClass. if seached class has conformed the protocol then
+    ///            return the same class otherwise check recurcively.
     func getClassWithProtocolInHierarchy(_ searchClass: AnyClass?, _ protocolToFind: Protocol?) -> AnyClass? {
         if !class_conformsToProtocol(searchClass, protocolToFind) {
             if searchClass?.superclass() == nil {
@@ -50,10 +55,13 @@ final class PESelectorHelper {
     }
     
     
-    /// method provide the functionality to exchange the implementaion of the new selector to the selector you want to swizzile.
+    /// method provide the functionality to exchange the implementaion of the new selector to
+    /// the selector you want to swizzile.
     /// this method is heart of method swizzling.
-    /// What is selector:- In objcetive c as it is uses dynamic dispatch mostly memory allocation happens in run time so we use
-    /// selectors to tell complile perform set of instruction which is specified in #selector so when we use that syntax we have to
+    /// What is selector:- In objcetive c as it is uses dynamic dispatch mostly memory
+    /// allocation happens in run time so we use
+    /// selectors to tell complile perform set of instruction which is
+    /// specified in #selector so when we use that syntax we have to
     /// explicitly tell complier by mentioning @objc infront of the func that this function is selector.
     /// - Parameters:
     ///   - newClass: Any Class type class you want to swizzle

@@ -32,8 +32,10 @@ typealias PENotificationCenterCompletionHandler = (UNNotificationPresentationOpt
 // - userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:
 //   - Used to process opening notifications.
 //
-// NOTE: On iOS 10, when a UNUserNotificationCenterDelegate is set, UIApplicationDelegate notification selectors no longer fire.
-//       However, this class maintains firing of UIApplicationDelegate selectors if the app did not setup it's own UNUserNotificationCenterDelegate.
+// NOTE: On iOS 10, when a UNUserNotificationCenterDelegate is set,
+//       UIApplicationDelegate notification selectors no longer fire.
+//       However, this class maintains firing of UIApplicationDelegate selectors if the app did not setup it's
+//       own UNUserNotificationCenterDelegate.
 //       This ensures we don't produce any side effects to standard iOS API selectors.
 //       The callLegacyAppDeletegateSelector selector below takes care of this backwards compatibility handling.
 
@@ -52,8 +54,9 @@ class PushEngageUNUserNotificationCenter: NSObject {
     // But rather in one of the subclasses
     private static var delegateUNSubClasses: [AnyClass]?
     
-    //ensures setDelegate: swizzles will never get executed twice for the same delegate object
-    //weak reference to avoid retain cycles
+    // ensures setDelegate: swizzles will never get executed
+    // twice for the same delegate object
+    // weak reference to avoid retain cycles
     private weak static var previousDelegate: UNUserNotificationCenterDelegate?
     
     private static let selector = PESelectorHelper.shared
@@ -163,7 +166,8 @@ class PushEngageUNUserNotificationCenter: NSObject {
         self.pushEngageGetNotificationSettings(completionHandler: block)
     }
     
-    /// This function handles to hook all the selector of PushEngageUNUserNotificationCenter with the UNUserNotificationCenterDelegate
+    /// This function handles to hook all the selector of PushEngageUNUserNotificationCenter
+    ///  with the UNUserNotificationCenterDelegate
     private func hookSelectorToDelegate(for delegate: UNUserNotificationCenterDelegate) {
         PELogger.debug(className: String(describing: PushEngageUNUserNotificationCenter.self),
                        message: "\(delegate)")
