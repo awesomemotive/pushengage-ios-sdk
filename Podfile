@@ -8,12 +8,12 @@ target 'PushEngage' do
   pod 'SwiftLint'
   
   target 'PushEngageTests' do
-    pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+    pod 'PushEngage', :path => "/Users/abhishek/Desktop/Project-repo-internal/pushengage-ios-sdk-internal"
   end
 end
     
 target 'PushNotificationDemo' do
-      pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+      pod 'PushEngage', :path => "/Users/abhishek/Desktop/Project-repo-internal/pushengage-ios-sdk-internal"
       
       post_install do |installer|
           installer.pods_project.targets.each do |target|
@@ -24,19 +24,23 @@ target 'PushNotificationDemo' do
       end
       
       target 'PushEngageNotificationExtension' do
-              pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+              pod 'PushEngage', :path => "/Users/abhishek/Desktop/Project-repo-internal/pushengage-ios-sdk-internal"
       end
         
       target 'PushEngageNotificationContentExtenstion' do
-              pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+              pod 'PushEngage', :path => "/Users/abhishek/Desktop/Project-repo-internal/pushengage-ios-sdk-internal"
       end
 end
 
 target 'PushNotificationObjcSample' do
-  pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+  pod 'PushEngage', :path => "/Users/abhishek/Desktop/Project-repo-internal/pushengage-ios-sdk-internal"
   
   target 'PushEngageObjcNotificationExtension' do
-    pod 'PushEngage', :path => "/Users/abhishek/Desktop/Public-repo/pushengage-ios-sdk"
+    pod 'PushEngage', :path => "/Users/abhishek/Desktop/Project-repo-internal/pushengage-ios-sdk-internal"
+  end
+  
+  target 'NotificationContentExtensionObjcSample' do
+    pod 'PushEngage', :path => "/Users/abhishek/Desktop/Project-repo-internal/pushengage-ios-sdk-internal"
   end
 end
 

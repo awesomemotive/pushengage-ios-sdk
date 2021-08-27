@@ -55,6 +55,9 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
         }
     }
 
+    
+    /// method provide the permission status Syncronysly.
+    /// - Returns: enum PermissionStatus.
     func getNotificationPermissionState() -> PermissonStatus {
         if self.useCachedState {
             return self.notificationPermissionStatus.value
@@ -71,6 +74,7 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
         return returnStatus
     }
 
+    // provides the notification permission in completion block
     func getNotificationPermissionState(completionHandler:@escaping ((PermissonStatus) -> Void)) {
         if self.useCachedState {
             completionHandler(self.notificationPermissionStatus.value)
@@ -97,6 +101,8 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
         }
     }
 
+    /// method prompt's the alert to subcriber weather they want notifications or not and register app
+    /// to the enable to get notification's
     func promptAuthorizationForNotification(with application: UIApplication,
                                             completionHandler: ((_ accepted: Bool) -> Void)?) {
         let responseBlock = { (granted: Bool, _ : Error?) in
@@ -113,6 +119,10 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
     }
     
     @discardableResult
+    /// this method handled the senerio where our sdk goes as the update to the application
+    /// that time we are trying to prompt the alert even if notification is already allowed so that
+    /// our SDK also know the status of permission and register the user so this will be custom alert will be
+    /// shown if func return response value as true.
     private func checkPermissionStatus() -> (response: Bool, status: PermissonStatus) {
         let status = getNotificationPermissionState()
         switch status {
@@ -129,6 +139,7 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
         }
     }
     
+    /// This method is responsible to start the remote notification services for the application
     func startRemoteNotificationService(for application: UIApplication) {
         if isStartNotificationCalled == .notCalled {
             isStartNotificationCalled = .isCalled
@@ -137,6 +148,10 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
         DispatchQueue.main.async { [weak self] in
             
             if permissionResult.response == true {
+                
+                // show the custom permission alert to user case
+                // when SDK goes as update to the pre existing Application or already installed.
+                
                 self?.showPermissionAlert(custom: "Notification may include alerts, sound and icon badges.",
                                           for: permissionResult.status)
                 self?.userDefaultService.ispermissionAlerted = true
@@ -169,6 +184,7 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
         }
     }
     
+    /// method is responsible for registering the device for the remote notifications.
     func registerToApns(for application: UIApplication?) {
         
         if Utility.isBackgroundFetchEnable() {
@@ -184,8 +200,9 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
         }
     }
     
+    /// Show the custom alert to the subcribers.
     func showPermissionAlert(custom message: String, for permissionStatus: PermissonStatus) {
-        let alert = UIAlertController(title: "PushNotificationDemo would like to send you " +
+        let alert = UIAlertController(title: "\(Utility.getApplicationName) Would like to send you " +
                                       "Notifications", message: message, preferredStyle: .alert)
         let allowButton = UIAlertAction(title: "Allow", style: .default) { [weak self] _ in
             self?.notificationPermissionStatus.value = .granted
@@ -202,7 +219,7 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
             // only available for iOS 10+
             alert.addAction(self.settingsButton())
             alert.title = "Notifications are not allowed"
-            alert.message = "please go -> to settings and enable the notification to enjoy our updates."
+            alert.message = "please go to settings and enable the notifications permission."
             alert.addAction(dismiss)
             
         } else {

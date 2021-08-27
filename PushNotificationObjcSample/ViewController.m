@@ -67,10 +67,10 @@
     switch (action) {
         case addAttribute: {
             
-            [PushEngage updateWithAttributes:@{@"name" : @"Abhishek",
-                                                     @"gender" : @"male",
-                                                     @"place" : @"banglore",
-                                                     @"phoneNo" : @91231114}
+            [PushEngage addWithAttributes:@{@"name" : @"Abhishek",
+                                            @"gender" : @"male",
+                                            @"place" : @"banglore",
+                                            @"phoneNo" : @91231114}
                                completionHandler:^(BOOL response, NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {
@@ -84,7 +84,7 @@
             break;
         }
         case addSegment: {
-            [PushEngage updateWithSegments:@[@"segmentTest1"] with:SegmentActionsUpdate
+            [PushEngage addWithSegments:@[@"segmentTest1"]
                                completionHandler:^(BOOL response, NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {
@@ -98,7 +98,7 @@
             break;
         }
         case addDynamicSegement: {
-            [PushEngage updateWithDynamic:@[@{@"name": @"dynamicOne" ,
+            [PushEngage addWithDynamic:@[@{@"name": @"dynamicOne" ,
                                                      @"duration": @10},
                                                    @{@"name" : @"segemt1",
                                                      @"duration" : @20},
@@ -134,7 +134,7 @@
         }
             
         case removeSegment: {
-            [PushEngage updateWithSegments:@[@"segmentTest1"] with:SegmentActionsRemove
+            [PushEngage removeWithSegments:@[@"segmentTest1"]
                               completionHandler:^(BOOL response, NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {

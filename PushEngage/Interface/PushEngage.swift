@@ -123,10 +123,10 @@ public typealias PENotificationWillShowInForground
     /// - Parameters:
     ///   - attributes: attribute supports [String: Any] type. eg.(["name": "bob"]) like that
     ///   - completionHandler: call back response which provide the response as bool true and false with error.
-    @objc public static  func update(attributes: Parameters,
+    @objc public static  func add(attributes: Parameters,
                                      completionHandler: ((_ response: Bool,
                                                           _ error: Error?) -> Void)?) {
-        viewModel.update(attributes: attributes, completionHandler: completionHandler)
+        viewModel.add(attributes: attributes, completionHandler: completionHandler)
     }
     //  get-subscriber-attributes
     
@@ -163,20 +163,28 @@ public typealias PENotificationWillShowInForground
         viewModel.deleteAttribute(values: values, completionHandler: completionHandler)
     }
     
-    //  update segments
     
-    
-    /// This Api used to update the segments to which segment subscriber is added.
+    /// This Api used to remove the segments.
     /// - Parameters:
-    ///   - segments: Array of String hold the information of segments to be added.
-    ///   - action: enum type .update, .remove and .delete
+    ///   - segments: Array of String hold the information of segments to be removed.
     ///   - completionHandler: call back with boolean if true operation
     ///   completed sucessfully with error if any error occurs.
-    @objc public static func update(segments: [String],
-                                    with action: SegmentActions,
-                                    completionHandler: ((_ response: Bool,
-                                                         _ error: Error?) -> Void)?) {
-        viewModel.update(segments: segments, with: action, completionHandler: completionHandler)
+    @objc public static func remove(segments: [String], completionHandler: ((_ response: Bool,
+                                                                            _ error: Error?) -> Void)?) {
+        viewModel.update(segments: segments, with: .remove, completionHandler: completionHandler)
+    }
+    
+    
+    /// This Api used to add the segments.
+    /// - Parameters:
+    ///   - segments: Array of String hold the information of segments to be added.
+    ///   - completionHandler: call back with boolean if true operation
+    ///   completed sucessfully with error if any error occurs.
+    @objc public static func add(segments: [String],
+                                 completionHandler: ((_ response: Bool,
+                                                      _ error: Error?) -> Void)?) {
+        viewModel.update(segments: segments, with: .add,
+                         completionHandler: completionHandler)
     }
     
     //  update dynamic segments
@@ -185,18 +193,10 @@ public typealias PENotificationWillShowInForground
     /// - Parameters:
     ///   - segments: Array of dictionary value where key is string type and value can be Any type.
     ///   - completionHandler: call back provide response boolean and Error type.
-    @objc public static func update(dynamic segments: [[String: Any]],
-                                    completionHandler: ((_ response: Bool,
-                                                         _ error: Error?) -> Void)?) {
-        viewModel.update(dynamic: segments, completionHandler: completionHandler)
-    }
-    
-    // This API is not required to be exposed.
-    
-    @objc private static func updateHashArray(for segmentId: Int,
-                                              completionHandler: ((_ response: Bool,
-                                                                  _ error: Error?) -> Void)?) {
-        viewModel.updateHashArray(for: segmentId, completionHandler: completionHandler)
+    @objc public static func add(dynamic segments: [[String: Any]],
+                                 completionHandler: ((_ response: Bool,
+                                                      _ error: Error?) -> Void)?) {
+        viewModel.add(dynamic: segments, completionHandler: completionHandler)
     }
     
     //  update trigger status
@@ -224,13 +224,6 @@ public typealias PENotificationWillShowInForground
                                                   completionHandler: ((_ response: SubscriberDetailsData? ,
                                                                        _ error: Error?) -> Void)?) {
         viewModel.getSubscriberDetails(for: fields, completionHandler: completionHandler)
-    }
-    
-    // This API is not requried to be exposed
-    
-    @objc private static func checkSubscriber(completionHandler: ((_ response: CheckSubscriberData?,
-                                                                  _ error: Error?) -> Void)?) {
-        viewModel.checkSubscriber(completionHandler: completionHandler)
     }
     
     // Trigger Campiagn Handler
@@ -303,7 +296,7 @@ public typealias PENotificationWillShowInForground
     }
     
     // These methods developer has to call if they are going to
-    // implements the UNUsernotification Delegate method by them and disable swizzling of methods.
+    // implements the UNUsernotification Delegate method by them and disable swizzling.
     
     /// Setup method need to integrate in UNNotification delegate method to process the notification after
     /// subscriber performs any action to the notification.

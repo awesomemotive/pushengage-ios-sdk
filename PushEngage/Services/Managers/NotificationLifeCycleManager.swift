@@ -39,9 +39,10 @@ class NotificationLifeCycleManager: NotificationLifeCycleService {
                     background.end()
                 case.failure(let error):
                     completionHandler?(.failure(error))
-                    PELogger.logError(message: action == .clicked ? "Notification click failed"
-                                        : "Notification view failed",
-                                      name: "Notification life cycle", tag: notificationId,
+                    let name: String = action == .clicked ? .clickCountTrackingFailed
+                        : .viewCountTrackingFailed
+                    PELogger.logError(message: error.localizedDescription,
+                                      name: name, tag: notificationId,
                                       subscriberHash: deviceHash)
                     background.end()
                 }
@@ -64,7 +65,7 @@ class NotificationLifeCycleManager: NotificationLifeCycleService {
                 case .failure(let error):
                     completionHandler(.failure(error))
                     PELogger.logError(message: error.localizedDescription,
-                                      name: "Sponsered failed",
+                                      name: .notificationRefetchFailed,
                                       tag: sponseredData.tag,
                                       subscriberHash: self?.userDefault.subscriberHash ?? "")
                     background.end()
@@ -96,19 +97,11 @@ class NotificationLifeCycleManager: NotificationLifeCycleService {
                     } else {
                         PELogger.error(className: String(describing: NotificationLifeCycleManager.self),
                                        message: "\(response.errorMessage ?? "")")
-                        PELogger.logError(message: action == .clicked ? "Notification click failed"
-                                            : "Notification view failed",
-                                          name: "Notification life cycle", tag: notificationId,
-                                          subscriberHash: deviceHash)
                         completionHandler?(.failure(.notificationUserActionFailed(response.errorMessage)))
                     }
                 } catch {
                     PELogger.error(className: String(describing: NotificationLifeCycleManager.self),
                                    message: PEError.parsingError.errorDescription ?? "")
-                    PELogger.logError(message: action == .clicked ? "Notification click failed with parsing error"
-                                        : "Notification view failed with parsing error",
-                                      name: "Notification life cycle", tag: notificationId,
-                                      subscriberHash: deviceHash)
                     completionHandler?(.failure(.parsingError))
                 }
             case .failure(let error):

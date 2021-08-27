@@ -38,13 +38,11 @@ struct  NetworkError: Codable {
 @objc public class SubsciberDetailsResponse: NSObject, Codable {
     public var errorCode: Int?
     public var data: SubscriberDetailsData?
-    public var error: ObjcErrorResponse?
     public var errorMessage: String?
 
     enum CodingKeys: String, CodingKey {
         case errorCode = "error_code"
         case data = "data"
-        case error
         case errorMessage = "error_message"
     }
 }

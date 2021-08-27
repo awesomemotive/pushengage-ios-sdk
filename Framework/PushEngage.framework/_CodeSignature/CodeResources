@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/PushEngage-Swift.h</key>
 		<data>
-		HOhl0iRfHxxctMMyxBeRLGV2g3o=
+		usuFBgMwlsqRFZkR8QiYiCRyiaY=
 		</data>
 		<key>Headers/PushEngage.h</key>
 		<data>
@@ -14,31 +14,31 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		csKNM/WPxzE4UCT22qL0ddomVEA=
+		6svXDg4QdGYdRCxUUAmMTpKLXgk=
 		</data>
-		<key>Modules/PushEngage.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
+		<key>Modules/PushEngage.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo</key>
 		<data>
-		UyVje8HYFFduNLreyPbOi+zlAu0=
+		shi5oje/KCIbGDJCwzB7SUtlTVI=
 		</data>
-		<key>Modules/PushEngage.swiftmodule/Project/x86_64.swiftsourceinfo</key>
+		<key>Modules/PushEngage.swiftmodule/Project/arm64.swiftsourceinfo</key>
 		<data>
-		UyVje8HYFFduNLreyPbOi+zlAu0=
+		shi5oje/KCIbGDJCwzB7SUtlTVI=
 		</data>
-		<key>Modules/PushEngage.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
+		<key>Modules/PushEngage.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
-		iEKsKux162CHPo+QNexiMTuAjH8=
+		2N++JxrZvyEG63CPLtmnBaxJ7RU=
 		</data>
-		<key>Modules/PushEngage.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
+		<key>Modules/PushEngage.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		yKj4Va5ja4MzwyjlPqH+Pfx+DU0=
+		r8x6oKNtGukUjalJSFevU9UKm1o=
 		</data>
-		<key>Modules/PushEngage.swiftmodule/x86_64.swiftdoc</key>
+		<key>Modules/PushEngage.swiftmodule/arm64.swiftdoc</key>
 		<data>
-		iEKsKux162CHPo+QNexiMTuAjH8=
+		2N++JxrZvyEG63CPLtmnBaxJ7RU=
 		</data>
-		<key>Modules/PushEngage.swiftmodule/x86_64.swiftmodule</key>
+		<key>Modules/PushEngage.swiftmodule/arm64.swiftmodule</key>
 		<data>
-		yKj4Va5ja4MzwyjlPqH+Pfx+DU0=
+		r8x6oKNtGukUjalJSFevU9UKm1o=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -49,98 +49,62 @@
 	<dict>
 		<key>Headers/PushEngage-Swift.h</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			HOhl0iRfHxxctMMyxBeRLGV2g3o=
-			</data>
 			<key>hash2</key>
 			<data>
-			UZpC0AHtAvJslro12tnWPJb5BVftsb/2ayJJgWZ62N4=
+			3XdlNuEfAzh6nB31QQ7+RLdBQQto1qtbpNapjVa7GvM=
 			</data>
 		</dict>
 		<key>Headers/PushEngage.h</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			tK/w+/AIkiV1RgYIA/PdjNDO47Y=
-			</data>
 			<key>hash2</key>
 			<data>
 			KszGGrS17jNCl/HwJieVPfaufOm1k6E40NB6V1JrJVI=
 			</data>
 		</dict>
-		<key>Modules/PushEngage.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
+		<key>Modules/PushEngage.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			UyVje8HYFFduNLreyPbOi+zlAu0=
-			</data>
 			<key>hash2</key>
 			<data>
-			ZfrFI9DlglyPHQuCbQQzEH/Xn4vpAc2B9hfLTHWW7ro=
+			KorlG39ppdPatQPg8ceW2/cjIgnVExJvt9RqwdRLWgM=
 			</data>
 		</dict>
-		<key>Modules/PushEngage.swiftmodule/Project/x86_64.swiftsourceinfo</key>
+		<key>Modules/PushEngage.swiftmodule/Project/arm64.swiftsourceinfo</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			UyVje8HYFFduNLreyPbOi+zlAu0=
-			</data>
 			<key>hash2</key>
 			<data>
-			ZfrFI9DlglyPHQuCbQQzEH/Xn4vpAc2B9hfLTHWW7ro=
+			KorlG39ppdPatQPg8ceW2/cjIgnVExJvt9RqwdRLWgM=
 			</data>
 		</dict>
-		<key>Modules/PushEngage.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
+		<key>Modules/PushEngage.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			iEKsKux162CHPo+QNexiMTuAjH8=
-			</data>
 			<key>hash2</key>
 			<data>
-			VWzhU4Gr4UAmNJiiu1Ceq6AbaU539fX6bTS/Ucch+4Y=
+			uUpp+tvj/FNk31SSmmK2AxFxXmGgyWygbl7LGPIXfc8=
 			</data>
 		</dict>
-		<key>Modules/PushEngage.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
+		<key>Modules/PushEngage.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			yKj4Va5ja4MzwyjlPqH+Pfx+DU0=
-			</data>
 			<key>hash2</key>
 			<data>
-			cvprkopYUpg/x/jx8fFXALZtmdFugMoKNlJ9EC3IWQ4=
+			gNU+Bu4NV5ORJSdOD/jKaQXH+WjJPAVqFcu7QnHQnAU=
 			</data>
 		</dict>
-		<key>Modules/PushEngage.swiftmodule/x86_64.swiftdoc</key>
+		<key>Modules/PushEngage.swiftmodule/arm64.swiftdoc</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			iEKsKux162CHPo+QNexiMTuAjH8=
-			</data>
 			<key>hash2</key>
 			<data>
-			VWzhU4Gr4UAmNJiiu1Ceq6AbaU539fX6bTS/Ucch+4Y=
+			uUpp+tvj/FNk31SSmmK2AxFxXmGgyWygbl7LGPIXfc8=
 			</data>
 		</dict>
-		<key>Modules/PushEngage.swiftmodule/x86_64.swiftmodule</key>
+		<key>Modules/PushEngage.swiftmodule/arm64.swiftmodule</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			yKj4Va5ja4MzwyjlPqH+Pfx+DU0=
-			</data>
 			<key>hash2</key>
 			<data>
-			cvprkopYUpg/x/jx8fFXALZtmdFugMoKNlJ9EC3IWQ4=
+			gNU+Bu4NV5ORJSdOD/jKaQXH+WjJPAVqFcu7QnHQnAU=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			80mJKVPR/YgrR8s/jxXG20a6fuA=
-			</data>
 			<key>hash2</key>
 			<data>
 			Qxz7SqDxwQkrFimsBQ4052rEQS9IGHi20q8M23QSYcY=

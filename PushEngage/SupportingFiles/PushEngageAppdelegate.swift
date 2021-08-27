@@ -13,10 +13,18 @@ import UIKit
  * the integartion step for the SDK integration for the host application.
  */
 
+
+// This class hooks into the UIApplicationDelegate selectors to receive iOS 9.
+//   - UNUserNotificationCenter is used for iOS 10
+//   - Orignal implementations are called so other plugins and the developers AppDelegate is still called.
+
 class PushEngageAppDelegate: NSObject {
     
     private static var delegateClass: AnyClass?
 
+    // Store an array of all UIApplicationDelegate subclasses to iterate over in cases
+    // where UIApplicationDelegate swizzled methods are not overriden in main AppDelegate
+    // But rather in one of the subclasses
     private static var delegateSubclasses: [AnyClass]?
     
     private static let viewModel = PushEngage.viewModel
@@ -32,7 +40,7 @@ class PushEngageAppDelegate: NSObject {
     @objc dynamic public func pushEngageSELTag() {}
     
     /// this method selector do the first step by swizzlie the UIApplication Delegate selectors with the PushEngageAppDelegate selector.
-    /// - Parameter delegate: delegate is UIApplication Delegate type parameter signature should match for method swizzling.
+    /// - Parameter delegate: provide the delegate you want to swizzil the methods and as this is specifc designed for the UIApplicationDelegate only.
 
      @objc dynamic public func setPushEngageDelegate(_ delegate: UIApplicationDelegate) {
         PELogger.debug(className: String(describing: PushEngageAppDelegate.self),
@@ -89,6 +97,8 @@ class PushEngageAppDelegate: NSObject {
         PELogger.debug(className: String(describing: ApplicationService.self), message: error.localizedDescription)
     }
     
+    /// Selector is fired when Alert has the response from the subscriber either allow or denied.
+    /// And that time device gets device token from the APNS and we register to the PushEngage server.
     @objc dynamic private func pushEngageApplication(_ application: UIApplication,
                                                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Self.viewModel.registerDeviceToServer(with: deviceToken)
@@ -97,6 +107,8 @@ class PushEngageAppDelegate: NSObject {
         }
     }
     
+    /// Fires when a notication is opened or recieved while the app is in focus.
+    ///   - Also fires when the app is in the background and a notificaiton with content-available=1 is received.
     @objc dynamic private func pushEngageApplication(_ application: UIApplication,
                                                      didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                                                      fetchCompletionHandler

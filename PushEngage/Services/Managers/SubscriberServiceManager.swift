@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 @objc public enum SegmentActions: Int {
-    case update
+    case add
     case remove
     case none
 }
@@ -313,7 +313,7 @@ class SubscriberServiceManager: SubscriberService {
         switch action {
         case .remove:
             route = .removeSegment(subscriberInfo)
-        case .update:
+        case .add:
             route = .addSegments(subscriberInfo)
         default:
             break
