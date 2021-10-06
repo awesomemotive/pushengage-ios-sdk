@@ -210,6 +210,7 @@ class PushEngageUNUserNotificationCenter: NSObject {
                                                         completionHandler: @escaping
                                                         (UNNotificationPresentationOptions) -> Void) {
         let parseuserInfo =  notification.request.content.userInfo
+        PELogger.debug(className: String(describing: PushEngageUNUserNotificationCenter.self), message: "\(parseuserInfo)")
         if !Utility.isPEPayload(userInfo: parseuserInfo) {
             self.proceedNotificationWithCenter(center, notification: notification, pushEngageCenter: self,
                                                completionHandler: completionHandler)
