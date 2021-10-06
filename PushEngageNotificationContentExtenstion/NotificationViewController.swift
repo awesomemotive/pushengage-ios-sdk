@@ -24,18 +24,21 @@ class NotificationViewController: UIViewController, UNNotificationContentExtensi
     }
     
     func didReceive(_ notification: UNNotification) {
-        let payLoad = PushEngage.getCustomUIPayLoad(for: notification.request)
-        let view = ContentView(payLoadInfo: payLoad)
-        hostingView = UIHostingController(rootView: view)
-        addChild(hostingView!)
-        hostingView!.view.translatesAutoresizingMaskIntoConstraints = false
-        self.view.addSubview(hostingView!.view)
-        NSLayoutConstraint.activate([hostingView!.view.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-                                     hostingView!.view.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-                                     hostingView!.view.topAnchor.constraint(equalTo: self.view.topAnchor),
-                                     hostingView!.view.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-                                     hostingView!.view.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
-                                     hostingView!.view.centerXAnchor.constraint(equalTo: self.view.centerXAnchor)])
+        print(notification.request.content.categoryIdentifier)
+        if(notification.request.content.categoryIdentifier == "customNotification"){
+            let payLoad = PushEngage.getCustomUIPayLoad(for: notification.request)
+            let view = ContentView(payLoadInfo: payLoad)
+            hostingView = UIHostingController(rootView: view)
+            addChild(hostingView!)
+            hostingView!.view.translatesAutoresizingMaskIntoConstraints = false
+            self.view.addSubview(hostingView!.view)
+            NSLayoutConstraint.activate([hostingView!.view.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+                                         hostingView!.view.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+                                         hostingView!.view.topAnchor.constraint(equalTo: self.view.topAnchor),
+                                         hostingView!.view.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+                                         hostingView!.view.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
+                                         hostingView!.view.centerXAnchor.constraint(equalTo: self.view.centerXAnchor)])
+        }
     }
-
+    
 }
