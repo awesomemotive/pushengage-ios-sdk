@@ -6,12 +6,12 @@
 //
 
 import Foundation
-import  UIKit
+import UIKit
 
 // MARK: - PEPayload
 struct PEPayload: Codable {
-    var aps: Aps?
-    var custom: Custom?
+    let aps: Aps?
+    let custom: Custom?
     
     enum CodingKeys: String, CodingKey {
         case custom = "pe"
@@ -21,11 +21,11 @@ struct PEPayload: Codable {
 
 // MARK: - Aps
 struct Aps: Codable {
-    var alert: Alert?
-    var badge: Int?
-    var sound: String?
-    var mutableContent, contentAvailable: Int?
-    var category, threadID, targetContentID: String?
+    let alert: Alert?
+    let badge: Int?
+    let sound: String?
+    let mutableContent, contentAvailable: Int?
+    let category, threadID, targetContentID: String?
 
     enum CodingKeys: String, CodingKey {
         case alert, badge, sound
@@ -39,21 +39,21 @@ struct Aps: Codable {
 
 // MARK: - Alert
 struct Alert: Codable {
-    var title, subtitle, body: String?
+    let title, subtitle, body: String?
 }
 
 // MARK: - Custom
 struct Custom: Codable {
-    var tag, attachmentURL, launchURL: String?
-    var isSponsered: Int?
-    var postback: AnyCodable?
-    var badgeIncrement: Int?
-    var title, body: String?
-    var badge: Int?
-    var sound, subtitle: String?
-    var actionButtons: [ActionButtonInfo]?
+    let tag, attachmentURL, launchURL: String?
+    let isSponsered: Int?
+    let postback: AnyCodable?
+    let badgeIncrement: Int?
+    let title, body: String?
+    let badge: Int?
+    let sound, subtitle: String?
+    let actionButtons: [ActionButtonInfo]?
     var additionalData: [String: String]?
-    var deeplinking: String?
+    let deeplinking: String?
     
     enum CodingKeys: String, CodingKey {
         case tag
@@ -69,13 +69,12 @@ struct Custom: Codable {
         case subtitle = "sb"
         case actionButtons = "ab"
         case deeplinking = "dl"
-        
     }
 }
 
 // MARK: - ActionButtonInfo
 struct ActionButtonInfo: Codable {
-    var id, text: String
+    let id, text: String
     
     enum CodingKeys: String, CodingKey {
         case id = "a"

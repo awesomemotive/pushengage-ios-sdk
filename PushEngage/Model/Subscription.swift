@@ -13,9 +13,8 @@ struct SubscriptionInfo: Codable {
     var subscription: Subscription?
     var deviceType, device, deviceVersion, deviceModel: String?
     var deviceManufacturer: String?
-    var latitude, longitude: String?
     var timezone: String?
-    var language, userAgent, totalScrWidthHeight, host: String?
+    var language, userAgent, totalScreenWidthHeight, host: String?
     var attributes: [String: String]?
     var profileID: String?
     var isNotificationEnable: Int?
@@ -29,10 +28,10 @@ struct SubscriptionInfo: Codable {
         case deviceVersion = "device_version"
         case deviceModel = "device_model"
         case deviceManufacturer = "device_manufacturer"
-        case latitude, longitude, timezone
+        case timezone
         case language
         case userAgent = "user_agent"
-        case totalScrWidthHeight = "total_scr_width_height"
+        case totalScreenWidthHeight = "total_screen_width_height"
         case host, attributes
         case profileID = "profile_id"
         case isNotificationEnable = "notification_disabled"

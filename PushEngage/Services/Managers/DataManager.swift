@@ -8,56 +8,53 @@
 import Foundation
 import UIKit
 
-
-class DataManager: DataSourceProtocol {
+/// `DataManager` class provides methods to retrieve subscription and subscriber details, as well as handling sponsored push notifications.
+final class DataManager: DataSourceType {
     
-    var userDefault: UserDefaultProtocol
+    /// The UserDefaults manager responsible for handling data persistence.
+    private let userDefaults: UserDefaultsType
     
-    init(userDefault: UserDefaultProtocol) {
-        self.userDefault = userDefault
+    /// Initializes the `DataManager` with the provided `UserDefaultsType` instance.
+    /// - Parameter userDefault: An instance conforming to `UserDefaultsType` used for data storage and retrieval.
+    init(userDefault: UserDefaultsType) {
+        self.userDefaults = userDefault
     }
     
     func getSubscriptionData() -> SubscriptionInfo {
         
-        let locationCoordinates = userDefault.getObject(for: LocationCoordinates.self,
-                                                        key: UserDefaultConstant.locationCoordinates)
-        let permisionStatus = userDefault.notificationPermissionState
-        let result = permisionStatus == .denied ? (userDefault.isDeleteSubscriberOnDisable ?? false ? 1 : 0) : nil
+        let permisionStatus = userDefaults.notificationPermissionState
+        let result = permisionStatus == .denied ? (userDefaults.isDeleteSubscriberOnDisable ?? false ? 1 : 0) : nil
         var env: String?
-        if let certEnv = UIApplication.shared.entitlements.value(forKey: .apsEnvironment)  as? String {
+        if let certEnv = UIApplication.shared.entitlements.value(forKey: .apsEnvironment) as? String {
             if certEnv == "development" {
                 env = "dev"
             } else if certEnv == "production" {
                 env = "prod"
             }
         }
-        let subcriptionInfo = SubscriptionInfo(siteID: userDefault.appId,
-                                               subscription: Subscription(endpoint: userDefault.deviceToken,
+        let subscriptionInfo = SubscriptionInfo(siteID: userDefaults.appId,
+                                               subscription: Subscription(endpoint: userDefaults.deviceToken,
                                                                           projectID: Utility.getBundleIdentifier),
                                                deviceType: "ios",
                                                device: Utility.getDevice,
                                                deviceVersion: Utility.getOSInfo,
                                                deviceModel: Utility.getPhoneName,
                                                deviceManufacturer: "Apple",
-                                               latitude: String(format: "%.2f",
-                                                                locationCoordinates?.latitude ?? 0),
-                                               longitude: String(format: "%.2f",
-                                                                 locationCoordinates?.longitude ?? 0),
                                                timezone: Utility.timeOffSet,
                                                language: Locale.current.languageCode,
                                                userAgent: "Apple \(Utility.getPhoneName)",
-                                               totalScrWidthHeight: Utility.totalScrWidthHeight,
+                                               totalScreenWidthHeight: Utility.totalScrWidthHeight,
                                                host: Utility.getBundleIdentifier,
-                                               profileID: userDefault.profileID,
+                                               profileID: userDefaults.profileID,
                                                isNotificationEnable: result,
                                                certEnv: env)
                                                
-        return subcriptionInfo
+        return subscriptionInfo
     }
     
     func getSubscriptionStatus() -> SubscriberDetails {
-        let status = SubscriberDetails(siteID: userDefault.appId,
-                                      deviceTokenHash: userDefault.subscriberHash)
+        let status = SubscriberDetails(siteID: userDefaults.appId,
+                                      deviceTokenHash: userDefaults.subscriberHash)
         return status
     }
     
@@ -68,10 +65,10 @@ class DataManager: DataSourceProtocol {
     }
     
     func getSubsriberUpgradeData() -> SubscriberUpgrade {
-        let subscription = Subscription(endpoint: userDefault.deviceToken,
+        let subscription = Subscription(endpoint: userDefaults.deviceToken,
                                         projectID: Utility.getBundleIdentifier)
-        return SubscriberUpgrade(deviceTokenHash: userDefault.subscriberHash,
+        return SubscriberUpgrade(deviceTokenHash: userDefaults.subscriberHash,
                                  subscription: subscription,
-                                 siteId: userDefault.appId ?? -100)
+                                 siteId: userDefaults.appId ?? -100)
     }
 }

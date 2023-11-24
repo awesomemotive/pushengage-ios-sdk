@@ -7,7 +7,7 @@
 
 import Foundation
 
-// Custom Generic ObseravleType.
+// Custom Generic ObservableType.
 
 protocol ObservableType {
     associatedtype DataType

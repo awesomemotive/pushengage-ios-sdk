@@ -7,7 +7,7 @@
 
 import UIKit
 
-public typealias PEnotificationOpenHandler = (PENotificationOpenResult) -> Void
+public typealias PENotificationOpenHandler = (PENotificationOpenResult) -> Void
 
 public typealias PEBackgroundTaskCompletionBlock =  ((UIBackgroundFetchResult) -> Void)
 
@@ -15,17 +15,34 @@ public typealias PESilentPushBackgroundHandler = (PENotification, PEBackgroundTa
 
 public typealias PENotificationDisplayNotification = (_ notification: PENotification?) -> Void
 
-public typealias PENotificationWillShowInForground
+public typealias PENotificationWillShowInForeground
     = (PENotification, _ completion: PENotificationDisplayNotification) -> Void
 
 @objcMembers
 @objc final public class PushEngage: NSObject {
     
-    // MARK: - public variable
+    // MARK: - Private properties
     
-    /// This computed variable is flag to enable or disable the logging  implementaion to debug and trouble-shooting
-    /// with in the sdk. please disble the logging when host application is in production.
-    public static var enableLogs: Bool {
+    private static let shared = PushEngage()
+    
+    private static let runOnce: Any? = {
+       loadRequiredSizzling()
+        _ = shared
+        return nil
+    }()
+    
+    /// Dependency injection for PushEngage manager
+    internal static let manager = DependencyInitialize.getPEManagerDependency()
+    
+    private override init() {
+        super.init()
+    }
+    
+    // MARK: - Public properties
+    
+    /// A boolean flag to enable or disable logging within the SDK for debugging and troubleshooting purposes.
+    /// It is recommended to disable logging when the host application is in production to improve performance.
+    public static var enableLogging: Bool {
         get {
              PELogger.isLoggingEnable
         }
@@ -34,292 +51,501 @@ public typealias PENotificationWillShowInForground
         }
     }
     
-    // MARK: - private variable
-    private static let shared = PushEngage()
+    // MARK: - Public methods
     
-    // MARK: - Dependency Injection for the view model in PushEngageServices
-    
-    internal static let viewModel = DependencyInitialize.getPEViewModelDependency()
-    
-    // MARK: - private initialization method
-    
-    private override init() {
-        
-        super.init()
-    }
-    
-    private static let runOnce: Any? = {
-       loadRequriedSizzling()
-        _ = shared
-        return nil
-    }()
-    
-    // MARK: - public methods
-    
-    
-    /// This is very important method to call for the setup of the SDK
-    /// if developer doesn't want to take the over head to handle the setup call this
-    /// method  in init method of the Application appdelegate. other wise developer has
-    /// to set up the SDK manually.
+    /// This method is crucial for setting up the SDK. If the developer prefers not to handle the setup manually,
+    /// calling this method in the `init` method of the Application AppDelegate is essential. Otherwise, the SDK
+    /// must be set up manually.
+    ///
+    /// - Parameters:
+    ///   - isEnabled: A boolean value indicating whether to enable the SDK setup through method swizzling.
     @objc public static func swizzleInjection(isEnabled: Bool) {
         if isEnabled {
             _ = Self.runOnce
         }
-        viewModel.updateSwizzledStatus(with: isEnabled)
+        manager.updateSwizzledStatus(with: isEnabled)
     }
     
-    /// Use this static method to set the notification open block which is create while sdk initilization
-    /// so  when notification is opened this handler will take requried action and provide deeplinking requried user info
-    /// - Parameter block: pass the block type PEnotificationOpenHandler to the parameter
-    ///                    so that when notification click action take place.
-    @objc public static func setNotificationOpenHandler(block: PEnotificationOpenHandler?) {
-        viewModel.setNotificationOpenHandler(block: block)
+    /// Use this static method to set the notification open handler, which is created during SDK initialization.
+    /// When a notification is opened, this handler will take the necessary action and provide the required
+    /// user information for deep linking.
+    ///
+    /// - Parameter block: The block of type `PENotificationOpenHandler` to be set as the notification open handler.
+    @objc public static func setNotificationOpenHandler(block: PENotificationOpenHandler?) {
+        manager.setNotificationOpenHandler(block: block)
     }
     
-    
-    /// Use this static method to set the notifiction handler when notification recives when app is in forground mode.
-    /// - Parameter block: pass the notificationForgroundHandler from the appdelegate.
-    @objc public static func setNotificationWillShowInForgroundHandler(block: PENotificationWillShowInForground?) {
-        viewModel.setNotificationWillShowInForgroundHandler(block: block)
+    /// Use this static method to set the notification handler for when notifications are received while the app is in foreground mode.
+    ///
+    /// - Parameter block: Pass the `PENotificationWillShowInForeground` block from the `AppDelegate` to handle notifications when the app is active.
+    @objc public static func setNotificationWillShowInForegroundHandler(block: PENotificationWillShowInForeground?) {
+        manager.setNotificationWillShowInForgroundHandler(block: block)
     }
     
-    
-    /// call this method in appdelegate
-    ///  to set the app push id to the SDK to register the subsciber to that app push id.
-    /// - Parameter key: App push id.
-    @objc public static func setAppId(key: String) {
-        
-        viewModel.setAppId(key: key)
+    /// Call this method in the `AppDelegate` to set the app push ID in the SDK, registering the subscriber to that specific app push ID.
+    ///
+    /// - Parameter key: The app push ID to be set.
+    @objc public static func setAppID(id: String) {
+        manager.setAppId(key: id)
     }
     
-    @objc public static func setEnv(enviroment: Environment) {
-        Configuration.enviroment = enviroment
+    /// Set the environment for the SDK, allowing developers to switch between different environments (e.g., staging, production).
+    ///
+    /// - Parameter environment: The desired environment to be set (e.g., .staging, .production).
+    @objc public static func setEnvironment(environment: Environment) {
+        manager.setEnvironment(environment)
     }
     
-    
-    /// call this method in appdelegate to start the notification services in the application.
-    /// and provide some pre-requisite information to the
-    ///  SDK to handle the SDK internal setup.
+    /// Provide necessary pre-requisite information to the SDK for internal setup.
+    ///
     /// - Parameters:
-    ///   - application: UIApplication instance
-    ///   - launchOptions: UiApplication launch options.
-    @objc public static func startNotificationServices(for application: UIApplication,
+    ///   - application: The UIApplication instance of the host application.
+    ///   - launchOptions: The launch options passed to the application during launch.
+    @objc public static func setInitialInfo(for application: UIApplication,
                                                        with launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
-        viewModel.setIntialInfo(for: application, with: launchOptions)
-        viewModel.startNotificationServices()
-    }
-    /// Description:- This method provides the Notification service extension feature to
-    ///  modify the content  to the application. This api will invoke if mutable content = 1
-    /// - Parameter request: Parameter is passed from the parent application so that method can modifiy the content.
-    @available(iOS 10.0, *)
-    @objc public static func didReceiveNotificationExtensionRequest(_ request: UNNotificationRequest,
-                                                                    bestContentHandler: UNMutableNotificationContent) {
-        viewModel.didReceiveNotificationExtensionRequest(request, bestContentHandler: bestContentHandler)
+        manager.setInitialInfo(for: application, with: launchOptions)
     }
     
-    // update Subsciber Attributes
+    /// Request notification permission
+    @objc public static func requestNotificationPermission() {
+        manager.handleNotificationPermission()
+    }
     
-    /// use this api call to update or add the attribute of the subscriber
+    /// Updates attributes of a subscriber. If an attribute with the specified key already exists, the existing value
+    /// will be replaced.
+    ///
     /// - Parameters:
-    ///   - attributes: attribute supports [String: Any] type. eg.(["name": "bob"]) like that
-    ///   - completionHandler: call back response which provide the response as bool true and false with error.
-    @objc public static  func add(attributes: Parameters,
+    ///   - attributes: Attributes to be added. Should be in the format ["attributeName": attributeValue].
+    ///   - completionHandler: A closure that gets called after the update operation is completed.
+    ///                         Provides a response boolean indicating success or failure and an optional error.
+    ///
+    /// - Note: The `attributes` parameter supports [String: Any] type, for example: ["name": "Bob"].
+    ///
+    /// - Example usage:
+    ///   ```
+    ///   let attributes = ["name": "Bob", "age": 30]
+    ///   PushEngage.add(attributes: attributes) { success, error in
+    ///       if success {
+    ///           print("Attributes added/updated successfully.")
+    ///       } else {
+    ///           if let error = error {
+    ///               print("Error occurred: \(error.localizedDescription)")
+    ///           } else {
+    ///               print("Unknown error occurred.")
+    ///           }
+    ///       }
+    ///   }
+    ///   ```
+    @objc public static func add(attributes: Parameters,
                                   completionHandler: ((_ response: Bool,
                                                           _ error: Error?) -> Void)?) {
-        viewModel.add(attributes: attributes, completionHandler: completionHandler)
-    }
-    //  get-subscriber-attributes
-    
-    
-    /// use this method to get the attribute of the subscriber.
-    /// - Parameter completionHandler: call back provide the atttribute information which is [String: Any]? type and error.
-    @objc public static func getAttribute(completionHandler: @escaping(_ info: [String: Any]?,
-                                                                       _ error: Error?) -> Void) {
-        viewModel.getAttribute(completionHandler: completionHandler)
+        manager.add(attributes: attributes, completionHandler: completionHandler)
     }
     
-    // add-profile-id
-    
-    /// This api is used to set the subscriber id to the server if sdk is successfully initialized in host application.
+    /// Sets attributes of a subscriber replacing any previously associated attributes.
+    ///
     /// - Parameters:
-    ///   - id: subsciber id aka (user name of the subcriber in host application.)
-    ///   - completionHandler: call this block to get the response of the api call which is bool.
+    ///   - attributes: Attributes to be added. Should be in the format ["attributeName": attributeValue].
+    ///   - completionHandler: A closure that gets called after the update operation is completed.
+    ///                         Provides a response boolean indicating success or failure and an optional error.
+    ///
+    /// - Note: The `attributes` parameter supports [String: Any] type, for example: ["name": "Bob"].
+    ///
+    /// - Example usage:
+    ///   ```
+    ///   let attributes = ["name": "Bob", "age": 30]
+    ///   PushEngage.set(attributes: attributes) { success, error in
+    ///       if success {
+    ///           print("Attributes added/updated successfully.")
+    ///       } else {
+    ///           if let error = error {
+    ///               print("Error occurred: \(error.localizedDescription)")
+    ///           } else {
+    ///               print("Unknown error occurred.")
+    ///           }
+    ///       }
+    ///   }
+    ///   ```
+    @objc public static func set(attributes: Parameters,
+                                  completionHandler: ((_ response: Bool,
+                                                          _ error: Error?) -> Void)?) {
+        manager.set(attributes: attributes, completionHandler: completionHandler)
+    }
+    
+    /// Retrieve the attributes of the subscriber.
+    ///
+    /// Use this method to get the attributes associated with the subscriber.
+    ///
+    /// - Parameters:
+    ///   - completionHandler: A completion handler that provides the attribute information as [String: Any]?,
+    ///                         along with an optional error if the operation fails.
+    ///
+    @objc public static func getSubscriberAttributes(completionHandler: @escaping(_ info: [String: Any]?,
+                                                                       _ error: Error?) -> Void) {
+        manager.getAttribute(completionHandler: completionHandler)
+    }
+    
+    /// Add a subscriber profile ID.
+    ///
+    /// Use this method to associate a subscriber ID (e.g., the username of the subscriber in the host application) with the SDK.
+    ///
+    /// - Parameters:
+    ///   - id: The subscriber ID to associate with the SDK.
+    ///   - completionHandler: A completion handler that provides the response of the method call as a boolean value,
+    ///                        along with an optional error if the operation fails.
+    ///
+    /// Example usage:
+    /// ```
+    /// PushEngage.addProfile(for: "your-unique-ID") { response, error in
+    ///     if response {
+    ///         print("Subscriber profile added successfully.")
+    ///     } else {
+    ///         if let error = error {
+    ///             print("Failed to add subscriber profile: \(error.localizedDescription)")
+    ///         } else {
+    ///             print("Unknown error occurred while adding subscriber profile.")
+    ///         }
+    ///     }
+    /// }
+    ///
+    /// ```
     @objc public static func addProfile(for id: String,
                                         completionHandler: ((_ response: Bool,
                                                              _ error: Error?) -> Void)?) {
-        viewModel.addProfile(for: id, completionHandler: completionHandler)
+        manager.addProfile(for: id, completionHandler: completionHandler)
     }
     
-    // delete Attributes
-    
-    
-    /// This API used to delete the subscriber attriburtes from the pushengage server.
+    /// Delete Subscriber Attributes.
+    ///
+    /// Use this method to remove specific subscriber attributes from the PushEngage server.
+    ///
     /// - Parameters:
-    ///   - values: Array of string with attribute value or pass empty array to remove compelete info.
-    ///   - completionHandler: response call back for the user.
-    @objc public static func deleteAttribute(values: [String],
-                                             completionHandler: ((_ response: Bool,
-                                                                  _ error: Error?) -> Void)?) {
-        viewModel.deleteAttribute(values: values, completionHandler: completionHandler)
+    ///   - keys: An array of strings representing the attribute keys to be removed.
+    ///             Pass an empty array to remove all subscriber attributes associated with the device.
+    ///   - completionHandler: A completion handler that provides the response of the API call as a boolean value,
+    ///                        along with an optional error if the operation fails.
+    ///
+    /// Example usage:
+    /// ```
+    /// PushEngage.deleteSubscriberAttributes(["AttributeKeyToDelete"]) { response, error in
+    ///     if response {
+    ///         print("Attributes deleted successfully.")
+    ///     } else {
+    ///         if let error = error {
+    ///             print("Failed to delete attributes: \(error.localizedDescription)")
+    ///         } else {
+    ///             print("Unknown error occurred while deleting attributes.")
+    ///         }
+    ///     }
+    /// }
+    ///
+    /// ```
+    @objc public static func deleteSubscriberAttributes(for keys: [String],
+                                                        completionHandler: ((_ response: Bool,
+                                                                             _ error: Error?) -> Void)?) {
+        manager.deleteAttribute(values: keys, completionHandler: completionHandler)
     }
     
-    
-    /// This Api used to remove the segments.
+    /// Remove Segments for Subscriber.
+    ///
+    /// Use this method to remove specific segments associated with the subscriber.
+    ///
     /// - Parameters:
-    ///   - segments: Array of String hold the information of segments to be removed.
-    ///   - completionHandler: call back with boolean if true operation
-    ///   completed sucessfully with error if any error occurs.
-    @objc public static func remove(segments: [String], completionHandler: ((_ response: Bool,
+    ///   - segments: An array of strings representing the segment names to be removed from the subscriber.
+    ///   - completionHandler: A completion handler that provides the response of the method call as a boolean value,
+    ///                        along with an optional error if the operation fails.
+    /// Example usage:
+    /// ```
+    /// PushEngage.removeSegments(["SegmentToRemove"]) { response, error in
+    ///     if response {
+    ///         print("Segments removed successfully.")
+    ///     } else {
+    ///         if let error = error {
+    ///             print("Failed to remove segments: \(error.localizedDescription)")
+    ///         } else {
+    ///             print("Unknown error occurred while removing segments.")
+    ///         }
+    ///     }
+    /// }
+    ///
+    /// ```
+    @objc public static func removeSegments(_ segments: [String], completionHandler: ((_ response: Bool,
                                                                             _ error: Error?) -> Void)?) {
-        viewModel.update(segments: segments, with: .remove, completionHandler: completionHandler)
+        manager.update(segments: segments, with: .remove, completionHandler: completionHandler)
     }
     
     
-    /// This Api used to add the segments.
+    /// Adds subscriber to segments.
+    ///
+    /// This method is used to add the subscriber to segments.
+    ///
     /// - Parameters:
-    ///   - segments: Array of String hold the information of segments to be added.
-    ///   - completionHandler: call back with boolean if true operation
-    ///   completed sucessfully with error if any error occurs.
-    @objc public static func add(segments: [String],
+    ///   - segments: An array of strings containing segment information to be added to the subscriber's profile.
+    ///   - completionHandler: A closure that provides a response indicating whether the operation was successful (`true` if successful, `false` otherwise) and an optional error object if any error occurs during the operation.
+    ///     - response: A boolean value indicating the success of the operation.
+    ///     - error: An optional error object describing the error that occurred during the operation, if any.
+    ///
+    /// Example usage:
+    /// ```
+    /// PushEngage.addSegments(["Segment1", "Segment2"]) { response, error in
+    ///     if response {
+    ///         print("Segments added successfully.")
+    ///     } else {
+    ///         if let error = error {
+    ///             print("Failed to add segments: \(error.localizedDescription)")
+    ///         } else {
+    ///             print("Unknown error occurred while adding segments.")
+    ///         }
+    ///     }
+    /// }
+    ///
+    /// ```
+    @objc public static func addSegments(_ segments: [String],
                                  completionHandler: ((_ response: Bool,
                                                       _ error: Error?) -> Void)?) {
-        viewModel.update(segments: segments, with: .add,
+        manager.update(segments: segments, with: .add,
                          completionHandler: completionHandler)
     }
     
-    //  update dynamic segments
-    
-    /// update the dynamic segement which is created from the pushengage dash board.
+    /// Add subscriber to dynamic segments
+    ///
+    /// Use this method to add subscriber to segments created from the PushEngage dashboard for a particular duration.
+    ///
     /// - Parameters:
-    ///   - segments: Array of dictionary value where key is string type and value can be Any type.
-    ///   - completionHandler: call back provide response boolean and Error type.
-    @objc public static func add(dynamic segments: [[String: Any]],
+    ///   - dynamicSegments: An array of dictionaries where the keys are strings and the values can be of any type.
+    ///   - completionHandler: A closure that provides a boolean response indicating whether the operation was successful (`true` if successful, `false` otherwise) and an optional error object if any error occurs during the operation.
+    ///
+    /// Example usage:
+    /// ```
+    /// let dynamicSegments: [[String: Any]] = [
+    ///     ["name": "Cricket", "duration": 3],
+    ///     ["name": "Tennis", "duration": 7],
+    /// ]
+    ///
+    /// PushEngage.addDynamicSegments(dynamicSegments) { response, error in
+    ///     if response {
+    ///         print("Dynamic segments updated successfully.")
+    ///     } else {
+    ///         if let error = error {
+    ///             print("Failed to update dynamic segments: \(error.localizedDescription)")
+    ///         } else {
+    ///             print("Unknown error occurred while updating dynamic segments.")
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    @objc public static func addDynamicSegments(_ dynamicSegments: [[String: Any]],
                                  completionHandler: ((_ response: Bool,
                                                       _ error: Error?) -> Void)?) {
-        viewModel.add(dynamic: segments, completionHandler: completionHandler)
+        manager.add(dynamic: dynamicSegments, completionHandler: completionHandler)
     }
     
-    //  update trigger status
-    
-    
+    /// Update trigger status
     /// Update the trigger status of the notification
     /// - Parameters:
     ///   - status: boolean flag wheather user has accepted for trigger enabled or not
     ///   - completionHandler: call back provide response boolean and Error type.
-    @objc public static func updateTrigger(status: Bool,
+    /// Private for now
+    @objc private static func updateTrigger(status: Bool,
                                            completionHandler: ((_ response: Bool,
                                                                 _ error: Error?) -> Void)?) {
-        viewModel.updateTrigger(status: status, completionHandler: completionHandler)
+        manager.updateTrigger(status: status, completionHandler: completionHandler)
     }
     
-    //  get subscriber details
-    
-    
-    /// Api provides the registered subscriber information.
+    /// Get Subscriber Details
+    ///
+    /// Use this method to retrieve information about the registered subscriber.
+    ///
     /// - Parameters:
-    ///   - fields: provide the fields if need field specific information like country to get only country information
-    ///             if no fields are provided then api will give complete Subscriber details
-    ///   - completionHandler: Call back provides the response as Subscriber details
-    @objc public static func getSubscriberDetails(for fields: [String]?,
-                                                  completionHandler: ((_ response: SubscriberDetailsData? ,
+    ///   - keys: An optional array of strings specifying the specific keys of information to retrieve for the subscriber.
+    ///           If no keys are provided, the API will return complete subscriber details. (Optional)
+    ///   - completionHandler: A closure that provides the response as a `SubscriberDetailsData` object representing the subscriber details, or an optional error object if any error occurs during the operation.
+    ///
+    /// Example usage:
+    /// ```
+    /// let specificKeys = ["country", "age"] // Optional: Retrieve specific keys like country and age.
+    ///
+    /// PushEngage.getSubscriberDetails(for: specificKeys) { response, error in
+    ///     if let subscriberDetails = response {
+    ///         print("Subscriber Details: \(subscriberDetails)")
+    ///     } else {
+    ///         if let error = error {
+    ///             print("Failed to retrieve subscriber details: \(error.localizedDescription)")
+    ///         } else {
+    ///             print("Unknown error occurred while retrieving subscriber details.")
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    @objc public static func getSubscriberDetails(for keys: [String]?,
+                                                  completionHandler: ((_ response: SubscriberDetailsData?,
                                                                        _ error: Error?) -> Void)?) {
-        viewModel.getSubscriberDetails(for: fields, completionHandler: completionHandler)
+        manager.getSubscriberDetails(for: keys, completionHandler: completionHandler)
     }
     
     // Trigger Campiagn Handler
-    
     /// Use this method to create the trigger for the campiagn
     /// - Parameters:
     ///   - details: provide the insctance of the Trigger campaign object and pass the details on
     ///   - completionHandler: call back provides the response as true or false.
-    @objc public static func createTriggerCampaign(for details: TriggerCampaign,
+    /// Private for now
+    @objc private static func createTriggerCampaign(for details: TriggerCampaign,
                                                    completionHandler: ((_ response: Bool) -> Void)?) {
-        viewModel.createCampaign(for: details, completionHandler: completionHandler)
+        manager.createCampaign(for: details, completionHandler: completionHandler)
     }
     
-    // best attempt handled
+    /// Silent Push Notification Handler
+    ///
+    /// Use this method to set the silent notification handler to handle silent push notifications.
+    /// It will give 30 seconds of time frame to the app so that any app update can be done.
+    ///
+    /// - Parameter completion: A closure that provides the silent push notification content.
+    ///
+    /// Use this method in your application to handle silent push notifications. Silent push notifications are notifications
+    /// that don't display any visible content to the user but allow your app to perform tasks in the background. When a silent
+    /// push notification is received, the provided closure will be called, allowing you to process the notification's content
+    /// and perform necessary background tasks.
+    @objc public static func silentPushHandler(_ completion: PESilentPushBackgroundHandler?) {
+        manager.setbackGroundSilentPushHandler(block: completion)
+    }
     
+    // MARK: Notification Content Extension methods
     
-    /// Use this api in notification service extension for bes attempt to deliver the notification to the device.
+    /// Get Custom UI Payload for Notification
+    ///
+    /// Use this method to get the custom UI payload associated with a notification request.
+    ///
+    /// - Parameter request: The UNNotificationRequest object for which you want to retrieve the custom UI payload.
+    /// - Returns: A CustomUIModel object containing the custom UI payload for the given notification request.
+    @available(iOS 10.0, *)
+    @objc public static func getCustomUIPayLoad(for request: UNNotificationRequest) -> CustomUIModel {
+        manager.getCustomUIPayLoad(for: request)
+    }
+    
+    // MARK: Notification Service Extension methods
+    
+    /// Modify the notification content received from the parent application in the Notification Service Extension.
+    ///
     /// - Parameters:
-    ///   - request: Notification Request
-    ///   - content: Content for the notification
-    /// - Returns: returns the UNMutableNotificationContent.
+    ///   - request: The UNNotificationRequest received from the parent application.
+    ///   - bestContentHandler: The UNMutableNotificationContent that can be modified to customize the notification.
+    @available(iOS 10.0, *)
+    @objc public static func didReceiveNotificationExtensionRequest(_ request: UNNotificationRequest,
+                                                                    bestContentHandler: UNMutableNotificationContent) {
+        manager.didReceiveNotificationExtensionRequest(request, bestContentHandler: bestContentHandler)
+    }
+    
+    /// Service Extension Time Will Expire Handler
+    ///
+    /// Use this method in the notification service extension to handle best attempts to deliver the notification to the device.
+    ///
+    /// - Parameters:
+    ///   - request: The original `UNNotificationRequest` received by the extension.
+    ///   - content: The mutable content for the notification. This content can be modified as needed before delivery.
+    ///
+    /// - Returns: The modified `UNMutableNotificationContent` that will be delivered to the user
+    ///
+    /// When the notification service extension time is about to expire, this method should be called to allow the SDK to modify the
+    /// notification content before delivery.
     @available(iOS 10.0, *)
     @objc public static func serviceExtensionTimeWillExpire(_ request: UNNotificationRequest,
                                                             content: UNMutableNotificationContent?)
                                                             -> UNMutableNotificationContent? {
-        return viewModel.serviceExtensionTimeWillExpire(request, content: content)
+        return manager.serviceExtensionTimeWillExpire(request, content: content)
     }
     
-    /// Use this api to set the silent notification to handle silent push as it will give 30 sec of time frame to app so that
-    /// any app update can be done.
-    /// - Parameter completion: pass the silent notification handler to the method if developer doesn't
-    ///                         set the completion
-    @objc public static func silentPushHandler(_ completion: PESilentPushBackgroundHandler?) {
-        viewModel.setbackGroundSilentPushHandler(block: completion)
-    }
-    
-    @available(iOS 10.0, *)
-    @objc public static func getCustomUIPayLoad(for request: UNNotificationRequest) -> CustomUIModel {
-        viewModel.getCustomUIPayLoad(for: request)
-    }
-    
-    // MARK: - Remote Notification Manually setup methods
-    // if developer has not added swizzling in there appdelegate init method the developers
-    // has use remote notification manually setup mathods.
-    
-    // MARK: - Register Device with server method.
-    
-    /// User has to register the device token to the server.
-    /// - Parameter deviceToken: send token as data type.
+    // MARK: - Remote Notification manual setup methods
+
+    /// Register Device Token Manually
+    ///
+    /// Use this method to manually register the device token with the PushEngage server if swizzling is not used.
+    ///
+    /// - Parameter deviceToken: The device token obtained from Apple Push Notification service (APNs) as Data.
+    ///
+    /// Call this method in your app delegate's `application(_:didRegisterForRemoteNotificationsWithDeviceToken:)` method
+    /// to register the device token with the PushEngage server manually.
+    ///
+    /// Example usage:
+    /// ```
+    /// func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    ///     PushEngage.registerDeviceToServer(with: deviceToken)
+    /// }
+    /// ```
+    ///
+    /// - Note: If you are using swizzling, you do not need to manually register the device token.
     @objc public static func registerDeviceToServer(with deviceToken: Data) {
-        viewModel.registerDeviceToServer(with: deviceToken)
+        manager.registerDeviceToServer(with: deviceToken)
     }
     
-    //  didReciveRemoteNotification silent features.
-    
-    
-    /// Use To handle the remote notification setup from SDK from the manual integration
+    /// Handle Remote Notifications Manually
+    ///
+    /// Use this method to handle remote notifications manually if swizzling is not used or if you want to
+    /// customize the notification handling behavior.
+    ///
     /// - Parameters:
-    ///   - application: UIApplication instance
-    ///   - userInfo: information while get notifiation userinfo to pass to SDK.
-    ///   - completionHandler: this is UIBackgroundFetchResult handler user has to send the handler from application.
-    /// - Returns:Boolean value as result like any backgound work started if true otherwise false.
+    ///   - application: UIApplication instance.
+    ///   - userInfo: The remote notification payload received from APNs as [AnyHashable: Any].
+    ///   - completionHandler: The completion handler provided by the host application for background fetch completion.
+    ///                        This handler must be called after processing the notification.
+    ///
+    /// - Returns: A boolean value indicating if any background work was started by the SDK.
+    ///
+    /// Call this method in your app delegate's `application(_:didReceiveRemoteNotification:fetchCompletionHandler:)` method.
+    ///
+    /// Example usage:
+    /// ```
+    /// func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+    ///                  fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    ///     let didStartBackgroundWork = PushEngage.receivedRemoteNotification(application: application,
+    ///                                                                         userInfo: userInfo,
+    ///                                                                         completionHandler: completionHandler)
+    ///     if !didStartBackgroundWork {
+    ///         // Handle the notification in the foreground, if required.
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// - Note: If you are using swizzling, you do not need to manually handle remote notifications.
     @discardableResult
-    @objc public static func recivedRemoteNotification(application: UIApplication,
+    @objc public static func receivedRemoteNotification(application: UIApplication,
                                                        userInfo: [AnyHashable: Any],
                                                        completionHandler: ((UIBackgroundFetchResult) -> Void)?) -> Bool {
-        viewModel.recivedRemoteNotification(application: application,
+        manager.receivedRemoteNotification(application: application,
                                             userInfo: userInfo,
                                             completionHandler: completionHandler)
     }
     
-    // These methods developer has to call if they are going to
-    // implements the UNUsernotification Delegate method by them and disable swizzling.
-    
-    /// Setup method need to integrate in UNNotification delegate method to process the notification after
-    /// subscriber performs any action to the notification.
-    /// - Parameter notification: UNNotificationresponse of the notification delivered on device only for iOS 10+
+    /**
+     Handles the remote notification interaction for devices running iOS 10.0 and above.
+
+     This method should be implemented in the application's UNUserNotificationCenterDelegate to process the user's response to a remote notification.
+     When a user interacts with a notification, this method should be called to handle the response and perform appropriate actions based on the user's interaction.
+
+     - Note: This method should only be implemented if the application chooses to handle UNNotificationResponse objects manually and has disabled method swizzling for notification handling.
+
+     - Parameter notification: The UNNotificationResponse object representing the user's response to a remote notification. It contains information about the notification.
+     */
     @available(iOS 10.0, *)
-    @objc public static func didRecivedRemoteNotification(with notification: UNNotificationResponse) {
-        viewModel.processiOS10Open(response: notification)
+    @objc public static func didReceiveRemoteNotification(with notification: UNNotificationResponse) {
+        manager.processiOS10Open(response: notification)
     }
     
 }
 
 // MARK: - Method Swizzling
-
 extension PushEngage {
-    
-    private static func loadRequriedSizzling() {
-        
-        // PushEngage selector tagmethod is implemented for checking is whether
-        // UIApplication is not loaded twice in runtime for the previous version check.
-        // This will not happen in swift because implemented runOnce swift lazy
-        // Using Swift's lazy evaluation of a static property we get the same
-        // thread-safety and called-once guarantees as dispatch_once provided.
-        
+    /**
+     Loads the required method swizzling for PushEngage SDK during the application's runtime initialization.
+
+     This method performs method swizzling to ensure proper integration of PushEngage SDK within the application.
+     It checks if the swizzling has already been performed to prevent duplicating the process.
+     */
+    private static func loadRequiredSizzling() {
+        /**
+         Checks if the `UIApplication` delegate methods are loaded twice during runtime, ensuring proper version compatibility.
+
+         The implementation utilizes Swift's lazy evaluation of a static property, ensuring thread-safety and guaranteeing that the code within the property is executed only once, providing similar behavior to `dispatch_once`.
+         */
         let isExisting = PESelectorHelper.shared
                          .injectSelectorAtRuntime(PushEngageAppDelegate.self,
                                          #selector(PushEngageAppDelegate.pushEngageSELTag),
@@ -340,6 +566,12 @@ extension PushEngage {
         
     }
     
+    /**
+     Sets the delegate for UNUserNotificationCenter, enabling the handling of notifications for devices running iOS 10 and above.
+
+     This method checks if the UNUserNotificationCenter class is available (introduced in iOS 10) to ensure compatibility.
+     If the class is available, it initializes and sets up the PushEngageUNUserNotificationCenter, enabling the app to handle notifications using the User Notifications framework.
+     */
     @available(iOS 10.0, *)
     private static func setUNUserNotificationCenterDelegate() {
         if NSClassFromString("UNUserNotificationCenter") == nil {

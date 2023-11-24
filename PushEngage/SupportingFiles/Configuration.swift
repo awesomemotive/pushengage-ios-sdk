@@ -7,13 +7,9 @@
 
 import Foundation
 
-struct Configuration {
-    static var enviroment: Environment = .prod
-}
-
 @objc public enum Environment: Int {
-    case dev
-    case prod
+    case staging = 0
+    case production = 1
 }
 
 struct PENetworkURLs {
@@ -26,8 +22,8 @@ struct PENetworkURLs {
     static let stagingTriggerURL
     = "https://x9dlvh1zcg.execute-api.us-east-1.amazonaws.com/beta/streams/staging-trigger/records"
     static let stagingBackendURL = "https://staging-dexter.pushengage.com/p/v1/"
-    static let stagingBackendCdnURL = "https://staging-dexter1.pushengage.com/p/v1/"
-    static let stagingNotifAnalyticURL = "https://staging-dexter1.pushengage.com/p/v1/"
+    static let stagingBackendCdnURL = "https://staging-dexter.pushengage.com/p/v1/"
+    static let stagingNotifAnalyticURL = "https://staging-dexter.pushengage.com/p/v1/"
     static let stagingLoggerURL = "https://cwlvm0dw8e.execute-api.us-east-1.amazonaws.com/staging/v1/"
     
     // not using currently for future.
@@ -49,46 +45,51 @@ struct PENetworkURLs {
     
     
     static var backendCdnBaseURL: String {
-        switch Configuration.enviroment {
-        case .dev:
+        let userDefaults = DependencyInitialize.getUserDefaults()
+        switch userDefaults.environment {
+        case .staging:
             return syncapiObject?.api?.backendCloud ?? stagingBackendCdnURL
-        case .prod:
+        case .production:
             return  syncapiObject?.api?.backendCloud ?? productionBackendCdnURL
         }
     }
     
     static var backendBaseURL: String {
-        switch Configuration.enviroment {
-        case .dev:
+        let userDefaults = DependencyInitialize.getUserDefaults()
+        switch userDefaults.environment {
+        case .staging:
             return syncapiObject?.api?.backend ?? stagingBackendURL
-        case .prod:
+        case .production:
             return  syncapiObject?.api?.backend ?? productionBackendURL
         }
     }
     
     static var notifyAnalyticsBaseURL: String {
-        switch Configuration.enviroment {
-        case .dev:
+        let userDefaults = DependencyInitialize.getUserDefaults()
+        switch userDefaults.environment {
+        case .staging:
             return syncapiObject?.api?.analytics ?? stagingNotifAnalyticURL
-        case .prod:
+        case .production:
             return syncapiObject?.api?.analytics ?? productionNotifyAnalyticURL
         }
     }
     
     static var triggerBaseURL: String {
-        switch Configuration.enviroment {
-        case .dev:
+        let userDefaults = DependencyInitialize.getUserDefaults()
+        switch userDefaults.environment {
+        case .staging:
             return syncapiObject?.api?.trigger ?? stagingTriggerURL
-        case .prod:
+        case .production:
             return syncapiObject?.api?.trigger ?? productionTriggerURL
         }
     }
     
     static var loggingBaseURL: String {
-        switch Configuration.enviroment {
-        case .dev:
+        let userDefaults = DependencyInitialize.getUserDefaults()
+        switch userDefaults.environment {
+        case .staging:
             return syncapiObject?.api?.log  ?? stagingLoggerURL
-        case .prod:
+        case .production:
             return syncapiObject?.api?.log ?? productionLoggingURL
         }
     }

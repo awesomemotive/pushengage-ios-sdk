@@ -20,20 +20,28 @@
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
     self.navigationItem.title = @"PushEngage Demo";
-    self.datalist = @[@"Add Segment", @"Remove segment",@"Add dynamic",
-                    @"AddAttribute", @"Delete attribute",@"Trigger", @"add profileId", @"getSubscriberDetails",
-                    @"getAttribute", @"check subscriber" ];
+    self.datalist = @[@"Add Segment",
+                      @"Remove segments",
+                      @"Add Dynamic Segments",
+                      @"Add Subscriber Attributes",
+                      @"Delete Attributes",
+                      @"Add Profile Id",
+                      @"Get Subscriber Details",
+                      @"Get Subscriber Attributes",
+                      @"Set Subscriber Attributes" ];
     self.textView.text = nil;
     self.textView.layer.borderWidth = 0.5;
     self.textView.layer.borderColor = UIColor.blackColor.CGColor;
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss:)];
     tapGesture.cancelsTouchesInView = NO;
     [self.view addGestureRecognizer: tapGesture];
-    UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:@"next"
-                                                       style:UIBarButtonItemStylePlain
-                                                       target:self
-                                                       action:@selector(nextView:)];
-    self.navigationItem.rightBarButtonItem = button;
+    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(requestPermissionTapped:)];
+    [self.requestPermissionButton addGestureRecognizer:tapGestureRecognizer];
+}
+
+- (void)requestPermissionTapped:(UITapGestureRecognizer *)sender {
+    [self.requestPermissionButton sendActionsForControlEvents:UIControlEventTouchUpInside];
+    [PushEngage requestNotificationPermission];
 }
 
 - (void) navigateToAddToCart {
@@ -74,7 +82,7 @@
                                completionHandler:^(BOOL response, NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {
-                        blockSelf.textView.text = @"added attribute succesfully";
+                        blockSelf.textView.text = @"Attribute(s) updated for subscriber successfully";
                     } else {
                         blockSelf.textView.text = [error debugDescription];
                     }
@@ -84,11 +92,11 @@
             break;
         }
         case addSegment: {
-            [PushEngage addWithSegments:@[@"segmentTest1"]
+            [PushEngage addSegments:@[@"segmentTest1"]
                                completionHandler:^(BOOL response, NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {
-                        blockSelf.textView.text = @"added segment successfully";
+                        blockSelf.textView.text = @"Subscriber added to segment successfully";
                     } else {
                         blockSelf.textView.text = [error debugDescription];
                     }
@@ -98,7 +106,7 @@
             break;
         }
         case addDynamicSegement: {
-            [PushEngage addWithDynamic:@[@{@"name": @"dynamicOne" ,
+            [PushEngage addDynamicSegments:@[@{@"name": @"dynamicOne" ,
                                                      @"duration": @10},
                                                    @{@"name" : @"segemt1",
                                                      @"duration" : @20},
@@ -108,7 +116,7 @@
                 
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {
-                        blockSelf.textView.text = @"successfully added dynamic segment";
+                        blockSelf.textView.text = @"Subscriber added to the dynamic segment successfully";
                     } else {
                         blockSelf.textView.text = [error debugDescription];
                     }
@@ -119,11 +127,11 @@
         }
         
         case deleteAttribute: {
-            [PushEngage deleteAttributeWithValues:@[@"name"]
+            [PushEngage deleteSubscriberAttributesFor:@[@"name"]
                                completionHandler:^(BOOL response, NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {
-                        blockSelf.textView.text = @"deleted attribute successfull";
+                        blockSelf.textView.text = @"Attribute(s) deleted for subscriber successfully";
                     } else {
                         blockSelf.textView.text = [error debugDescription];
                     }
@@ -134,11 +142,11 @@
         }
             
         case removeSegment: {
-            [PushEngage removeWithSegments:@[@"segmentTest1"]
+            [PushEngage removeSegments:@[@"segmentTest1"]
                               completionHandler:^(BOOL response, NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {
-                        blockSelf.textView.text = @"Segment added successfully";
+                        blockSelf.textView.text = @"Subscriber removed from the segment(s)";
                     } else {
                         blockSelf.textView.text = [error debugDescription];
                     }
@@ -148,20 +156,20 @@
             break;
         }
         
-        case trigger: {
-            [PushEngage updateTriggerWithStatus: NO
-                               completionHandler:^(BOOL response, NSError * _Nullable error) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (response) {
-                        blockSelf.textView.text = @"added trigger successfully";
-                    } else {
-                        blockSelf.textView.text = [error debugDescription];
-                    }
-                    blockSelf = nil;
-                });
-            }];
-            break;
-        }
+//        case trigger: {
+//            [PushEngage updateTriggerWithStatus: NO
+//                               completionHandler:^(BOOL response, NSError * _Nullable error) {
+//                dispatch_async(dispatch_get_main_queue(), ^{
+//                    if (response) {
+//                        blockSelf.textView.text = @"added trigger successfully";
+//                    } else {
+//                        blockSelf.textView.text = [error debugDescription];
+//                    }
+//                    blockSelf = nil;
+//                });
+//            }];
+//            break;
+//        }
             
         case addProfileId: {
             [PushEngage addProfileFor: @"abhishekkumarthakur@gmail.com"
@@ -183,25 +191,51 @@
                                completionHandler:^(SubscriberDetailsData * _Nullable response,
                                                    NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    if (response) {
-                        blockSelf.textView.text = [response description];
-                    } else {
-                        blockSelf.textView.text = @"error to get subscription details";
-                    }
-                    blockSelf = nil;
-                });
+                        if (response) {
+                            NSString *responseString = [NSString stringWithFormat:@"device: %@, user_agent: %@, country: %@, ts_created: %@, state: %@, city: %@, host: %@, device_type: %@, timezone: %@, segments: %@",
+                                                        response.device ?: @"(null)",
+                                                        response.userAgent ?: @"(null)",
+                                                        response.country ?: @"(null)",
+                                                        response.tsCreated ?: @"(null)",
+                                                        response.state ?: @"(null)",
+                                                        response.city ?: @"(null)",
+                                                        response.host ?: @"(null)",
+                                                        response.deviceType ?: @"(null)",
+                                                        response.timezone ?: @"(null)",
+                                                        [response.segments componentsJoinedByString:@", "] ?: @"(null)"];
+                            
+                            self.textView.text = responseString;
+                        } else {
+                            self.textView.text = error.localizedDescription;
+                        }
+                        blockSelf = nil;
+                    });
             }];
             break;
         }
             
         case getAttribute: {
-            [PushEngage getAttributeWithCompletionHandler:^(NSDictionary<NSString *,id> * _Nullable response,
+            [PushEngage getSubscriberAttributesWithCompletionHandler:^(NSDictionary<NSString *,id> * _Nullable response,
                                                                    NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {
                         blockSelf.textView.text = [response description];
                     } else {
                         NSLog(@"error message %@", error);
+                    }
+                    blockSelf = nil;
+                });
+            }];
+            break;
+        }
+        case setAttributes: {
+            [PushEngage setWithAttributes:@{@"gender" : @"male"}
+                               completionHandler:^(BOOL response, NSError * _Nullable error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (response) {
+                        blockSelf.textView.text = @"Attribute(s) set for subscriber successfully";
+                    } else {
+                        blockSelf.textView.text = [error debugDescription];
                     }
                     blockSelf = nil;
                 });

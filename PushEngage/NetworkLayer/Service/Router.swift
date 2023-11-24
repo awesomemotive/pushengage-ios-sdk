@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Router: NetworkRouter {
+class Router: NetworkRouterType {
 
     private static let sessionManager: URLSession = {
         let config = URLSessionConfiguration.ephemeral

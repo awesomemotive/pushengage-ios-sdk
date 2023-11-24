@@ -19,7 +19,7 @@ import Foundation
     case dataEncodeingFailed
     case errorResponse(String)
     case networkNotReachable
-    case canceled
+    case cancelled
     case missingInputURL
     case missingRedirectURL
     case underlying(error: Swift.Error)
@@ -38,8 +38,7 @@ import Foundation
     case siteKeyNotAvailable
     case permissionNotDetermined
     case notificationUserActionFailed(String?)
-    @available(iOS 10.0, *)
-    case sponseredfailWithContent(DownloadOperationInput)
+    case sponseredfailWithContent(attachmentString: String?, networkService: NetworkRouterType)
 }
 
 extension PEError: LocalizedError {
@@ -68,7 +67,7 @@ extension PEError: LocalizedError {
             return errorMessage
         case .networkNotReachable:
             return .networkNotReachable
-        case .canceled:
+        case .cancelled:
             return .canceled
         case .missingInputURL:
             return .missingInputURL

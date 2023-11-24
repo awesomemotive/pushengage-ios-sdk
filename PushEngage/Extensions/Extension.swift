@@ -94,9 +94,8 @@ extension Dictionary {
 
 
 extension UserDefaults {
-    static var shared: UserDefaults {
-        let combined = UserDefaults.standard
-        combined.addSuite(named: Utility.getAppGroupInfo)
+    static var shared: UserDefaults? {
+        let combined = UserDefaults(suiteName: Utility.getAppGroupInfo)
         return combined
     }
     
@@ -129,6 +128,10 @@ extension UserDefaults.Key {
     
     static var deviceToken: UserDefaults.Key<String> {
         return .init(name: UserDefaultConstant.deviceToken)
+    }
+    
+    static var sdkEnvironment: UserDefaults.Key<Int> {
+        return .init(name: UserDefaultConstant.environment)
     }
     
     static var badgeCount: UserDefaults.Key<Int> {
@@ -168,7 +171,7 @@ extension UserDefaults.Key {
     }
     
     static var istriedFirstTime: UserDefaults.Key<Bool> {
-        return .init(name: UserDefaultConstant.istriedFirstTime)
+        return .init(name: UserDefaultConstant.isTriedFirstTime)
     }
     
     static var isSponseredIdKey: UserDefaults.Key<String> {
@@ -176,6 +179,6 @@ extension UserDefaults.Key {
     }
     
     static var isSwizzled: UserDefaults.Key<Bool> {
-        return .init(name: UserDefaultConstant.isSwizziled)
+        return .init(name: UserDefaultConstant.isSwizzled)
     }
 }

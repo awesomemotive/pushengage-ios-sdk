@@ -9,6 +9,7 @@
 
 @interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
 
+@property (weak, nonatomic) IBOutlet UIButton *requestPermissionButton;
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
 @property (strong, nonatomic) IBOutlet UITextView *textView;
 typedef NS_ENUM(NSUInteger, ApiAction) {
@@ -17,10 +18,11 @@ typedef NS_ENUM(NSUInteger, ApiAction) {
     addDynamicSegement,
     addAttribute,
     deleteAttribute,
-    trigger,
+//    trigger,
     addProfileId,
     getSubscriberDetails,
-    getAttribute
+    getAttribute,
+    setAttributes
 };
 
 @end

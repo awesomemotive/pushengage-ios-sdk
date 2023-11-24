@@ -7,49 +7,55 @@
 
 import Foundation
 
-
-class  UserDefaultManager: UserDefaultProtocol {
+class UserDefaultManager: UserDefaultsType {
     
-    private let userDefaultSharedContainer: UserDefaults = .shared
+    private let userDefaultSharedContainer: UserDefaults? = .shared
+    
+    var environment: Environment {
+        get {
+            Environment(rawValue: userDefaultSharedContainer?[.sdkEnvironment] ?? 1) ?? .production
+        }
+        set(value) {
+            userDefaultSharedContainer?[.sdkEnvironment] = (value == .production) ? 1 : 0
+        }
+    }
     
     var badgeCount: Int? {
         get {
-            userDefaultSharedContainer[.badgeCount]
+            userDefaultSharedContainer?[.badgeCount]
         }
         
         set (value) {
-            userDefaultSharedContainer[.badgeCount] = value
+            userDefaultSharedContainer?[.badgeCount] = value
         }
     }
     
     var deviceToken: String {
         get {
-            userDefaultSharedContainer[.deviceToken] ?? ""
+            userDefaultSharedContainer?[.deviceToken] ?? ""
         }
         
         set (value) {
-            userDefaultSharedContainer[.deviceToken] = value
+            userDefaultSharedContainer?[.deviceToken] = value
         }
     }
     
     var subscriberHash: String {
         get {
-            userDefaultSharedContainer[.subscriberHash] ?? ""
+            userDefaultSharedContainer?[.subscriberHash] ?? ""
         }
-        
         set(value) {
-            userDefaultSharedContainer[.subscriberHash] = value
+            userDefaultSharedContainer?[.subscriberHash] = value
         }
     }
     
-    var notificationPermissionState: PermissonStatus {
+    var notificationPermissionState: PermissionStatus {
         get {
-            let rawValue = userDefaultSharedContainer[.permissionState] ?? "notYetRequested"
-            return PermissonStatus(rawValue: rawValue) ?? PermissonStatus.notYetRequested
+            let rawValue = userDefaultSharedContainer?[.permissionState] ?? "notYetRequested"
+            return PermissionStatus(rawValue: rawValue) ?? PermissionStatus.notYetRequested
         }
-        
         set (value) {
-            userDefaultSharedContainer[.permissionState] = value.rawValue
+            userDefaultSharedContainer?[.permissionState] = value.rawValue
         }
     }
     
@@ -59,25 +65,25 @@ class  UserDefaultManager: UserDefaultProtocol {
     
     var lastSmartSubscribeDate: Date? {
         get {
-            userDefaultSharedContainer[.lastSmartSubscribeDate]
+            userDefaultSharedContainer?[.lastSmartSubscribeDate]
         } set (value) {
-            userDefaultSharedContainer[.lastSmartSubscribeDate] = value
+            userDefaultSharedContainer?[.lastSmartSubscribeDate] = value
         }
     }
     
     var ispermissionAlerted: Bool {
         get {
-            userDefaultSharedContainer[.ispermissionAlerted] ?? false
+            userDefaultSharedContainer?[.ispermissionAlerted] ?? false
         } set (value) {
-            userDefaultSharedContainer[.ispermissionAlerted] = value
+            userDefaultSharedContainer?[.ispermissionAlerted] = value
         }
     }
     
     var profileID: String? {
         get {
-            userDefaultSharedContainer[.profileID]
+            userDefaultSharedContainer?[.profileID]
         } set (value) {
-            userDefaultSharedContainer[.profileID] = value
+            userDefaultSharedContainer?[.profileID] = value
         }
     }
     
@@ -88,9 +94,9 @@ class  UserDefaultManager: UserDefaultProtocol {
     
     var siteKey: String? {
         get {
-            userDefaultSharedContainer[.siteKey]
+            userDefaultSharedContainer?[.siteKey]
         } set {
-            userDefaultSharedContainer[.siteKey] = newValue
+            userDefaultSharedContainer?[.siteKey] = newValue
         }
     }
     
@@ -106,11 +112,10 @@ class  UserDefaultManager: UserDefaultProtocol {
     
     var isSubscriberDeleted: Bool {
         get {
-             userDefaultSharedContainer[.isSubscriberDeleted] ?? false
+             userDefaultSharedContainer?[.isSubscriberDeleted] ?? false
         }
-        
         set {
-            userDefaultSharedContainer[.isSubscriberDeleted] = newValue
+            userDefaultSharedContainer?[.isSubscriberDeleted] = newValue
         }
     }
     
@@ -122,38 +127,35 @@ class  UserDefaultManager: UserDefaultProtocol {
     
     var istriedFirstTime: Bool {
         get {
-            userDefaultSharedContainer[.istriedFirstTime] ?? false
+            userDefaultSharedContainer?[.istriedFirstTime] ?? false
         }
         
         set {
-            userDefaultSharedContainer[.istriedFirstTime] = newValue
+            userDefaultSharedContainer?[.istriedFirstTime] = newValue
         }
     }
     
-    
     func setsponseredID(id: String) {
-        userDefaultSharedContainer[.isSponseredIdKey] = id
+        userDefaultSharedContainer?[.isSponseredIdKey] = id
     }
     
     var sponseredIdKey: String? {
-        userDefaultSharedContainer[.isSponseredIdKey]
+        userDefaultSharedContainer?[.isSponseredIdKey]
     }
     
-    var isSwizziled: Bool {
-        
+    var isSwizzled: Bool {
         get {
-            userDefaultSharedContainer[.isSwizzled] ?? false
+            userDefaultSharedContainer?[.isSwizzled] ?? false
         }
-        
         set {
-            userDefaultSharedContainer[.isSwizzled] = newValue
+            userDefaultSharedContainer?[.isSwizzled] = newValue
         }
     }
     
     func save<T: Codable>(object: T, for key: String) {
         do {
             let data = try JSONEncoder().encode(object)
-            userDefaultSharedContainer.setValue(data, forKey: key)
+            userDefaultSharedContainer?.setValue(data, forKey: key)
         } catch {
             PELogger.error(className: String(describing: UserDefaultManager.self),
                            message: PEError.parsingError.errorDescription ?? "")
@@ -161,7 +163,7 @@ class  UserDefaultManager: UserDefaultProtocol {
     }
     
     func getObject<T: Codable>(for typeof: T.Type, key: String) -> T? {
-        guard let data = userDefaultSharedContainer.data(forKey: key) else {
+        guard let data = userDefaultSharedContainer?.data(forKey: key) else {
             return nil
         }
         return Utility.decodeData(tyeof: T.self, data: data)

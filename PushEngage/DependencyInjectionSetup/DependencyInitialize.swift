@@ -28,35 +28,27 @@ internal final class DependencyInitialize {
         
         container = Container()
             
-            // MARK: - LocationProtocol
-            // this locationInfoProtocol is beign registered with its manager
-            // which is location manager. As you can see there is no dependency to initialize the
-            // location manager. So no need to resolve the dependencies
-            .register(LocationInfoProtocol.self) { _  in
-                LocationManager()
-            }
-            
             // MARK: - UserDefaultProtocol
             
-            .register(UserDefaultProtocol.self) {_ in
+            .register(UserDefaultsType.self) {_ in
                 UserDefaultManager()
             }
             
             // MARK: - NetworkRouter
             
-            .register(NetworkRouter.self) { _ in
+            .register(NetworkRouterType.self) { _ in
                 Router()
             }
             
             // MARK: - DataSourceProtocol
-            .register(DataSourceProtocol.self) { resolver in
-                let  userDefault = resolver.resolve(UserDefaultProtocol.self)
+            .register(DataSourceType.self) { resolver in
+                let  userDefault = resolver.resolve(UserDefaultsType.self)
                 return DataManager(userDefault: userDefault)
             }
             
             // MARK: - NotificationProtocol
-            .register(NotificationProtocol.self) { resolved in
-                let userDefaultServices = resolved.resolve(UserDefaultProtocol.self)
+            .register(NotificationServiceType.self) { resolved in
+                let userDefaultServices = resolved.resolve(UserDefaultsType.self)
                 if #available(iOS 10.0, *) {
                     return NotificationSettingsManageriOS10(userDefaultService: userDefaultServices)
                 } else {
@@ -74,20 +66,20 @@ internal final class DependencyInitialize {
             // So we are resolving it and you and notice this that DataSourceProtocol and other dependencies
             // are already registered with the container.
             
-            .register(SubscriberService.self) { resolver in
-                let datasource = resolver.resolve(DataSourceProtocol.self)
-                let networkRouter = resolver.resolve(NetworkRouter.self)
-                let userDefault = resolver.resolve(UserDefaultProtocol.self)
+            .register(SubscriberServiceType.self) { resolver in
+                let datasource = resolver.resolve(DataSourceType.self)
+                let networkRouter = resolver.resolve(NetworkRouterType.self)
+                let userDefault = resolver.resolve(UserDefaultsType.self)
                 return SubscriberServiceManager(datasourceProtocol: datasource,
                                                 networkRouter: networkRouter,
                                                 userDefault: userDefault)
             }
             
             // MARK: - NotificationLifeCycleService
-            .register(NotificationLifeCycleService.self) { resolver in
-                let networkRouter = resolver.resolve(NetworkRouter.self)
-                let datasource = resolver.resolve(DataSourceProtocol.self)
-                let userdefault = resolver.resolve(UserDefaultProtocol.self)
+            .register(NotificationLifeCycleServiceType.self) { resolver in
+                let networkRouter = resolver.resolve(NetworkRouterType.self)
+                let datasource = resolver.resolve(DataSourceType.self)
+                let userdefault = resolver.resolve(UserDefaultsType.self)
                 return NotificationLifeCycleManager(networkRouter: networkRouter,
                                                     datasource: datasource,
                                                     userDefault: userdefault)
@@ -95,11 +87,11 @@ internal final class DependencyInitialize {
             
             // MARK: - ApplicationProtocol
             
-            .register(ApplicationProtocol.self) { resolve in
-                let userDefault = resolve.resolve(UserDefaultProtocol.self)
-                let subscriberService = resolve.resolve(SubscriberService.self)
-                let notificationLifeCycleService = resolve.resolve(NotificationLifeCycleService.self)
-                let networkService = resolve.resolve(NetworkRouter.self)
+            .register(ApplicationServiceType.self) { resolve in
+                let userDefault = resolve.resolve(UserDefaultsType.self)
+                let subscriberService = resolve.resolve(SubscriberServiceType.self)
+                let notificationLifeCycleService = resolve.resolve(NotificationLifeCycleServiceType.self)
+                let networkService = resolve.resolve(NetworkRouterType.self)
                 return ApplicationService(userDefault: userDefault,
                                           subscriberService: subscriberService,
                                           notificationLifeCycleService: notificationLifeCycleService,
@@ -108,10 +100,10 @@ internal final class DependencyInitialize {
             
             // MARK: - NotificationExtensionProtocol
             
-            .register(NotificationExtensionProtocol.self) { resolver in
-                let networkRouter = resolver.resolve(NetworkRouter.self)
-                let userDefaultService = resolver.resolve(UserDefaultProtocol.self)
-                let notificationCycleService = resolver.resolve(NotificationLifeCycleService.self)
+            .register(NotificationExtensionType.self) { resolver in
+                let networkRouter = resolver.resolve(NetworkRouterType.self)
+                let userDefaultService = resolver.resolve(UserDefaultsType.self)
+                let notificationCycleService = resolver.resolve(NotificationLifeCycleServiceType.self)
                 return NotificationExtensionManager(networkService: networkRouter,
                                                     notifcationLifeCycleService: notificationCycleService,
                                                     userDefaultDatasource: userDefaultService)
@@ -119,44 +111,43 @@ internal final class DependencyInitialize {
             
             // MARK: - TriggerCampaignProtocol
             
-            .register(TriggerCampaignProtocol.self) { resolver  in
-                let networkRouter = resolver.resolve(NetworkRouter.self)
-                let userDefaultService = resolver.resolve(UserDefaultProtocol.self)
+            .register(TriggerCampaignType.self) { resolver  in
+                let networkRouter = resolver.resolve(NetworkRouterType.self)
+                let userDefaultService = resolver.resolve(UserDefaultsType.self)
                 return TriggerCampaignManager(userDefaultService: userDefaultService,
                                               networkService: networkRouter)
             }
             
             // MARK: - PEViewModel
         
-            .register(PEViewModel.self) { resolver in
-                let applicationService = resolver.resolve(ApplicationProtocol.self)
-                let notificationService = resolver.resolve(NotificationProtocol.self)
-                let notificationExtensionService = resolver.resolve(NotificationExtensionProtocol.self)
-                let subsciberService = resolver.resolve(SubscriberService.self)
-                let userDefaultService = resolver.resolve(UserDefaultProtocol.self)
-                let notificationLifeCycleService = resolver.resolve(NotificationLifeCycleService.self)
-                let locationService = resolver.resolve(LocationInfoProtocol.self)
-                let triggerCampaiginService = resolver.resolve(TriggerCampaignProtocol.self)
-                return PEViewModel(applicationService: applicationService,
+            .register(PEManagerType.self) { resolver in
+                let applicationService = resolver.resolve(ApplicationServiceType.self)
+                let notificationService = resolver.resolve(NotificationServiceType.self)
+                let notificationExtensionService = resolver.resolve(NotificationExtensionType.self)
+                let subscriberService = resolver.resolve(SubscriberServiceType.self)
+                let userDefaultService = resolver.resolve(UserDefaultsType.self)
+                let notificationLifeCycleService = resolver.resolve(NotificationLifeCycleServiceType.self)
+                let triggerCampaiginService = resolver.resolve(TriggerCampaignType.self)
+                
+                return PEManager(applicationService: applicationService,
                                    notificationService: notificationService,
                                    notificationExtensionService: notificationExtensionService,
-                                   subscriberService: subsciberService,
+                                   subscriberService: subscriberService,
                                    userDefaultService: userDefaultService,
                                    notificationLifeCycleService: notificationLifeCycleService,
-                                   locationService: locationService,
                                    triggerCamapaiginService: triggerCampaiginService)
             }
     }
     
-    class func getPEViewModelDependency() -> PEViewModel {
-        return sharedInstance.container.resolve(PEViewModel.self)
+    class func getPEManagerDependency() -> PEManagerType {
+        return sharedInstance.container.resolve(PEManagerType.self)
     }
     
-    class func getUserDefaults() -> UserDefaultProtocol {
-        return sharedInstance.container.resolve(UserDefaultProtocol.self)
+    class func getUserDefaults() -> UserDefaultsType {
+        return sharedInstance.container.resolve(UserDefaultsType.self)
     }
     
-    class func getRouter() -> NetworkRouter {
-        return sharedInstance.container.resolve(NetworkRouter.self)
+    class func getRouter() -> NetworkRouterType {
+        return sharedInstance.container.resolve(NetworkRouterType.self)
     }
 }

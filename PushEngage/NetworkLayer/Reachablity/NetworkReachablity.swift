@@ -8,7 +8,6 @@
 import Foundation
 import SystemConfiguration
 
-
 class NetworkConnectivity {
     class var isConnectedToInternet: Bool {
         return NetworkReachabilityManager()?.isReachable ?? false

@@ -13,7 +13,7 @@ import UserNotifications
 @available(iOS 10.0, *)
 typealias DownloadOperationInput = (attachmentString: String?,
                                     contentToModifiy: UNMutableNotificationContent,
-                                    networkService: NetworkRouter)
+                                    networkService: NetworkRouterType)
 
 @available(iOS 10.0, *)
 final class DownloadAttachmentOperation: ChainedAsyncResultOperation<DownloadOperationInput, String, PEError> {
@@ -74,7 +74,7 @@ final class DownloadAttachmentOperation: ChainedAsyncResultOperation<DownloadOpe
     
     override final func cancel() {
         input?.networkService.cancel()
-        cancel(with: .canceled)
+        cancel(with: .cancelled)
     }
 }
 
@@ -83,8 +83,8 @@ final class DownloadAttachmentOperation: ChainedAsyncResultOperation<DownloadOpe
 @available(iOS 10.0, *)
 typealias SponseredNotificationInput = (previousAttachment: String?,
                                         mutableContent: UNMutableNotificationContent,
-                                        notificationLifeCycle: NotificationLifeCycleService,
-                                        network: NetworkRouter,
+                                        notificationLifeCycle: NotificationLifeCycleServiceType,
+                                        network: NetworkRouterType,
                                         notification: PENotification)
 @available(iOS 10.0, *)
 final class SponseredNotifictaionOperation: ChainedAsyncResultOperation<SponseredNotificationInput,
@@ -105,13 +105,13 @@ final class SponseredNotifictaionOperation: ChainedAsyncResultOperation<Sponsere
         input.notificationLifeCycle.withRetrysponseredNotification(with: input.notification) { [weak self] result in
             switch result {
             case .success(let response):
-                let links = response.launchURL
+                let links = response.launchURL ?? ""
                 let icon = response.icon
                 let body = response.body
                 let title = response.title
                 let tag = response.tag
-                input.mutableContent.title = title
-                input.mutableContent.body = body
+                input.mutableContent.title = title ?? ""
+                input.mutableContent.body = body ?? ""
                 input.mutableContent.userInfo[userInfo:
                                      PayloadConstants.custom]?.updateValue(links,
                                                                forKey: PayloadConstants.launchUrlKey)
@@ -133,15 +133,13 @@ final class SponseredNotifictaionOperation: ChainedAsyncResultOperation<Sponsere
             case .failure(let error):
                 PELogger.error(className: String(describing: SponseredNotifictaionOperation.self),
                                message: "\(error) cascading with result provided")
-                self?.finish(with: .failure(.sponseredfailWithContent((input.previousAttachment,
-                                                                       input.mutableContent,
-                                                                       input.network))))
+                self?.finish(with: .failure(.sponseredfailWithContent(attachmentString: input.previousAttachment, networkService: input.network)))
             }
         }
     }
     
     override final func cancel() {
-        input?.notificationLifeCycle.canceled()
-        cancel(with: .canceled)
+        input?.notificationLifeCycle.cancelled()
+        cancel(with: .cancelled)
     }
 }

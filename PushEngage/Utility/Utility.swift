@@ -103,7 +103,7 @@ struct Utility {
                           .main.object(forInfoDictionaryKey: InfoPlistConstants.pushEngageAppGroupKey) as? String {
             return appGroup
         } else {
-            return String(format: "group.%@.pushEngage", Utility.getBundleIdentifier)
+            return ""
         }
     }
     
@@ -254,7 +254,7 @@ struct Utility {
             mutableAction.isAuthenticationRequired = false
             actionArray.append(mutableAction)
             //   iOS 8 shows notification buttons in reverse in all cases but alerts.
-            //   This flips it so the frist button is on the left.
+            //   This flips it so the first button is on the left.
             if actionArray.count == 2 {
                 category.setActions([actionArray[1], actionArray[0]], for: .minimal)
             }
@@ -287,13 +287,16 @@ struct Utility {
     
     @available(iOS 10.0, *)
     static func createUNNotificationRequest(notification: PENotification,
-                                            networkService: NetworkRouter?) -> UNNotificationRequest? {
+                                            networkService: NetworkRouterType?) -> UNNotificationRequest? {
         let content =  UNMutableNotificationContent()
         addButtonTo(withNotification: notification, content: content)
         content.title = notification.title ?? ""
         content.subtitle = notification.subtitle ?? ""
         content.body = notification.body ?? ""
         content.userInfo = notification.rawPayload
+        if let threadId = notification.threadId {
+            content.threadIdentifier = threadId
+        }
         if let sound = notification.sound {
             content.sound = UNNotificationSound(named: UNNotificationSoundName(sound))
         } else {

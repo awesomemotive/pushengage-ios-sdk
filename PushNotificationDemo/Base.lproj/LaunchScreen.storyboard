@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -17,17 +17,19 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" semanticContentAttribute="spatial" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Logo" translatesAutoresizingMaskIntoConstraints="NO" id="PK9-OJ-EGU">
-                                <rect key="frame" x="87" y="389" width="240" height="128"/>
+                            <imageView opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="banner" translatesAutoresizingMaskIntoConstraints="NO" id="5gt-io-yOA">
+                                <rect key="frame" x="82" y="405" width="250" height="100"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="250" id="M2Z-Qt-GaH"/>
+                                    <constraint firstAttribute="height" constant="100" id="wNP-cb-Cr6"/>
+                                </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="PK9-OJ-EGU" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" multiplier="0.57971" id="C7M-HG-gfB"/>
-                            <constraint firstItem="PK9-OJ-EGU" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="dpx-hd-cDh"/>
-                            <constraint firstItem="PK9-OJ-EGU" firstAttribute="height" secondItem="Ze5-6b-2t3" secondAttribute="height" multiplier="0.142857" id="nVL-yj-mT6"/>
-                            <constraint firstItem="PK9-OJ-EGU" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="wbG-1M-UdL"/>
+                            <constraint firstItem="5gt-io-yOA" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="1vW-FY-tHk"/>
+                            <constraint firstItem="5gt-io-yOA" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="i9P-NU-9mD"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -37,7 +39,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Logo" width="180" height="180"/>
+        <image name="banner" width="634.5" height="100"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

@@ -9,17 +9,16 @@ import Foundation
 import UserNotifications
 import UIKit
 
-
-class NotificationExtensionManager: NotificationExtensionProtocol {
+final class NotificationExtensionManager: NotificationExtensionType {
     
-    var networkService: NetworkRouter
-    var notifcationLifeCycleService: NotificationLifeCycleService
-    var userDefaultDatasource: UserDefaultProtocol
-    private var operationQueue: OperationQueue
+    private let networkService: NetworkRouterType
+    private let notifcationLifeCycleService: NotificationLifeCycleServiceType
+    private let operationQueue: OperationQueue
+    private var userDefaultDatasource: UserDefaultsType
     
-    init(networkService: NetworkRouter,
-         notifcationLifeCycleService: NotificationLifeCycleService,
-         userDefaultDatasource: UserDefaultProtocol) {
+    init(networkService: NetworkRouterType,
+         notifcationLifeCycleService: NotificationLifeCycleServiceType,
+         userDefaultDatasource: UserDefaultsType) {
         self.networkService = networkService
         self.notifcationLifeCycleService = notifcationLifeCycleService
         self.userDefaultDatasource = userDefaultDatasource
@@ -115,7 +114,7 @@ class NotificationExtensionManager: NotificationExtensionProtocol {
                              image: images.first, buttons: buttons)
     }
     
-    // MARK: - upate badge count handler method implmentation
+    // MARK: - update badge count handler method implementation
     
     @available(iOS 10.0, *)
     private func updateBadgeCount(with notification: PENotification? ,

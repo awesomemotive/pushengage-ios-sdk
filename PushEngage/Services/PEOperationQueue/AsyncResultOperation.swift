@@ -47,8 +47,8 @@ extension AsyncResultOperation: ChainedOperationOutputProviding {
                 return nil
             }
             switch failureError {
-            case .sponseredfailWithContent(let newValue):
-                return newValue
+            case .sponseredfailWithContent(var attachmentString?, let networkService):
+                return (attachmentString, networkService)
             default:
                 return nil
             }

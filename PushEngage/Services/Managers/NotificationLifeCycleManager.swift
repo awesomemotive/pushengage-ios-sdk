@@ -8,22 +8,21 @@
 import Foundation
 import  UIKit
 
-class NotificationLifeCycleManager: NotificationLifeCycleService {
+final class NotificationLifeCycleManager: NotificationLifeCycleServiceType {
     
+    private let networkRouter: NetworkRouterType
+    private let datasource: DataSourceType
+    private let userDefault: UserDefaultsType
     
-    let networkRouter: NetworkRouter
-    let datasource: DataSourceProtocol
-    let userDefault: UserDefaultProtocol
-    
-    init(networkRouter: NetworkRouter,
-         datasource: DataSourceProtocol,
-         userDefault: UserDefaultProtocol) {
+    init(networkRouter: NetworkRouterType,
+         datasource: DataSourceType,
+         userDefault: UserDefaultsType) {
         self.networkRouter = networkRouter
         self.datasource = datasource
         self.userDefault = userDefault
     }
     
-    func withRetrynotificationLifecycleUpdate(with action: NotificationLifeAction,
+    func withRetrynotificationLifecycleUpdate(with action: NotificationAction,
                                               deviceHash: String,
                                               notificationId: String,
                                               actionid: String?,
@@ -66,7 +65,7 @@ class NotificationLifeCycleManager: NotificationLifeCycleService {
                     completionHandler(.failure(error))
                     PELogger.logError(message: error.localizedDescription,
                                       name: .notificationRefetchFailed,
-                                      tag: sponseredData.tag,
+                                      tag: sponseredData.tag ?? "",
                                       subscriberHash: self?.userDefault.subscriberHash ?? "")
                     background.end()
                  
@@ -75,7 +74,7 @@ class NotificationLifeCycleManager: NotificationLifeCycleService {
         }
     }
     
-    private func notificationLifecycleUpdate(with action: NotificationLifeAction,
+    private func notificationLifecycleUpdate(with action: NotificationAction,
                                              deviceHash: String,
                                              notificationId: String,
                                              actionid: String?,
@@ -162,7 +161,7 @@ class NotificationLifeCycleManager: NotificationLifeCycleService {
         }
     }
     
-    func canceled() {
+    func cancelled() {
         networkRouter.cancel()
     }
 }

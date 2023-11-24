@@ -8,7 +8,6 @@
 import Foundation
 
 // This struct is for the all the api call which is having not data in the response.
-
 struct NetworkResponse: Codable {
     let errorCode: Int?
     let errorMessage: String?
@@ -21,7 +20,7 @@ struct NetworkResponse: Codable {
     }
 }
 
-struct  NetworkError: Codable {
+struct NetworkError: Codable {
     let message: String
     let code: Int
     
@@ -36,9 +35,9 @@ struct  NetworkError: Codable {
 
 @objcMembers
 @objc public class SubsciberDetailsResponse: NSObject, Codable {
-    public var errorCode: Int?
-    public var data: SubscriberDetailsData?
-    public var errorMessage: String?
+    public let errorCode: Int?
+    public let data: SubscriberDetailsData?
+    public let errorMessage: String?
 
     enum CodingKeys: String, CodingKey {
         case errorCode = "error_code"
@@ -50,11 +49,12 @@ struct  NetworkError: Codable {
 // MARK: - SubscriberDetailsData
 @objcMembers
 @objc public class SubscriberDetailsData: NSObject, Codable {
-    public var city, device, host, userAgent: String?
-    public var deviceType: String?
-    public var segments: [String]?
-    public var timezone, country, tsCreated, state: String?
-    public var subscriptionURL: String?
+    public let city, device, host, userAgent: String?
+    public let deviceType: String?
+    public let segments: [String]?
+    public let timezone, country, tsCreated, state: String?
+    public let subscriptionURL: String?
+    public let profileId: String?
 
     enum CodingKeys: String, CodingKey {
         case city, device, host
@@ -64,6 +64,7 @@ struct  NetworkError: Codable {
         case tsCreated = "ts_created"
         case state
         case subscriptionURL = "subscription_url"
+        case profileId = "profile_id"
     }
 }
 

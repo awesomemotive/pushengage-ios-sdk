@@ -41,6 +41,7 @@ import Foundation
     init(userInfo: [AnyHashable: Any]) {
         var parsedValue: PEPayload? = Utility.parse(typeof: PEPayload.self,
                                                     payload: userInfo)
+        self.threadId = parsedValue?.aps?.threadID
         self.rawPayload = userInfo
         self.mutableContent = parsedValue?.aps?.mutableContent ?? 0
         self.contentAvailable = parsedValue?.aps?.contentAvailable ?? 0
@@ -95,7 +96,7 @@ import Foundation
                        message: "PENotification is deinitalized")
     }
 
-    // MARK: - will show in forground
+    // MARK: - will show in foreground
     
     func timeOutTimerSetup() {
         timeoutTimer = Timer.init(timeInterval: 25.0,
