@@ -7,7 +7,7 @@
 
 import Foundation
 
-class TriggerCampaignManager: TriggerCampaignProtocol {
+final class TriggerCampaignManager: TriggerCampaignType {
     
     enum CampaignKeys: String {
         case title = "title"
@@ -21,11 +21,11 @@ class TriggerCampaignManager: TriggerCampaignProtocol {
         case siteId = "site_id"
     }
     
-    let userDefaultService: UserDefaultProtocol
-    let networkService: NetworkRouter
+    private let userDefaultService: UserDefaultsType
+    private let networkService: NetworkRouterType
     
-    init(userDefaultService: UserDefaultProtocol,
-         networkService: NetworkRouter) {
+    init(userDefaultService: UserDefaultsType,
+         networkService: NetworkRouterType) {
         self.userDefaultService = userDefaultService
         self.networkService = networkService
     }

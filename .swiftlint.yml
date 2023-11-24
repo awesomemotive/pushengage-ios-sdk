@@ -5,6 +5,15 @@ disabled_rules:
     - vertical_whitespace
     - redundant_objc_attribute
     - nesting
+    - large_tuple
+    - line_length
+    - vertical_parameter_alignment
+    - void_function_in_ternary
+    - for_where
+    - function_body_length
+    - comma
+    - blanket_disable_command
+    - colon
 excluded:
   - Carthage
   - Pods

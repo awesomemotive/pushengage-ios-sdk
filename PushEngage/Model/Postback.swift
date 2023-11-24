@@ -10,7 +10,7 @@ import Foundation
 // MARK: - SponsoredPush
 
 struct SponsoredPush: Codable {
-    var tag: String
+    var tag: String?
     var postback: AnyCodable?
 }
 
@@ -38,7 +38,7 @@ struct SponsoredPush: Codable {
 
 // MARK: - SponsoredResponse
 struct SponsoredResponse: Codable {
-    var errorCode: Int
+    var errorCode: Int?
     var data: SponsoredData?
     var errorMessage: String?
     var error: NetworkError?
@@ -53,12 +53,11 @@ struct SponsoredResponse: Codable {
 
 // MARK: - SponsoredData
 struct SponsoredData: Codable {
-    
-    var title: String
-    var body: String
-    var icon: String
-    var tag: String
-    var launchURL: String
+    var title: String?
+    var body: String?
+    var icon: String?
+    var tag: String?
+    var launchURL: String?
     var sponseredActionButton: [SButton]?
     
     enum CodingKeys: String, CodingKey {
@@ -73,7 +72,7 @@ struct SponsoredData: Codable {
 
 extension SponsoredData {
     struct SButton: Codable {
-        var slabel: String
+        var slabel: String?
         
         enum CodingKeys: String, CodingKey {
             case slabel = "b"

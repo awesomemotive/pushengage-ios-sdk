@@ -33,9 +33,11 @@ typedef void (^_Nonnull PENotificationDisplayHandler)(PENotification * _Nullable
 typedef void (^_Nullable SilentPushHandler)(UIBackgroundFetchResult);
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    UNUserNotificationCenter.currentNotificationCenter.delegate = self;
+    if (@available(iOS 10.0, *)) {
+        UNUserNotificationCenter.currentNotificationCenter.delegate = self;
+    }
     
-    [PushEngage setNotificationWillShowInForgroundHandlerWithBlock:^(PENotification * _Nonnull notification,
+    [PushEngage setNotificationWillShowInForegroundHandlerWithBlock:^(PENotification * _Nonnull notification,
                                                                      PENotificationDisplayHandler completion) {
         if (notification.contentAvailable == 1) {
             completion(nil);
@@ -65,10 +67,11 @@ typedef void (^_Nullable SilentPushHandler)(UIBackgroundFetchResult);
     }];
     
     application.applicationIconBadgeNumber = 0;
-    [PushEngage setAppIdWithKey:@"2d1b475e-cc73-42a1-8f13-58c944e3"];
-    [PushEngage startNotificationServicesFor:application with:launchOptions];
+    [PushEngage setEnvironmentWithEnvironment:EnvironmentStaging];
+    [PushEngage setAppIDWithId:@"3ca8257d-1f40-41e0-88bc-ea28dc6495ef"];
+    [PushEngage setInitialInfoFor:application with:launchOptions];
     [PushEngage setNotificationOpenHandlerWithBlock:actionHandler];
-    [PushEngage setEnableLogs:true];
+    [PushEngage setEnableLogging:true];
     return YES;
 }
 
@@ -76,14 +79,14 @@ typedef void (^_Nullable SilentPushHandler)(UIBackgroundFetchResult);
 #pragma mark - UISceneSession lifecycle
 
 
-- (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession options:(UISceneConnectionOptions *)options {
+- (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession options:(UISceneConnectionOptions *)options  API_AVAILABLE(ios(13.0)){
     // Called when a new scene session is being created.
     // Use this method to select a configuration to create the new scene with.
     return [[UISceneConfiguration alloc] initWithName:@"Default Configuration" sessionRole:connectingSceneSession.role];
 }
 
 
-- (void)application:(UIApplication *)application didDiscardSceneSessions:(NSSet<UISceneSession *> *)sceneSessions {
+- (void)application:(UIApplication *)application didDiscardSceneSessions:(NSSet<UISceneSession *> *)sceneSessions  API_AVAILABLE(ios(13.0)){
     // Called when the user discards a scene session.
     // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
     // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
@@ -91,12 +94,12 @@ typedef void (^_Nullable SilentPushHandler)(UIBackgroundFetchResult);
 
 #pragma mark - UNUsersNotificationDelegate
 
-- (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler {
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler  API_AVAILABLE(ios(10.0)){
     NSLog(@"userinfo  from appdelegate %@", response.notification.request.content.userInfo);
     completionHandler();
 }
 
-- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler  API_AVAILABLE(ios(10.0)){
     UNNotificationPresentationOptions option  =  (UNNotificationPresentationOptions)7;
     NSLog(@"will recive notification is from Appdeledate %lu", (unsigned long)option);
     completionHandler(option);

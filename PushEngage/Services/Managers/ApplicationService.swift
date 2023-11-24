@@ -9,25 +9,24 @@ import Foundation
 import UIKit
 import UserNotifications
 
-protocol LastNotificationSetDelagate: AnyObject {
+protocol LastNotificationSetDelegate: AnyObject {
     func setLast(notification infoDict: [AnyHashable: Any], completionHandler: ((UIBackgroundFetchResult) -> Void)?)
     func silentRemoteNotificationRecivedNotification(with userInfo: [AnyHashable: Any], isOpened: Bool)
 }
 
-class ApplicationService: ApplicationProtocol {
-    
-    private var userDefault: UserDefaultProtocol
-    private let subscriberService: SubscriberService
-    private let notificationLifeCycleService: NotificationLifeCycleService
-    private let networkService: NetworkRouter
+final class ApplicationService: ApplicationServiceType {
+    private var userDefault: UserDefaultsType
+    private let subscriberService: SubscriberServiceType
+    private let notificationLifeCycleService: NotificationLifeCycleServiceType
+    private let networkService: NetworkRouterType
     private let operationQueue: OperationQueue
     
-    weak var notifydelegate: LastNotificationSetDelagate?
+    weak var notifydelegate: LastNotificationSetDelegate?
     
-     init(userDefault: UserDefaultProtocol,
-          subscriberService: SubscriberService,
-          notificationLifeCycleService: NotificationLifeCycleService,
-          networkService: NetworkRouter) {
+     init(userDefault: UserDefaultsType,
+          subscriberService: SubscriberServiceType,
+          notificationLifeCycleService: NotificationLifeCycleServiceType,
+          networkService: NetworkRouterType) {
         self.userDefault = userDefault
         self.subscriberService = subscriberService
         self.notificationLifeCycleService = notificationLifeCycleService
@@ -60,9 +59,9 @@ class ApplicationService: ApplicationProtocol {
         }
     }
     
-    func recivedRemoteNotification(application: UIApplication,
-                                   userInfo: [AnyHashable: Any],
-                                   completionHandler: ((UIBackgroundFetchResult) -> Void)?) -> Bool {
+    func receivedRemoteNotification(application: UIApplication,
+                                    userInfo: [AnyHashable: Any],
+                                    completionHandler: ((UIBackgroundFetchResult) -> Void)?) -> Bool {
         var backgroundJobFired = false
         let peNotification = PENotification(userInfo: userInfo)
         
@@ -90,7 +89,7 @@ class ApplicationService: ApplicationProtocol {
         return backgroundJobFired
     }
     
-    @available(iOS, deprecated:9.0)
+    @available(iOS, deprecated: 9.0)
     private func notificationForiOS9(_ notification: PENotification) {
         let notification = Utility.createUILocalNotification(for: notification)
         UIApplication.shared.scheduleLocalNotification(notification)
@@ -132,9 +131,9 @@ class ApplicationService: ApplicationProtocol {
         let content = UNMutableNotificationContent()
         content.sound = UNNotificationSound.default
         content.userInfo = notification.rawPayload
-        let sponseredInput: SponseredNotificationInput = (nil ,
-                              content ,
-                              self.notificationLifeCycleService ,
+        let sponseredInput: SponseredNotificationInput = (nil,
+                              content,
+                              self.notificationLifeCycleService,
                               self.networkService,
                               notification)
         let sponserOperation = SponseredNotifictaionOperation(input: sponseredInput)

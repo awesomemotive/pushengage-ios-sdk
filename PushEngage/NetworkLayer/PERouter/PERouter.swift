@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum NotificationLifeAction {
+enum NotificationAction {
     case viewed
     case clicked
 }
@@ -15,7 +15,7 @@ enum NotificationLifeAction {
 public typealias Parameters = [String: Any]
 typealias NotificationCycleStatus = (hash: String,
                                      notificationId: String,
-                                     action: NotificationLifeAction,
+                                     action: NotificationAction,
                                      id: String?)
 typealias UpdateSubcriberInfoList = (hash: String,
                                      info: SubscriptionInfo,
@@ -26,8 +26,9 @@ enum PERouter {
     case getImage(String)
     case getSubscriberForfields((hash: String, fields: [String]?))
     case checkSubscriberHash(String)
-    case subscriberAttribute((hash: String, attributes: [String: Any]))
-    case getSubsciberAttribute(String)
+    case setSubscriberAttributes((hash: String, attributes: [String: Any]))
+    case addSubscriberAttributes((hash: String, attributes: [String: Any]))
+    case getSubscriberAttribute(String)
     case updateSubscriberStatus(SubscriberDetails)
     case addProfile(SubscriberDetails)
     case deleteAttributes((hash: String, attributes: [String]))
@@ -93,7 +94,9 @@ enum PERouter {
             try URLParameterEncoder.encode(urlRequest: &urlRequest, with: value.params)
         case .getSubscriberForfields:
             try URLParameterEncoder.encode(urlRequest: &urlRequest, with: params ?? [:])
-        case .subscriberAttribute:
+        case .setSubscriberAttributes:
+            try JSONParameterEncoder.encode(urlRequest: &urlRequest, for: params ?? [:])
+        case .addSubscriberAttributes:
             try JSONParameterEncoder.encode(urlRequest: &urlRequest, for: params ?? [:])
         case .deleteAttributes(let info):
             let data = try JSONSerialization.data(withJSONObject: info.attributes)
@@ -150,7 +153,7 @@ enum PERouter {
     private func httpMethod() -> HTTPMethod {
         switch self {
         case .addSubscriber,
-             .subscriberAttribute,
+             .setSubscriberAttributes,
              .updateSubscriberStatus,
              .addProfile,
              .addTimeZone,
@@ -166,7 +169,7 @@ enum PERouter {
         case .getImage,
              .getSubscriberForfields,
              .checkSubscriberHash,
-             .getSubsciberAttribute,
+             .getSubscriberAttribute,
              .notificationCycleStatus,
              .subscriberSync:
             return .get
@@ -174,6 +177,7 @@ enum PERouter {
             return .delete
         case .updateSubsciber,
              .triggerCampaigning,
+             .addSubscriberAttributes,
              .subscriberUpgrade:
             return .put
         default:
@@ -190,7 +194,9 @@ enum PERouter {
             let queryParameterValue = fields.joined(separator: ",")
             let parameter = ["fields": queryParameterValue]
             return parameter
-        case .subscriberAttribute(let value):
+        case .addSubscriberAttributes(let value):
+            return value.attributes
+        case .setSubscriberAttributes(let value):
             return value.attributes
         case .subscriberUpgrade(let value):
             let parameter = ["subscription": value]
@@ -200,7 +206,7 @@ enum PERouter {
                              "bv": Utility.getOSInfo]
             return parameter
         case .notificationCycleStatus(let notificationInfo):
-            var parameter: [String: Any] = ["device_token_hash": notificationInfo.hash ,
+            var parameter: [String: Any] = ["device_token_hash": notificationInfo.hash,
                                             "tag": notificationInfo.notificationId,
                                             "device_type": Utility.getOSInfo,
                                             "swv": NetworkConstants.sdkVersion,
@@ -236,10 +242,11 @@ enum PERouter {
                 let url = try Utility.urlUnWrapper(for: path)
                 return url
             } catch let error {
-                switch Configuration.enviroment {
-                case .dev:
+                let userDefaults = DependencyInitialize.getUserDefaults()
+                switch userDefaults.environment {
+                case .staging:
                     fatalError("URL missing please check in debuging")
-                case .prod:
+                case .production:
                     let error = error as? PEError
                     PELogger.error(className: String(describing: PERouter.self),
                                    message: error?.errorDescription ?? "")
@@ -252,9 +259,11 @@ enum PERouter {
             relativePath = String(format: NetworkConstants.getHashPath, fields.hash)
         case .checkSubscriberHash(let hash):
             relativePath = String(format: NetworkConstants.checkSubscriberHash, hash)
-        case .subscriberAttribute(let attributeHash):
+        case .addSubscriberAttributes(let attributeHash):
             relativePath = String(format: NetworkConstants.subscriberAttribute, attributeHash.hash)
-        case .getSubsciberAttribute(let hash):
+        case .setSubscriberAttributes(let attributeHash):
+            relativePath = String(format: NetworkConstants.subscriberAttribute, attributeHash.hash)
+        case .getSubscriberAttribute(let hash):
             relativePath = String(format: NetworkConstants.getSubscriberAttribute, hash)
         case .updateSubscriberStatus:
             relativePath = NetworkConstants.updateSubscriberStatus
@@ -263,7 +272,7 @@ enum PERouter {
         case .deleteAttributes(let deleteInfo):
             relativePath = String(format: NetworkConstants.subscriberAttribute, deleteInfo.hash)
         case .subscriberUpgrade:
-            relativePath = NetworkConstants.upgarde
+            relativePath = NetworkConstants.subscriberUpgrade
         case .addTimeZone:
             relativePath = NetworkConstants.timeZone
         case .addSegments:
@@ -320,8 +329,9 @@ enum PERouter {
              .addSubscriber,
              .getSubscriberForfields,
              .checkSubscriberHash,
-             .subscriberAttribute,
-             .getSubsciberAttribute,
+             .setSubscriberAttributes,
+             .addSubscriberAttributes,
+             .getSubscriberAttribute,
              .updateSubscriberStatus,
              .addProfile, .deleteAttributes,
              .subscriberUpgrade,
@@ -333,13 +343,9 @@ enum PERouter {
              .removeDynamicSegment,
              .updateTrigger,
              .updateSubsciber,
-             // MARK: - Trigger Campaigining
+             .notificationCycleStatus,
+             // MARK: - Trigger Campaigning
              .triggerCampaigning:
-            return myHeaders
-        case .notificationCycleStatus(let actionStatus):
-            if case .viewed = actionStatus.action {
-                myHeaders[NetworkConstants.requestHeaderRefererKey] = NetworkConstants.requestHeaderRefererValue
-            }
             return myHeaders
         case .sponseredNotification:
             return myHeaders

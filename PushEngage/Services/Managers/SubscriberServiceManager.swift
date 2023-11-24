@@ -14,15 +14,14 @@ import UIKit
     case none
 }
 
-class SubscriberServiceManager: SubscriberService {
+final class SubscriberServiceManager: SubscriberServiceType {
+    private let datasourceProtocol: DataSourceType
+    private let networkRouter: NetworkRouterType
+    private var userDefault: UserDefaultsType
     
-    var datasourceProtocol: DataSourceProtocol
-    var networkRouter: NetworkRouter
-    var userDefault: UserDefaultProtocol
-    
-    init(datasourceProtocol: DataSourceProtocol,
-         networkRouter: NetworkRouter,
-         userDefault: UserDefaultProtocol) {
+    init(datasourceProtocol: DataSourceType,
+         networkRouter: NetworkRouterType,
+         userDefault: UserDefaultsType) {
         self.datasourceProtocol = datasourceProtocol
         self.networkRouter = networkRouter
         self.userDefault = userDefault
@@ -33,6 +32,7 @@ class SubscriberServiceManager: SubscriberService {
                 .isEuKey: userDefault.isGDPR,
                 .geoFetch: userDefault.isLocationEnabled]
     }
+    
     func addSubscriber(completionHandler: ServiceCallBackObjects<AddSubscriberData>?) {
         let data = (object: datasourceProtocol.getSubscriptionData(),
                     params: queryParms)
@@ -66,7 +66,7 @@ class SubscriberServiceManager: SubscriberService {
         }
     }
     
-    func updateSubsciber(completionHandler: ServiceCallBackObjects<NetworkResponse>?) {
+    func updateSubscriber(completionHandler: ServiceCallBackObjects<NetworkResponse>?) {
         var data = datasourceProtocol.getSubscriptionData()
         data.subscription = nil
         let value = (userDefault.subscriberHash, data, queryParms)
@@ -121,8 +121,8 @@ class SubscriberServiceManager: SubscriberService {
             case .success(let data):
                 PELogger.debug(className: String(describing: SubscriberServiceManager.self), data: data)
                 do {
-                    let decodedObject =  try JSONDecoder().decode(SubsciberDetailsResponse.self, from: data)
-                    decodedObject.errorCode == 0 ?  completionHandler?(decodedObject.data, nil)
+                    let decodedObject = try JSONDecoder().decode(SubsciberDetailsResponse.self, from: data)
+                    decodedObject.errorCode == 0 ? completionHandler?(decodedObject.data, nil)
                     : completionHandler?(nil, .networkResponseFaliure(decodedObject.errorCode,
                                                                       decodedObject.errorMessage))
                 } catch {
@@ -139,8 +139,8 @@ class SubscriberServiceManager: SubscriberService {
         }
     }
     
-    func update(attributes: Parameters, completionHandler: SubscriberBoolCallBack?) {
-        networkRouter.request(.subscriberAttribute((userDefault.subscriberHash, attributes))) { [weak self] (result) in
+    func setSubscriberAttributes(attributes: Parameters, completionHandler: SubscriberBoolCallBack?) {
+        networkRouter.request(.setSubscriberAttributes((userDefault.subscriberHash, attributes))) { [weak self] (result) in
             switch result {
             case .success(let data):
                 do {
@@ -154,7 +154,29 @@ class SubscriberServiceManager: SubscriberService {
                 }
             case .failure(let error):
                 self?.retryFor404(error: error, completion: { result, error in
-                    result ? self?.update(attributes: attributes, completionHandler: completionHandler)
+                    result ? self?.setSubscriberAttributes(attributes: attributes, completionHandler: completionHandler)
+                        : completionHandler?(false, error)
+                })
+            }
+        }
+    }
+    
+    func addSubscriberAttributes(attributes: Parameters, completionHandler: SubscriberBoolCallBack?) {
+        networkRouter.request(.addSubscriberAttributes((userDefault.subscriberHash, attributes))) { [weak self] (result) in
+            switch result {
+            case .success(let data):
+                do {
+                    let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
+                    decodedData.error == nil && decodedData.errorCode == 0 ?
+                    completionHandler?(true, nil) :
+                    completionHandler?(false, PEError.networkResponseFaliure(decodedData.errorCode,
+                                                                             decodedData.errorMessage))
+                } catch {
+                    completionHandler?(false, PEError.parsingError)
+                }
+            case .failure(let error):
+                self?.retryFor404(error: error, completion: { result, error in
+                    result ? self?.addSubscriberAttributes(attributes: attributes, completionHandler: completionHandler)
                         : completionHandler?(false, error)
                 })
             }
@@ -162,7 +184,7 @@ class SubscriberServiceManager: SubscriberService {
     }
 
     func getAttribute(completionHandler: @escaping ServiceCallBack) {
-        networkRouter.request(.getSubsciberAttribute(userDefault.subscriberHash)) { [weak self] (result) in
+        networkRouter.request(.getSubscriberAttribute(userDefault.subscriberHash)) { [weak self] (result) in
             switch result {
             case .success(let data):
                 do {
@@ -564,13 +586,13 @@ extension SubscriberServiceManager {
         let siteStatus = SiteStatus(rawValue: userDefault.siteStatus)
         if siteStatus != .active {
             userDefault.isSubscriberDeleted = true
-            PELogger.debug(className: String(describing: SubscriberService.self),
+            PELogger.debug(className: String(describing: SubscriberServiceType.self),
                            message: "site status is not active.")
             completion?(.stiteStatusNotActive)
             return
         }
         if userDefault.notificationPermissionState == .notYetRequested {
-            PELogger.debug(className: String(describing: SubscriberService.self),
+            PELogger.debug(className: String(describing: SubscriberServiceType.self),
                            message: "permission is not determined.")
             completion?(.permissionNotDetermined)
             return
@@ -595,7 +617,7 @@ extension SubscriberServiceManager {
         }
     }
     
-    func updateSettingPermission(status: PermissonStatus) {
+    func updateSettingPermission(status: PermissionStatus) {
         let dispatchGroup = DispatchGroup()
         dispatchGroup.enter()
         self.syncSiteInfo(for: userDefault.siteKey ?? "") { _, _ in

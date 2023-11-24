@@ -8,40 +8,41 @@
 import UIKit
 import UserNotifications
 import PushEngage
-@main
 
-// swiftlint:disable all
+@main
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
     var window: UIWindow?
     
-    
     override init() {
         super.init()
-        // method Swizzing enable for the application.
+        // enable method swizzling for the application.
         PushEngage.swizzleInjection(isEnabled: true)
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        window = UIWindow()
-        self.window?.rootViewController = storyboard.instantiateInitialViewController()
+        self.window = UIWindow()
+        self.window?.rootViewController = UINavigationController(rootViewController: PushServiceTestSample())
         self.window?.makeKeyAndVisible()
 
         if #available(iOSApplicationExtension 10.0, *) {
             UNUserNotificationCenter.current().delegate = self
         }
         
-        application.applicationIconBadgeNumber = 0
-        PushEngage.setEnv(enviroment: .dev)
-        PushEngage.setAppId(key: "2d1b475e-cc73-42a1-8f13-58c944e3")
-        PushEngage.startNotificationServices(for: application,
+        if #available(iOS 17, *) {
+            UNUserNotificationCenter.current().setBadgeCount(0)
+        } else {
+            application.applicationIconBadgeNumber = 0
+        }
+        
+        PushEngage.setEnvironment(environment: .staging)
+        PushEngage.setAppID(id: "3ca8257d-1f40-41e0-88bc-ea28dc6495ef")
+        PushEngage.setInitialInfo(for: application,
                                              with: launchOptions)
         
-        // Notification handler when notification deliver's and app is in foreground.
-        
-        PushEngage.setNotificationWillShowInForgroundHandler { notification, completion in
+        // Notification handler when notification delivers and app is in foreground.
+        PushEngage.setNotificationWillShowInForegroundHandler { notification, completion in
             if notification.contentAvailable == 1 {
                 // in case developer failed to set completion handler. After 25 sec handler will call.
                 completion(nil)
@@ -77,13 +78,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
         
         // Silent notification Handler.
-        
-        PushEngage.silentPushHandler { notification , completion  in
+        PushEngage.silentPushHandler {notification, completion  in
             // in case developer failed to set completion handler. After 25 sec handler will call and set.
             completion?(.newData)
         }
         
-        PushEngage.enableLogs = true
+        PushEngage.enableLogging = true
         
         return true
     }
@@ -92,17 +92,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     @available(iOSApplicationExtension 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         print("HOST implemented the notification didRecive notification.")
-//        PushEngage.didRecivedRemoteNotification(with: response)
+        //        Uncomment below line if swizzling is not used
+        //        PushEngage.didReceiveRemoteNotification(with: response)
         completionHandler()
     }
 
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         print("HOST didRegisterForRemoteNotificationsWithDeviceToken is implemented device Token: -, \(deviceToken)")
-//        PushEngage.registerDeviceToServer(with: deviceToken)
+        //        Uncomment below line if swizzling is not used
+        //        PushEngage.registerDeviceToServer(with: deviceToken)
     }
     
-//    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-//      PushEngage.recivedRemoteNotification(application: application, userInfo: userInfo, completionHandler: completionHandler)
-//    }
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        //    Uncomment below line if swizzling is not used
+        //    PushEngage.receivedRemoteNotification(application: application, userInfo: userInfo, completionHandler: completionHandler)
+    }
 }

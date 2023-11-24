@@ -8,7 +8,7 @@
 import UIKit
 import UserNotifications
 
-// method Swizzling of UNUsernotificationCenterDelegate method for OS 10 + 
+// method Swizzling of UNUsernotificationCenterDelegate method for iOS 10+ 
 
 class PEUNUserNotificationCenterDelegate: NSObject, UNUserNotificationCenterDelegate {
     static var singleInstance: PEUNUserNotificationCenterDelegate?
@@ -61,7 +61,7 @@ class PushEngageUNUserNotificationCenter: NSObject {
     
     private static let selector = PESelectorHelper.shared
     
-    private static let viewModel = PushEngage.viewModel
+    private static let viewModel = PushEngage.manager
     
     private static var iOS10work = true
     
@@ -220,7 +220,7 @@ class PushEngageUNUserNotificationCenter: NSObject {
             return
         }
         
-        Self.viewModel.handleWillPresentNotificationInForground(with: parseuserInfo) { [weak self] (responseNotification) in
+        Self.viewModel.handleWillPresentNotificationInForeground(with: parseuserInfo) { [weak self] (responseNotification) in
             let notifiyDisplayType = responseNotification
                 != nil ? UNNotificationPresentationOptions(rawValue: 7) : UNNotificationPresentationOptions(rawValue: 0)
             self?.finishProcessingNotification(notification: notification,
@@ -257,7 +257,7 @@ class PushEngageUNUserNotificationCenter: NSObject {
                                               instance: PushEngageUNUserNotificationCenter?) {
         let completionHandlerOptions = displayType
         if Self.viewModel.getAppId() != nil {
-            Self.viewModel.recivedNotification(with: notification.request.content.userInfo, isOpened: false)
+            Self.viewModel.receivedNotification(with: notification.request.content.userInfo, isOpened: false)
         }
         self.proceedNotificationWithCenter(center, notification: notification,
                                            pushEngageCenter: instance,
@@ -294,7 +294,7 @@ class PushEngageUNUserNotificationCenter: NSObject {
                 let isTextReply = response.isKind(of: classValue)
                 let userText: String? = isTextReply ? response.value(forKey: "userText") as? String : nil
                 self.oldAppDelegateSelector(notification: response.notification,
-                                                   isTextReply: isTextReply ,
+                                                   isTextReply: isTextReply,
                                                    actionIdentifier: response.actionIdentifier,
                                                    userText: userText,
                                                    fromPresentNotification: false,

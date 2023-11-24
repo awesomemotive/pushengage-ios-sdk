@@ -7,8 +7,6 @@
 
 import UIKit
 
-// swiftlint:disable all
-
 class PEPay: UIViewController {
 
     
