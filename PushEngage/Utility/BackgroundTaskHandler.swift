@@ -8,7 +8,6 @@
 import Foundation
 import UIKit
 
-
 // This class is handling the Background task with expiration
 // of task when any task take place in the backgound mode
 

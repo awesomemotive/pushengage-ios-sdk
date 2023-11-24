@@ -27,5 +27,7 @@
 		<key>NSExtensionPrincipalClass</key>
 		<string>NotificationService</string>
 	</dict>
+	<key>PushEngage_App_Group_Key</key>
+	<string>group.app.com.pushengage.userDefaultS</string>
 </dict>
 </plist>

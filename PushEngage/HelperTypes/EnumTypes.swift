@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum PermissonStatus: String {
+public enum PermissionStatus: String {
     
     /// The application is authorized to post user notifications.
     

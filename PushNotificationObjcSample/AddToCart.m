@@ -70,16 +70,16 @@
         [[TriggerNotification alloc] initWithNotificationURL:[[Input alloc] initWithKey:@"checkout url" value:@"www.amazon.com"] title:[[Input alloc] initWithKey:@"imported shoes" value:@"Nike shoes"] message:[[Input alloc] initWithKey:@"messages" value:@"check out the sale 90%"] notificationImage:nil bigImage:nil actions:[[Input alloc] initWithKey:@"Grab a shoes" value:@"www.pushengage.com"]]
          ] data:nil];
     
-    [PushEngage createTriggerCampaignFor:campaign completionHandler:^(BOOL response) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (response) {
-                [object showAlert:[NSString stringWithFormat:@"successfully for add to cart."]];
-                object = nil;
-            } else {
-                NSLog(@"error to add trigger");
-            }
-        });
-    }];
+//    [PushEngage createTriggerCampaignFor:campaign completionHandler:^(BOOL response) {
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            if (response) {
+//                [object showAlert:[NSString stringWithFormat:@"successfully for add to cart."]];
+//                object = nil;
+//            } else {
+//                NSLog(@"error to add trigger");
+//            }
+//        });
+//    }];
 }
 
 - (void) showAlert:(NSString *) message {
@@ -100,16 +100,16 @@
     TriggerCampaign *campaign = [[TriggerCampaign alloc] initWithCampaignName:@"Shopping"
                                                          eventName:@"checkout"
                                                          notificationDetails:nil data:@{@"revenue" : @"40"}];
-    [PushEngage createTriggerCampaignFor:campaign completionHandler:^(BOOL response) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (response) {
-                [object showAlert:[NSString stringWithFormat:@" sucessfully checkout trigger added."]];
-                object = nil;
-            } else {
-                NSLog(@"error add checkout trigger");
-            }
-        });
-    }];
+//    [PushEngage createTriggerCampaignFor:campaign completionHandler:^(BOOL response) {
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            if (response) {
+//                [object showAlert:[NSString stringWithFormat:@" sucessfully checkout trigger added."]];
+//                object = nil;
+//            } else {
+//                NSLog(@"error add checkout trigger");
+//            }
+//        });
+//    }];
 }
 
 

@@ -8,8 +8,8 @@
 import Foundation
 import UIKit
 
-@available(iOS, deprecated:9.0)
-class NotificationSettingsManageriOS9: NotificationProtocol {
+@available(iOS, deprecated: 9.0)
+final class NotificationSettingsManageriOS9: NotificationServiceType {
     
     // MARK: - private  Enum.
     
@@ -21,7 +21,7 @@ class NotificationSettingsManageriOS9: NotificationProtocol {
     
     // MARK: - private handler.
     
-    private (set) var notificationPermissionStatus = Variable<PermissonStatus>(.notYetRequested)
+    private (set) var notificationPermissionStatus = Variable<PermissionStatus>(.notYetRequested)
     
     // MARK: - private static handler.
     
@@ -33,21 +33,17 @@ class NotificationSettingsManageriOS9: NotificationProtocol {
     private var application: UIApplication?
     private let settings: UIUserNotificationSettings
     private var isStartNotificationCalled: StartRemoteNotifyStatus = .notCalled
-    private var userDefaultService: UserDefaultProtocol
+    private var userDefaultService: UserDefaultsType
     
     // MARK: - initialization
     
-    init(userDefaultService: UserDefaultProtocol) {
+    init(userDefaultService: UserDefaultsType) {
         self.settings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
         self.userDefaultService = userDefaultService
         notificationDefault.addObserver(self,
                                         selector: #selector(willEnterForeground),
                                         name: UIApplication.willEnterForegroundNotification,
                                         object: nil)
-    }
-    
-    deinit {
-        notificationDefault.removeObserver(UIApplication.willEnterForegroundNotification)
     }
     
     @objc func willEnterForeground() {
@@ -61,7 +57,7 @@ class NotificationSettingsManageriOS9: NotificationProtocol {
     }
     
     @discardableResult
-    private func checkPermissionStatus() -> (response: Bool, status: PermissonStatus) {
+    private func checkPermissionStatus() -> (response: Bool, status: PermissionStatus) {
         let status = self.getNotificationPermissionState()
         switch status {
         case .denied, .granted:
@@ -77,7 +73,7 @@ class NotificationSettingsManageriOS9: NotificationProtocol {
         }
     }
     
-    func startRemoteNotificationService(for application: UIApplication) {
+    func handleNotificationPermission(for application: UIApplication) {
         self.application = application
         if isStartNotificationCalled == .notCalled {
             isStartNotificationCalled = .isCalled
@@ -96,7 +92,7 @@ class NotificationSettingsManageriOS9: NotificationProtocol {
             }
             
             switch self?.notificationPermissionStatus.value {
-            case .notYetRequested :
+            case .notYetRequested:
                 self?.promptForNotification(application) { [weak self] (response: Bool) -> Void in
                     self?.notificationPermissionStatus.value = response ? .granted : .denied
                     self?.registerToApns(for: application)
@@ -115,7 +111,7 @@ class NotificationSettingsManageriOS9: NotificationProtocol {
         }
     }
     
-    func getNotificationPermissionState() -> PermissonStatus {
+    func getNotificationPermissionState() -> PermissionStatus {
             
         if application?.currentUserNotificationSettings?.types.contains(.alert) == true {
             return .granted
@@ -159,7 +155,7 @@ class NotificationSettingsManageriOS9: NotificationProtocol {
         Self.notifiationPromptResponseBlock = completionHandler
     }
     
-    func showPermissionAlert(custom message: String, for permissionStatus: PermissonStatus) {
+    func showPermissionAlert(custom message: String, for permissionStatus: PermissionStatus) {
         let alert = UIAlertController(title: "PushNotificationDemo would like to send you " +
                                       "Notifications", message: message, preferredStyle: .alert)
         let allowButton = UIAlertAction(title: "Allow", style: .default) { [weak self] _ in
@@ -185,4 +181,9 @@ class NotificationSettingsManageriOS9: NotificationProtocol {
                          .rootViewController?.present(alert, animated: true, completion: nil)
         }
     }
+    
+    deinit {
+        notificationDefault.removeObserver(UIApplication.willEnterForegroundNotification)
+    }
+    
 }

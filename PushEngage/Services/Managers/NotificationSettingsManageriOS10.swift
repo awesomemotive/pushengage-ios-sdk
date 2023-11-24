@@ -9,30 +9,25 @@ import UserNotifications
 import UIKit
 
 @available(iOS 10.0, *)
-class NotificationSettingsManageriOS10: NotificationProtocol {
-    
-    // MARK: - private Enum.
+final class NotificationSettingsManageriOS10: NotificationServiceType {
     
     private enum StartRemoteNotifyStatus {
         case isCalled
         case notCalled
-        case canCallForground
+        case canCallForeground
     }
+        
+    private (set) var notificationPermissionStatus = Variable<PermissionStatus>(.notYetRequested)
     
-    // MARK: - private handler.
-    
-    private (set) var notificationPermissionStatus = Variable<PermissonStatus>(.notYetRequested)
-    
-    // MARK: - private varibale.
-    
-    private var notificationDefault = NotificationCenter.default
+    // MARK: - Private varibles.
+    private let notificationDefault = NotificationCenter.default
+    private let serialQueue: DispatchQueue
+    private let nativeNotificattionInstance = UNUserNotificationCenter.current()
     private var useCachedState: Bool = false
-    private var serialQueue: DispatchQueue
-    private var nativeNotificatInstance = UNUserNotificationCenter.current()
-    private var userDefaultService: UserDefaultProtocol
+    private var userDefaultService: UserDefaultsType
     private var isStartNotificationCalled: StartRemoteNotifyStatus = .notCalled
 
-    init(userDefaultService: UserDefaultProtocol) {
+    init(userDefaultService: UserDefaultsType) {
         self.userDefaultService = userDefaultService
         self.serialQueue = DispatchQueue(label: "com.pushengage.notification.settings.iOS10")
         notificationDefault.addObserver(self,
@@ -41,28 +36,23 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
                                         object: nil)
     }
     
-    deinit {
-        notificationDefault.removeObserver(UIApplication.willEnterForegroundNotification)
-    }
-    
-    @objc func willEnterForeground() {
+    @objc private func willEnterForeground() {
         if isStartNotificationCalled == .isCalled {
-            isStartNotificationCalled = .canCallForground
+            isStartNotificationCalled = .canCallForeground
         }
         
-        if isStartNotificationCalled == .canCallForground {
+        if isStartNotificationCalled == .canCallForeground {
             checkPermissionStatus()
         }
     }
 
-    
     /// method provide the permission status Syncronysly.
     /// - Returns: enum PermissionStatus.
-    func getNotificationPermissionState() -> PermissonStatus {
+    func getNotificationPermissionState() -> PermissionStatus {
         if self.useCachedState {
             return self.notificationPermissionStatus.value
         }
-        var returnStatus: PermissonStatus =  .notYetRequested
+        var returnStatus: PermissionStatus =  .notYetRequested
         let semaphore = DispatchSemaphore(value: 0)
         serialQueue.sync { [weak self] in
             self?.getNotificationPermissionState { (status) in
@@ -75,15 +65,15 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
     }
 
     // provides the notification permission in completion block
-    func getNotificationPermissionState(completionHandler:@escaping ((PermissonStatus) -> Void)) {
+    func getNotificationPermissionState(completionHandler:@escaping ((PermissionStatus) -> Void)) {
         if self.useCachedState {
             completionHandler(self.notificationPermissionStatus.value)
             return
         }
-        var permission: PermissonStatus = .notYetRequested
+        var permission: PermissionStatus = .notYetRequested
         
         serialQueue.async { [weak self] in
-            self?.nativeNotificatInstance.getNotificationSettings { [weak self] (settings) in
+            self?.nativeNotificattionInstance.getNotificationSettings { [weak self] (settings) in
                 switch settings.authorizationStatus {
                 case .authorized:
                     permission = .granted
@@ -113,17 +103,17 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
             }
         }
         let option: UNAuthorizationOptions = [.alert, .badge, .sound]
-        nativeNotificatInstance.requestAuthorization(options: option, completionHandler: responseBlock)
+        nativeNotificattionInstance.requestAuthorization(options: option, completionHandler: responseBlock)
         PELogger.debug(className: String(describing: NotificationSettingsManageriOS10.self),
                        message: "promted Notification authorization request alert.")
     }
     
-    @discardableResult
     /// this method handled the senerio where our sdk goes as the update to the application
     /// that time we are trying to prompt the alert even if notification is already allowed so that
     /// our SDK also know the status of permission and register the user so this will be custom alert will be
     /// shown if func return response value as true.
-    private func checkPermissionStatus() -> (response: Bool, status: PermissonStatus) {
+    @discardableResult
+    private func checkPermissionStatus() -> (response: Bool, status: PermissionStatus) {
         let status = getNotificationPermissionState()
         switch status {
         case .denied, .granted:
@@ -140,7 +130,7 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
     }
     
     /// This method is responsible to start the remote notification services for the application
-    func startRemoteNotificationService(for application: UIApplication) {
+    func handleNotificationPermission(for application: UIApplication) {
         if isStartNotificationCalled == .notCalled {
             isStartNotificationCalled = .isCalled
         }
@@ -164,7 +154,7 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
             switch self?.notificationPermissionStatus.value {
             case .notYetRequested :
                 self?.promptAuthorizationForNotification(with: application) { [weak self] response in
-                    if self?.userDefaultService.isSwizziled == false {
+                    if self?.userDefaultService.isSwizzled == false {
                         self?.notificationPermissionStatus.value = response ? .granted : .denied
                     }
                     self?.registerToApns(for: application)
@@ -201,7 +191,7 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
     }
     
     /// Show the custom alert to the subcribers.
-    func showPermissionAlert(custom message: String, for permissionStatus: PermissonStatus) {
+    func showPermissionAlert(custom message: String, for permissionStatus: PermissionStatus) {
         let alert = UIAlertController(title: "\(Utility.getApplicationName) Would like to send you " +
                                       "Notifications", message: message, preferredStyle: .alert)
         let allowButton = UIAlertAction(title: "Allow", style: .default) { [weak self] _ in
@@ -219,7 +209,7 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
             // only available for iOS 10+
             alert.addAction(self.settingsButton())
             alert.title = "Notifications are not allowed"
-            alert.message = "please go to settings and enable the notifications permission."
+            alert.message = "Please go to Settings and enable the notification permission."
             alert.addAction(dismiss)
             
         } else {
@@ -233,7 +223,7 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
     }
     
     private func settingsButton() -> UIAlertAction {
-        return UIAlertAction(title: "settings", style: .default) { (_) in
+        return UIAlertAction(title: "Settings", style: .default) { (_) in
             guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
                 return
             }
@@ -245,4 +235,8 @@ class NotificationSettingsManageriOS10: NotificationProtocol {
     
     // hanlded for notificationSetting iOS 9.
     func onNotificationPromptResponse(notification type: Int) { }
+    
+    deinit {
+        notificationDefault.removeObserver(UIApplication.willEnterForegroundNotification)
+    }
  }

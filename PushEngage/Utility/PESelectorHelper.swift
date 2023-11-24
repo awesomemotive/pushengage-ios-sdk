@@ -7,7 +7,7 @@
 
 import Foundation
 
-// Selector helpers are implemenated to provide the helper class to achive method swizzling.
+// Selector helpers are implemenated to provide the helper class to achieve method swizzling.
 
 final class PESelectorHelper {
 
@@ -89,10 +89,10 @@ final class PESelectorHelper {
         let methodTypeEncoding = String(cString: unWrappedTypeEncoding)
         
         // check weather the selector which you want your new selector work like. for the addToClass.
-        let isExisiting = class_getInstanceMethod(addToClass, makeLikeSel) != nil
+        let isExisting = class_getInstanceMethod(addToClass, makeLikeSel) != nil
 
         // if exist
-        if isExisiting {
+        if isExisting {
             // then add the method to the class with help of selector method impl and encoding.
             class_addMethod(addToClass, newSel, newMethodImplementation, methodTypeEncoding)
             guard let unWrappedInstanceMethod = class_getInstanceMethod(addToClass, newSel) else {
@@ -111,7 +111,7 @@ final class PESelectorHelper {
                             newMethodImplementation,
                             methodTypeEncoding)
         }
-        return isExisiting
+        return isExisting
     }
     
     /// this method is combination of the checkIfClassInstanceOverridesSelector and

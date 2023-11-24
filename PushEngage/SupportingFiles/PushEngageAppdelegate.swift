@@ -9,10 +9,9 @@ import Foundation
 import UIKit
 
 /*
- * This class is PushEngageAppdelegate which is swizzlied with the UIApplicationDelegate so that we can reduce the
- * the integartion step for the SDK integration for the host application.
+ * This class is PushEngageAppdelegate which is swizzled with the UIApplicationDelegate so that
+ we can reduce the the integration steps for the host application.
  */
-
 
 // This class hooks into the UIApplicationDelegate selectors to receive iOS 9.
 //   - UNUserNotificationCenter is used for iOS 10
@@ -27,7 +26,7 @@ class PushEngageAppDelegate: NSObject {
     // But rather in one of the subclasses
     private static var delegateSubclasses: [AnyClass]?
     
-    private static let viewModel = PushEngage.viewModel
+    private static let manager = PushEngage.manager
     
     private let selectorHelper = PESelectorHelper.shared
     
@@ -39,10 +38,10 @@ class PushEngageAppDelegate: NSObject {
     
     @objc dynamic public func pushEngageSELTag() {}
     
-    /// this method selector do the first step by swizzlie the UIApplication
+    /// this method selector do the first step by swizzling the UIApplication
     /// Delegate selectors with the PushEngageAppDelegate selector.
     /// - Parameter delegate: provide the delegate
-    /// you want to swizzil the methods and as this is specifc designed for the UIApplicationDelegate only.
+    /// you want to swizzle the methods and as this is specifc designed for the UIApplicationDelegate only.
 
      @objc dynamic public func setPushEngageDelegate(_ delegate: UIApplicationDelegate) {
         PELogger.debug(className: String(describing: PushEngageAppDelegate.self),
@@ -68,7 +67,7 @@ class PushEngageAppDelegate: NSObject {
                                           Self.delegateSubclasses ?? [], newClass, unWrappedDelegateClass)
 
         if Utility.lesserThaniOS(version: "10.0") {
-            self.swizzileMethodBeforeiOS10(delegate)
+            self.swizzleMethodBeforeiOS10(delegate)
         }
         
         // inject selector for pushEngageApplication(_:didRegisterForRemoteNotificationsWithDeviceToken:)
@@ -103,42 +102,42 @@ class PushEngageAppDelegate: NSObject {
     /// And that time device gets device token from the APNS and we register to the PushEngage server.
     @objc dynamic private func pushEngageApplication(_ application: UIApplication,
                                                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        Self.viewModel.registerDeviceToServer(with: deviceToken)
+        Self.manager.registerDeviceToServer(with: deviceToken)
         if self.responds(to: #selector(pushEngageApplication(_:didRegisterForRemoteNotificationsWithDeviceToken:))) {
             pushEngageApplication(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
         }
     }
     
-    /// Fires when a notication is opened or recieved while the app is in focus.
+    /// Fires when a notification is opened or received while the app is in focus.
     ///   - Also fires when the app is in the background and a notificaiton with content-available=1 is received.
     @objc dynamic private func pushEngageApplication(_ application: UIApplication,
                                                      didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                                                      fetchCompletionHandler
                                                      completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         
-        let firedExisitingSelector = self.responds(to:
+        let firedExistingSelector = self.responds(to:
                                      #selector(
                                      pushEngageApplication(_:didReceiveRemoteNotification:fetchCompletionHandler:)))
         var initiateBackgroundtask = false
         
-        if Self.viewModel.getAppId() != nil {
-            let isAlertNotiification = userInfo[userInfo: "aps"]?[userInfo: "alert"] != nil
+        if Self.manager.getAppId() != nil {
+            let isAlertNotification = userInfo[userInfo: "aps"]?[userInfo: "alert"] != nil
             let appState = application.applicationState
             
-            if Utility.lesserThaniOS(version: "10.0") && appState == .inactive && isAlertNotiification {
-                Self.viewModel.recivedNotification(with: userInfo, isOpened: true)
-            } else if appState == .active && isAlertNotiification {
-                Self.viewModel.recivedNotification(with: userInfo, isOpened: false)
+            if Utility.lesserThaniOS(version: "10.0") && appState == .inactive && isAlertNotification {
+                Self.manager.receivedNotification(with: userInfo, isOpened: true)
+            } else if appState == .active && isAlertNotification {
+                Self.manager.receivedNotification(with: userInfo, isOpened: false)
             } else {
-                initiateBackgroundtask = Self.viewModel
-                                             .recivedRemoteNotification(application: application,
+                initiateBackgroundtask = Self.manager
+                                             .receivedRemoteNotification(application: application,
                                                                         userInfo: userInfo,
                                                                         completionHandler:
-                                                                        firedExisitingSelector ? nil : completionHandler)
+                                                                        firedExistingSelector ? nil : completionHandler)
             }
         }
         
-        if firedExisitingSelector {
+        if firedExistingSelector {
             self.pushEngageApplication(application,
                                        didReceiveRemoteNotification: userInfo,
                                        fetchCompletionHandler: completionHandler)
@@ -151,8 +150,8 @@ class PushEngageAppDelegate: NSObject {
     }
    
     // Back work compatiblity
-    @available(iOS, deprecated:9.0)
-    func swizzileMethodBeforeiOS10(_ delegate: UIApplicationDelegate) {
+    @available(iOS, deprecated: 9.0)
+    func swizzleMethodBeforeiOS10(_ delegate: UIApplicationDelegate) {
 
         if Self.delegateClass == nil {
             PELogger.debug(className: String(describing: PushEngageAppDelegate.self), message: "delegate class is nil")
@@ -174,12 +173,12 @@ class PushEngageAppDelegate: NSObject {
         }
     }
 
-    @available(iOS, deprecated:9.0)
+    @available(iOS, deprecated: 9.0)
     @objc dynamic func pushEngageLocalNotificationOpend(_ application: UIApplication,
                                                         handleActionWithIdentifier identifier: String?,
                                                         for notification: UILocalNotification,
                                                         completionHandler: @escaping () -> Void) {
-        if Self.viewModel.getAppId() != nil {
+        if Self.manager.getAppId() != nil {
             self.operationForLocalActionBased(notification: notification, with: identifier ?? "")
         }
         
@@ -193,7 +192,7 @@ class PushEngageAppDelegate: NSObject {
         completionHandler()
     }
     
-    @available(iOS, deprecated:9.0)
+    @available(iOS, deprecated: 9.0)
     private func operationForLocalActionBased(notification: UILocalNotification,
                                               with identifier: String) {
         
@@ -205,7 +204,7 @@ class PushEngageAppDelegate: NSObject {
         .updateValue(identifier, forKey: "actionSelected")
         
 //        let applicationStateisActive = UIApplication.shared.applicationState == .active
-        Self.viewModel.recivedNotification(with: userInfo, isOpened: true)
+        Self.manager.receivedNotification(with: userInfo, isOpened: true)
         
         // commented just because of the reference
         
@@ -216,12 +215,12 @@ class PushEngageAppDelegate: NSObject {
     
     
 //  implemented for the iOS 9 compatible notification settings
-    @available(iOS, deprecated:9.0)
+    @available(iOS, deprecated: 9.0)
     @objc dynamic func pushEngageDidRegisterUserNotifications(_ application: UIApplication,
                                                               didRegister
                                                               notificationSettings: UIUserNotificationSettings) {
-        if Self.viewModel.getAppId() != nil {
-            Self.viewModel.update(notificationType: Int(notificationSettings.types.rawValue))
+        if Self.manager.getAppId() != nil {
+            Self.manager.update(notificationType: Int(notificationSettings.types.rawValue))
         }
 
         if self.responds(to: #selector(pushEngageDidRegisterUserNotifications(_:didRegister:))) {
@@ -229,7 +228,7 @@ class PushEngageAppDelegate: NSObject {
         }
     }
     
-    @available(iOS, deprecated:9.0)
+    @available(iOS, deprecated: 9.0)
     private func swizzleForiOS9(_ delegate: UIApplicationDelegate) {
         if Self.delegateClass == nil {
             PELogger.debug(className: String(describing: PushEngageAppDelegate.self), message: "delegate class is nil")
@@ -249,10 +248,10 @@ class PushEngageAppDelegate: NSObject {
         }
     }
     
-    @available(iOS, deprecated:9.0)
+    @available(iOS, deprecated: 9.0)
     @objc dynamic func pushEngageLocalNotificationOpened(_ application: UIApplication,
                                                          didReceive notification: UILocalNotification) {
-        if Self.viewModel.getAppId() != nil {
+        if Self.manager.getAppId() != nil {
             self.operationForLocalActionBased(notification: notification, with: "__DEFAULT__")
         }
         
@@ -263,8 +262,8 @@ class PushEngageAppDelegate: NSObject {
     
     @objc dynamic func pushEngageReciveRemoteNotification(_ application: UIApplication,
                                                           didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
-        if Self.viewModel.getAppId() != nil {
-            Self.viewModel.recivedNotification(with: userInfo, isOpened: true)
+        if Self.manager.getAppId() != nil {
+            Self.manager.receivedNotification(with: userInfo, isOpened: true)
         }
         
         if self.responds(to: #selector(pushEngageReciveRemoteNotification(_:didReceiveRemoteNotification:))) {
