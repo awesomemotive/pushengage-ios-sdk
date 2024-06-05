@@ -33,6 +33,38 @@ final class SubscriberServiceManager: SubscriberServiceType {
                 .geoFetch: userDefault.isLocationEnabled]
     }
     
+    func sendGoal(goal: Goal, completionHandler: ((_ response: Bool,
+                                                   _ error: PEError?) -> Void)?) {
+        if goal.name.isEmpty {
+            completionHandler?(false, PEError.invalidInput)
+            return
+        }
+        
+        var subscriptionData = datasourceProtocol.getSubscriptionStatus()
+        subscriptionData.goalName = goal.name
+        subscriptionData.goalValue = goal.value
+        subscriptionData.goalCount = goal.count
+        
+        networkRouter.request(.sendGoal(subscriptionData)) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
+                    if decodedData.error == nil && decodedData.errorCode == 0 && (decodedData.data?.success ?? true) {
+                        completionHandler?(true, nil)
+                    } else {
+                        completionHandler?(false, PEError.networkResponseFailure(decodedData.errorCode,
+                                                                                 decodedData.errorMessage))
+                    }
+                } catch {
+                    completionHandler?(false, PEError.parsingError)
+                }
+            case .failure(let error):
+                PELogger.error(className: String(describing: SubscriberServiceManager.self), message: error.errorDescription ?? "")
+            }
+        }
+    }
+    
     func addSubscriber(completionHandler: ServiceCallBackObjects<AddSubscriberData>?) {
         let data = (object: datasourceProtocol.getSubscriptionData(),
                     params: queryParms)
@@ -48,7 +80,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                         completionHandler?(addSubsciberData, nil)
                     } else {
                         self?.userDefault.isSubscriberDeleted = true
-                        completionHandler?(nil, .networkResponseFaliure(decodedData.errorCode,
+                        completionHandler?(nil, .networkResponseFailure(decodedData.errorCode,
                                                                         decodedData.errorMessage))
                     }
                 } catch {
@@ -76,7 +108,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                 do {
                     let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                     decodedData.error == nil && decodedData.errorCode == 0 ? completionHandler?(decodedData, nil)
-                        : completionHandler?(nil, .networkResponseFaliure(decodedData.errorCode,
+                        : completionHandler?(nil, .networkResponseFailure(decodedData.errorCode,
                                                                           decodedData.errorMessage))
                 } catch {
                     PELogger.error(className: String(describing: SubscriberServiceManager.self),
@@ -99,7 +131,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                 do {
                     let decodedData = try JSONDecoder().decode(CheckSubscriberResponse.self, from: data)
                     decodedData.errorCode == 0 ? completionHandler?(decodedData.data, nil)
-                    : completionHandler?(nil, .networkResponseFaliure(decodedData.errorCode,
+                    : completionHandler?(nil, .networkResponseFailure(decodedData.errorCode,
                                                                       decodedData.errorMessage))
                 } catch {
                     completionHandler?(nil, .parsingError)
@@ -123,7 +155,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                 do {
                     let decodedObject = try JSONDecoder().decode(SubsciberDetailsResponse.self, from: data)
                     decodedObject.errorCode == 0 ? completionHandler?(decodedObject.data, nil)
-                    : completionHandler?(nil, .networkResponseFaliure(decodedObject.errorCode,
+                    : completionHandler?(nil, .networkResponseFailure(decodedObject.errorCode,
                                                                       decodedObject.errorMessage))
                 } catch {
                     completionHandler?(nil, .parsingError)
@@ -147,7 +179,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                     let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                     decodedData.error == nil && decodedData.errorCode == 0 ?
                     completionHandler?(true, nil) :
-                    completionHandler?(false, PEError.networkResponseFaliure(decodedData.errorCode,
+                    completionHandler?(false, PEError.networkResponseFailure(decodedData.errorCode,
                                                                              decodedData.errorMessage))
                 } catch {
                     completionHandler?(false, PEError.parsingError)
@@ -169,7 +201,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                     let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                     decodedData.error == nil && decodedData.errorCode == 0 ?
                     completionHandler?(true, nil) :
-                    completionHandler?(false, PEError.networkResponseFaliure(decodedData.errorCode,
+                    completionHandler?(false, PEError.networkResponseFailure(decodedData.errorCode,
                                                                              decodedData.errorMessage))
                 } catch {
                     completionHandler?(false, PEError.parsingError)
@@ -195,7 +227,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                     } else {
                         let errorCode = jsonDic?["error_code"] as? Int
                         let errorMessage = jsonDic?["error_message"] as? String
-                        completionHandler(nil, .networkResponseFaliure(errorCode,
+                        completionHandler(nil, .networkResponseFailure(errorCode,
                                                                        errorMessage ?? "attribute not available"))
                     }
                     PELogger.debug(className: String(describing: SubscriberServiceManager.self),
@@ -229,7 +261,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                     let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                     decodedData.error == nil && decodedData.errorCode == 0 ?
                         completionHandler?(true, nil) :
-                        completionHandler?(false, .networkResponseFaliure(decodedData.errorCode,
+                        completionHandler?(false, .networkResponseFailure(decodedData.errorCode,
                                                                           decodedData.errorMessage))
                 } catch {
                     PELogger.error(className: String(describing: SubscriberServiceManager.self),
@@ -256,7 +288,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                     let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                     decodedData.error == nil && decodedData.errorCode == 0 ?
                     completionHandler?(true, nil)
-                    : completionHandler?(false, .networkResponseFaliure(decodedData.errorCode,
+                    : completionHandler?(false, .networkResponseFailure(decodedData.errorCode,
                                                                         decodedData.errorMessage))
                 } catch {
                     PELogger.error(className: String(describing: SubscriberServiceManager.self),
@@ -283,7 +315,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                     let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                     decodedData.error == nil && decodedData.errorCode == 0
                     ? completionHandler?(true, nil)
-                    : completionHandler?(false, .networkResponseFaliure(decodedData.errorCode,
+                    : completionHandler?(false, .networkResponseFailure(decodedData.errorCode,
                                                                         decodedData.errorMessage))
                 } catch {
                     PELogger.error(className: String(describing: SubscriberServiceManager.self),
@@ -311,7 +343,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                 do {
                     let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                     decodedData.errorCode == 0 ? completion?(true, nil)
-                        : completion?(false, .networkResponseFaliure(decodedData.errorCode,
+                        : completion?(false, .networkResponseFailure(decodedData.errorCode,
                                                                      decodedData.errorMessage))
                 } catch {
                     PELogger.error(className: String(describing: SubscriberServiceManager.self),
@@ -347,7 +379,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                     let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                     decodedData.error == nil && decodedData.errorCode == 0 ?
                     completionHandler?(true, nil)
-                    : completionHandler?(false, .networkResponseFaliure(decodedData.errorCode,
+                    : completionHandler?(false, .networkResponseFailure(decodedData.errorCode,
                                                                         decodedData.errorMessage))
                 } catch {
                     PELogger.error(className: String(describing: SubscriberServiceManager.self),
@@ -383,7 +415,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                         let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                         decodedData.error == nil && decodedData.errorCode == 0 ?
                         completionHandler?(true, nil)
-                        : completionHandler?(false, .networkResponseFaliure(decodedData.errorCode,
+                        : completionHandler?(false, .networkResponseFailure(decodedData.errorCode,
                                                                             decodedData.errorMessage))
                     } catch {
                         PELogger.error(className: String(describing: SubscriberServiceManager.self),
@@ -419,7 +451,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                     let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                     decodedData.error == nil && decodedData.errorCode == 0 ?
                     completionHandler?(true, nil) :
-                    completionHandler?(false, .networkResponseFaliure(decodedData.errorCode,
+                    completionHandler?(false, .networkResponseFailure(decodedData.errorCode,
                                                                       decodedData.errorMessage))
 
                 } catch {
@@ -439,18 +471,18 @@ final class SubscriberServiceManager: SubscriberServiceType {
         }
     }
     
-    func updateTrigger(status: Bool,
+    func automatedNotification(status: TriggerStatusType,
                        completionHandler: SubscriberBoolCallBack?) {
         var triggerStatusInfo = datasourceProtocol.getSubscriptionStatus()
-        triggerStatusInfo.triggerStatus = status == true ? 1 : 0
-        networkRouter.request(.updateTrigger(triggerStatusInfo)) { [weak self] (result) in
+        triggerStatusInfo.triggerStatus = status.rawValue
+        networkRouter.request(.automatedNotification(triggerStatusInfo)) { [weak self] (result) in
             switch result {
             case .success(let data):
                 do {
                     let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
                     decodedData.error == nil && decodedData.errorCode == 0 ?
                     completionHandler?(true, nil)
-                    : completionHandler?(false, .networkResponseFaliure(decodedData.errorCode,
+                    : completionHandler?(false, .networkResponseFailure(decodedData.errorCode,
                                                                       decodedData.errorMessage))
                 } catch {
                     PELogger.error(className: String(describing: SubscriberServiceManager.self),
@@ -461,7 +493,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
                 PELogger.error(className: String(describing: SubscriberServiceManager.self),
                                message: error.errorDescription ?? "")
                 self?.retryFor404(error: error) { result, error in
-                    result ? self?.updateTrigger(status: status, completionHandler: completionHandler)
+                    result ? self?.automatedNotification(status: status, completionHandler: completionHandler)
                         : completionHandler?(false, error)
                 }
             }
@@ -485,7 +517,7 @@ extension SubscriberServiceManager {
                                                for: UserDefaultConstant.pushEngageSyncApi)
                         completionHandler?(object.data, nil)
                     } else {
-                        completionHandler?(nil, .networkResponseFaliure(object.errorCode,
+                        completionHandler?(nil, .networkResponseFailure(object.errorCode,
                                                                         object.errorMessage))
                     }
                 } catch {

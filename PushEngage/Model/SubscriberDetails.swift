@@ -21,6 +21,9 @@ struct SubscriberDetails: Codable {
     var segments: [Segment]?
     var segmentId: Int?
     var notificationDisabled: Bool?
+    var goalCount: Int?
+    var goalValue: Double?
+    var goalName: String?
     
     enum CodingKeys: String, CodingKey {
         case siteID = "site_id"
@@ -35,7 +38,9 @@ struct SubscriberDetails: Codable {
         case deviceToken = "device_token"
         case segmentId = "segment_id"
         case notificationDisabled = "delete_on_notification_disable"
-        
+        case goalCount = "count"
+        case goalValue = "value"
+        case goalName = "name"
     }
 }
 

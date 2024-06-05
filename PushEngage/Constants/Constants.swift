@@ -25,13 +25,18 @@ internal struct NetworkConstants {
     static let requestHeaderContentTypeKey = "Content-Type"
     static let requestHeaderAuthorizationKey = "Authorization"
     static let requestHeaderRefererKey = "referer"
+    static let requestHeaderClientKey = "X-Pe-Client"
+    static let requestHeaderClientVersionKey = "X-Pe-Client-Version"
+    static let requestHeaderSdkVersionKey = "X-Pe-Sdk-Version"
+    static let requestHeaderAppIdKey = "X-Pe-App-Id"
+    static let requestHeaderUserAgentKey = "User-Agent"
 
     // MARK: - Values
     static let requestHeaderAuthorizationValue = "Bearer "
     static let requestHeaderContentTypeValue = "application/json"
     static let requestHeaderContentTypeValueForcharSet = "application/x-www-form-urlencoded; charset=utf-8"
     static let requestHeaderRefererValue = "https://pushengage.com/service-worker.js"
-
+    static let requestHeaderClientValue = "iOS"
     // MARK: - BASE URL
     
     static let baseURL = PENetworkURLs.backendBaseURL
@@ -46,7 +51,7 @@ internal struct NetworkConstants {
     
     // MARK: - SDK version
     
-    static let sdkVersion = "0.0.2"
+    static let sdkVersion = "0.0.3"
 
     // MARK: - URL relative - path
     static let addSubscriberPath = "subscriber/add"
@@ -66,11 +71,15 @@ internal struct NetworkConstants {
     static let updateTrigger = "subscriber/updatetriggerstatus"
     static let updateSubscriber = "subscriber/%@"
     static let syncSubscriber = "sites/%@/sync/ios"
+    static let addAlert = "alerts"
     
     // MARK: - Notification relative path
     static let notificationView = "notification/view"
     static let notificationClicked = "notification/click"
     static let sponsoreFetch = "notification/fetch"
+    
+    // MARK: Goal tracking
+    static let sendGoal = "goals"
     
     // MARK: - Error logging relative path
     static let logs = "logs"
@@ -183,6 +192,7 @@ extension String {
     static let viewCountTrackingFailed = "viewCountTrackingFailed"
     static let clickCountTrackingFailed = "clickCountTrackingFailed"
     static let notificationRefetchFailed = "notificationRefetchFailed"
+    static let invalidInput = "One or more inputs provided are not valid."
 }
 
 // MARK: - Registration Messages.

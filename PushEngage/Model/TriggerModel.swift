@@ -7,63 +7,107 @@
 
 import Foundation
 
+@objc public enum TriggerAlertType: Int {
+    case priceDrop
+    case inventory
+}
+
+@objc public enum TriggerAlertAvailabilityType: Int {
+    case inStock
+    case outOfStock
+}
+
 @objcMembers
 @objc public class TriggerCampaign: NSObject {
-    var campaignName, eventName: String
+    let campaignName: String
+    let eventName: String
+    var referenceId: String?
+    var profileId: String?
     var data: [String: String]?
-    var notificationDetails: [TriggerNotification]?
     
     public init(campaignName: String,
                 eventName: String,
-                notificationDetails: [TriggerNotification]?,
-                data: [String: String]?) {
+                referenceId: String?=nil,
+                profileId: String?=nil,
+                data: [String: String]?=nil) {
         self.eventName = eventName
         self.campaignName = campaignName
-        self.notificationDetails = notificationDetails
+        self.profileId = profileId
+        self.referenceId = referenceId
         self.data = data
     }
     
 }
 
-@objcMembers
-@objc public class TriggerNotification: NSObject {
+@objc public class TriggerAlert: NSObject {
+    let type: TriggerAlertType
+    let productId: String
+    let link: String
+    let price: Double
+    let variantId: String?
+    let expiryDateTime: Date?
+    let alertPrice: Double?
+    let availability: TriggerAlertAvailabilityType?
+    let profileId: String?
+    let mrp: Double?
+    let data: [String: String]?
     
-    var title: Input?
-    var message: Input?
-    var notificationURL: Input
-    var notificationImage: Input?
-    var bigImage: Input?
-    var actions: Input?
-    
-    public init(notificationURL: Input,
-                title: Input?,
-                message: Input?,
-                notificationImage: Input?,
-                bigImage: Input?,
-                actions: Input?) {
-        self.notificationURL = notificationURL
-        self.title = title
-        self.message = message
-        self.actions = actions
-        self.bigImage = bigImage
-        self.notificationImage = notificationImage
+    public init(type: TriggerAlertType,
+                productId: String,
+                link: String,
+                price: Double,
+                variantId: String?=nil,
+                expiryTimestamp: Date?=nil,
+                alertPrice: Double?=nil,
+                availability: TriggerAlertAvailabilityType?=nil,
+                profileId: String?=nil,
+                mrp: Double?=nil,
+                data: [String : String]?=nil) {
+        self.type = type
+        self.productId = productId
+        self.link = link
+        self.price = price
+        self.variantId = variantId
+        self.expiryDateTime = expiryTimestamp
+        self.alertPrice = alertPrice
+        self.availability = availability
+        self.profileId = profileId
+        self.mrp = mrp
+        self.data = data
     }
 }
 
-@objcMembers
-@objc public class Input: NSObject {
-    var key: String
-    var value: String
-    var dict: [String: String] {
-        return [key: value]
-    }
-    
-    public init(key: String, value: String) {
-        self.key = key
-        self.value = value
+struct TriggerModel: Codable {
+    var partitionKey: String
+    var data: TriggerModelData
+
+    enum CodingKeys: String, CodingKey {
+        case partitionKey = "PartitionKey"
+        case data = "Data"
     }
 }
 
+struct TriggerModelData: Codable {
+    var siteId: Int
+    var deviceTokenHash: String
+    let campaignName: String
+    let eventName: String
+    var timezone: String?
+    var referenceId: String?
+    var profileId: String?
+    var data: [String: String]?
+    
+    enum CodingKeys: String, CodingKey {
+        case siteId = "site_id"
+        case deviceTokenHash = "device_token_hash"
+        case campaignName = "campaign_name"
+        case eventName = "event_name"
+        case timezone = "timezone"
+        case referenceId = "ref_id"
+        case profileId = "profile_id"
+        case data = "data"
+    }
+}
 
 struct TriggerResponse: Codable {
     var sequenceNumber, shardID: String
@@ -73,4 +117,3 @@ struct TriggerResponse: Codable {
         case shardID = "ShardId"
     }
 }
-

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="KGk-i7-Jjw" customClass="DataCell" customModule="PushNotificationDemo" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9j4-ba-6pm">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <subviews>
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="key" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="M8D-63-DT4">
+                                <rect key="frame" x="8" y="4" width="112" height="36"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="value" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Dkz-kj-NRH">
+                                <rect key="frame" x="130" y="4" width="112" height="36"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="suZ-5m-Ahv">
+                                <rect key="frame" x="248" y="8" width="64" height="28"/>
+                                <color key="backgroundColor" red="0.23921568630000001" green="0.26274509800000001" blue="0.96078431369999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="gray" title="Add">
+                                    <fontDescription key="titleFontDescription" type="system" pointSize="8"/>
+                                </buttonConfiguration>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="M8D-63-DT4" firstAttribute="leading" secondItem="9j4-ba-6pm" secondAttribute="leading" constant="8" id="08f-aY-YBR"/>
+                            <constraint firstItem="M8D-63-DT4" firstAttribute="width" secondItem="9j4-ba-6pm" secondAttribute="width" multiplier="0.35" id="8IP-pS-q1T"/>
+                            <constraint firstItem="Dkz-kj-NRH" firstAttribute="bottom" secondItem="M8D-63-DT4" secondAttribute="bottom" id="9li-uh-xtk"/>
+                            <constraint firstItem="Dkz-kj-NRH" firstAttribute="width" secondItem="9j4-ba-6pm" secondAttribute="width" multiplier="0.35" id="Ckr-LP-aQ5"/>
+                            <constraint firstItem="Dkz-kj-NRH" firstAttribute="leading" secondItem="M8D-63-DT4" secondAttribute="trailing" constant="10" id="NDb-hC-OID"/>
+                            <constraint firstItem="Dkz-kj-NRH" firstAttribute="top" secondItem="M8D-63-DT4" secondAttribute="top" id="Pgj-9X-YXM"/>
+                            <constraint firstAttribute="bottom" secondItem="M8D-63-DT4" secondAttribute="bottom" constant="4" id="bLj-aV-I2E"/>
+                            <constraint firstItem="M8D-63-DT4" firstAttribute="top" secondItem="9j4-ba-6pm" secondAttribute="top" constant="4" id="cnX-WT-eYV"/>
+                            <constraint firstItem="suZ-5m-Ahv" firstAttribute="width" secondItem="9j4-ba-6pm" secondAttribute="width" multiplier="0.2" id="hSz-ii-Y3W"/>
+                            <constraint firstAttribute="bottom" secondItem="suZ-5m-Ahv" secondAttribute="bottom" constant="8" id="lmL-Ql-coa"/>
+                            <constraint firstItem="Dkz-kj-NRH" firstAttribute="centerY" secondItem="M8D-63-DT4" secondAttribute="centerY" id="qMe-Uj-0UK"/>
+                            <constraint firstAttribute="trailing" secondItem="suZ-5m-Ahv" secondAttribute="trailing" constant="8" id="tFr-3T-VS9"/>
+                            <constraint firstItem="suZ-5m-Ahv" firstAttribute="top" secondItem="9j4-ba-6pm" secondAttribute="top" constant="8" id="veZ-5T-4Lg"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="9j4-ba-6pm" secondAttribute="trailing" id="5JZ-jp-qR0"/>
+                    <constraint firstAttribute="bottom" secondItem="9j4-ba-6pm" secondAttribute="bottom" id="JIy-fY-Ex2"/>
+                    <constraint firstItem="9j4-ba-6pm" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="hgW-fg-Zrf"/>
+                    <constraint firstItem="9j4-ba-6pm" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="rAl-y6-jkp"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="actionButton" destination="suZ-5m-Ahv" id="4gS-To-kf1"/>
+                <outlet property="keyTextField" destination="M8D-63-DT4" id="3sM-kj-igE"/>
+                <outlet property="valueTextField" destination="Dkz-kj-NRH" id="dGg-Vy-xwM"/>
+            </connections>
+            <point key="canvasLocation" x="-24" y="20"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

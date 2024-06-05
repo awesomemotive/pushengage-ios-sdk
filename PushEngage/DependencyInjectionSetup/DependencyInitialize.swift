@@ -111,11 +111,13 @@ internal final class DependencyInitialize {
             
             // MARK: - TriggerCampaignProtocol
             
-            .register(TriggerCampaignType.self) { resolver  in
+            .register(TriggerCampaignManagerType.self) { resolver  in
                 let networkRouter = resolver.resolve(NetworkRouterType.self)
                 let userDefaultService = resolver.resolve(UserDefaultsType.self)
+                let dataSource = resolver.resolve(DataSourceType.self)
                 return TriggerCampaignManager(userDefaultService: userDefaultService,
-                                              networkService: networkRouter)
+                                              networkService: networkRouter,
+                                              dataSource: dataSource)
             }
             
             // MARK: - PEViewModel
@@ -127,7 +129,7 @@ internal final class DependencyInitialize {
                 let subscriberService = resolver.resolve(SubscriberServiceType.self)
                 let userDefaultService = resolver.resolve(UserDefaultsType.self)
                 let notificationLifeCycleService = resolver.resolve(NotificationLifeCycleServiceType.self)
-                let triggerCampaiginService = resolver.resolve(TriggerCampaignType.self)
+                let triggerCampaiginService = resolver.resolve(TriggerCampaignManagerType.self)
                 
                 return PEManager(applicationService: applicationService,
                                    notificationService: notificationService,

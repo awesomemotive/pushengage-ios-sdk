@@ -6,7 +6,6 @@
 //
 
 #import "ViewController.h"
-#import "AddToCart.h"
 @import PushEngage;
 
 @interface ViewController ()
@@ -28,7 +27,11 @@
                       @"Add Profile Id",
                       @"Get Subscriber Details",
                       @"Get Subscriber Attributes",
-                      @"Set Subscriber Attributes" ];
+                      @"Set Subscriber Attributes",
+                      @"Send Goal",
+                      @"Trigger Campaigns",
+                      @"Enable Automated Notification",
+                      @"Disable Automated Notification"];
     self.textView.text = nil;
     self.textView.layer.borderWidth = 0.5;
     self.textView.layer.borderColor = UIColor.blackColor.CGColor;
@@ -42,16 +45,6 @@
 - (void)requestPermissionTapped:(UITapGestureRecognizer *)sender {
     [self.requestPermissionButton sendActionsForControlEvents:UIControlEventTouchUpInside];
     [PushEngage requestNotificationPermission];
-}
-
-- (void) navigateToAddToCart {
-    AddToCart *controller = [AddToCart new];
-    [self.navigationController pushViewController:controller animated:YES];
-    
-}
-
-- (void) nextView:(id) sender {
-    [self navigateToAddToCart];
 }
 
 - (void) dismiss:(UITapGestureRecognizer *)sender {
@@ -155,22 +148,6 @@
             }];
             break;
         }
-        
-//        case trigger: {
-//            [PushEngage updateTriggerWithStatus: NO
-//                               completionHandler:^(BOOL response, NSError * _Nullable error) {
-//                dispatch_async(dispatch_get_main_queue(), ^{
-//                    if (response) {
-//                        blockSelf.textView.text = @"added trigger successfully";
-//                    } else {
-//                        blockSelf.textView.text = [error debugDescription];
-//                    }
-//                    blockSelf = nil;
-//                });
-//            }];
-//            break;
-//        }
-            
         case addProfileId: {
             [PushEngage addProfileFor: @"abhishekkumarthakur@gmail.com"
                            completionHandler:^(BOOL response, NSError * _Nullable error) {
@@ -236,6 +213,61 @@
                         blockSelf.textView.text = @"Attribute(s) set for subscriber successfully";
                     } else {
                         blockSelf.textView.text = [error debugDescription];
+                    }
+                    blockSelf = nil;
+                });
+            }];
+            break;
+        }
+        case sendGoal: {
+            Goal *goal = [[Goal alloc] initWithName:@"revenue" count:@(1.0) value:@(2.0)];
+
+            [PushEngage sendGoalWithGoal:goal completionHandler:^(BOOL response, NSError *error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (error) {
+                        blockSelf.textView.text = error.localizedDescription;
+                    } else {
+                        blockSelf.textView.text = @"Goal Added Successfully";
+                    }
+                    blockSelf = nil;
+                });
+            }];
+            break;
+        }
+        case triggerCampaigns: {
+            TriggerCampaign *triggerCampaign = [[TriggerCampaign alloc] initWithCampaignName:@"promotion" eventName:@"product" referenceId:@"" profileId:@"" data:@{@"title" : @"New Product"}];
+            [PushEngage sendTriggerEventWithTriggerCampaign: triggerCampaign completionHandler:^(BOOL response, NSError *error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (error) {
+                        blockSelf.textView.text = error.localizedDescription;
+                    } else {
+                        blockSelf.textView.text = @"Send Trigger Alert Successfull";
+                    }
+                    blockSelf = nil;
+                });
+            }];
+            break;
+        }
+        case enableAutomatedNotification: {
+            [PushEngage automatedNotificationWithStatus: TriggerStatusTypeEnabled completionHandler:^(BOOL response, NSError *error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (error) {
+                        blockSelf.textView.text = error.localizedDescription;
+                    } else {
+                        blockSelf.textView.text = @"Trigger enabled successfully";
+                    }
+                    blockSelf = nil;
+                });
+            }];
+            break;
+        }
+        case disableAutomatedNotification: {
+            [PushEngage automatedNotificationWithStatus: TriggerStatusTypeDisabled completionHandler:^(BOOL response, NSError *error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (error) {
+                        blockSelf.textView.text = error.localizedDescription;
+                    } else {
+                        blockSelf.textView.text = @"Trigger disabled successfully";
                     }
                     blockSelf = nil;
                 });

@@ -23,12 +23,13 @@ protocol SubscriberServiceType {
     func update(segments: [String], action: SegmentActions, completionHandler: SubscriberBoolCallBack?)
     func update(dynamic segmentInfo: [Parameters], completionHandler: SubscriberBoolCallBack?)
     func segmentHashArray(for segmentId: Int, completionHandler: SubscriberBoolCallBack?)
-    func updateTrigger(status: Bool, completionHandler: SubscriberBoolCallBack?)
+    func automatedNotification(status: TriggerStatusType, completionHandler: SubscriberBoolCallBack?)
     func checkSubscriber(completionHandler: ServiceCallBackObjects<CheckSubscriberData>?)
     func updateSubscriber(completionHandler: ServiceCallBackObjects<NetworkResponse>?)
     func syncSiteInfo(for siteKey: String, completionHandler: ServiceCallBackObjects<SyncAPIData>?)
     func retryAddSubscriberProcess(completion: ((PEError?) -> Void)?)
     func updateSettingPermission(status: PermissionStatus)
-    
+    func sendGoal(goal: Goal, completionHandler: ((_ response: Bool,
+                                                   _ error: PEError?) -> Void)?)
 }
 

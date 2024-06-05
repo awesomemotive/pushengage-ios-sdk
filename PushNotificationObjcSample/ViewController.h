@@ -18,11 +18,14 @@ typedef NS_ENUM(NSUInteger, ApiAction) {
     addDynamicSegement,
     addAttribute,
     deleteAttribute,
-//    trigger,
     addProfileId,
     getSubscriberDetails,
     getAttribute,
-    setAttributes
+    setAttributes,
+    sendGoal,
+    triggerCampaigns,
+    enableAutomatedNotification,
+    disableAutomatedNotification
 };
 
 @end

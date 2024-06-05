@@ -40,7 +40,7 @@ final class DataManager: DataSourceType {
                                                deviceVersion: Utility.getOSInfo,
                                                deviceModel: Utility.getPhoneName,
                                                deviceManufacturer: "Apple",
-                                               timezone: Utility.timeOffSet,
+                                               timezone: Utility.timeZone,
                                                language: Locale.current.languageCode,
                                                userAgent: "Apple \(Utility.getPhoneName)",
                                                totalScreenWidthHeight: Utility.totalScrWidthHeight,

@@ -76,10 +76,17 @@ protocol SegmentManagerType {
 }
 
 protocol CampaignManagerType {
-    func createCampaign(for details: TriggerCampaign,
-                        completionHandler: ((_ response: Bool) -> Void)?)
-    func updateTrigger(status: Bool,
+    func automatedNotification(status: TriggerStatusType,
                        completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?)
+    func sendTriggerEvent(trigger: TriggerCampaign, completionHandler: ((_ response: Bool,
+                                                                         _ error: PEError?) -> Void)?)
+    func addAlert(triggerAlert: TriggerAlert, completionHandler: ((_ response: Bool,
+                                                                   _ error: PEError?) -> Void)?)
+}
+
+protocol GoalManagerType {
+    func sendGoal(goal: Goal, completionHandler: ((_ response: Bool,
+                                                   _ error: PEError?) -> Void)?)
 }
 
 protocol CustomUIManagerType {
@@ -92,14 +99,15 @@ protocol SwizzleManagerType {
 }
 
 protocol PEManagerType: DeviceManagerType,
-                            SubscriberManagerType,
-                            AppInfoManagerType,
-                            NotificationManagerType,
-                            AttributeManagerType,
-                            SegmentManagerType,
-                            CampaignManagerType,
-                            CustomUIManagerType,
-                            SwizzleManagerType {}
+                        SubscriberManagerType,
+                        AppInfoManagerType,
+                        NotificationManagerType,
+                        AttributeManagerType,
+                        SegmentManagerType,
+                        CampaignManagerType,
+                        CustomUIManagerType,
+                        SwizzleManagerType,
+                        GoalManagerType {}
 
 final class PEManager: PEManagerType {
     
@@ -110,7 +118,7 @@ final class PEManager: PEManagerType {
     private var userDefaultsService: UserDefaultsType
     private let notificationLifeCycleService: NotificationLifeCycleServiceType
     private let notificationExtensionService: NotificationExtensionType
-    private let triggerCamapaiginService: TriggerCampaignType
+    private let triggerCampaignService: TriggerCampaignManagerType
     private var application: UIApplication?
     private var launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     private var lastNotificationPayload: [AnyHashable: Any]?
@@ -134,14 +142,14 @@ final class PEManager: PEManagerType {
          subscriberService: SubscriberServiceType,
          userDefaultService: UserDefaultsType,
          notificationLifeCycleService: NotificationLifeCycleServiceType,
-         triggerCamapaiginService: TriggerCampaignType) {
+         triggerCamapaiginService: TriggerCampaignManagerType) {
         self.applicationService = applicationService
         self.notificationService = notificationService
         self.subscriberService = subscriberService
         self.userDefaultsService = userDefaultService
         self.notificationLifeCycleService = notificationLifeCycleService
         self.notificationExtensionService = notificationExtensionService
-        self.triggerCamapaiginService = triggerCamapaiginService
+        self.triggerCampaignService = triggerCamapaiginService
         self.applicationService.notifydelegate = self
         self.setupBindings()
         self.addObservers()
@@ -526,18 +534,6 @@ final class PEManager: PEManagerType {
         }
     }
     
-    // MARK: - update trigger status
-  func updateTrigger(status: Bool,
-                     completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
-    let error = prerequesiteNetworkCallCheck {
-        subscriberService.updateTrigger(status: status,
-                                        completionHandler: completionHandler)
-    }
-    if error != nil {
-        completionHandler?(false, error)
-    }
-  }
-    
     // MARK: - get subscriber details
    func getSubscriberDetails(for fields: [String]?,
                              completionHandler: ((_ response: SubscriberDetailsData?, _ error: PEError?) -> Void)?) {
@@ -556,14 +552,48 @@ final class PEManager: PEManagerType {
         }
     }
     
-    // MARK: - Trigger Campaign
-    func createCampaign(for details: TriggerCampaign,
-                        completionHandler: ((_ response: Bool) -> Void)?) {
+    func sendGoal(goal: Goal, completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
         let error = prerequesiteNetworkCallCheck {
-            triggerCamapaiginService.createCampaign(for: details, completionHandler: completionHandler)
+            subscriberService.sendGoal(goal: goal, completionHandler: completionHandler)
+        }
+        
+        if error != nil {
+            completionHandler?(false, error)
+        }
+    }
+    
+    // MARK: - Trigger Campaign
+    func automatedNotification(status: TriggerStatusType,
+                               completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
+        let error = prerequesiteNetworkCallCheck {
+            subscriberService.automatedNotification(status: status,
+                                                    completionHandler: completionHandler)
         }
         if error != nil {
-            completionHandler?(false)
+            completionHandler?(false, error)
+        }
+    }
+    
+    func sendTriggerEvent(trigger: TriggerCampaign,
+                          completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
+        let error = prerequesiteNetworkCallCheck {
+            triggerCampaignService.sendTriggerEvent(trigger: trigger, completion: completionHandler)
+        }
+        
+        if error != nil {
+            completionHandler?(false, error)
+        }
+    }
+    
+    func addAlert(triggerAlert: TriggerAlert,
+                  completionHandler: ((_ response: Bool,
+                                       _ error: PEError?) -> Void)?) {
+        let error = prerequesiteNetworkCallCheck {
+            triggerCampaignService.addAlert(triggerAlert: triggerAlert, completionHandler: completionHandler)
+        }
+        
+        if error != nil {
+            completionHandler?(false, error)
         }
     }
     

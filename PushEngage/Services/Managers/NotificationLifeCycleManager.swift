@@ -126,7 +126,7 @@ final class NotificationLifeCycleManager: NotificationLifeCycleServiceType {
                     } else {
                         PELogger.error(className: String(describing: NotificationLifeCycleManager.self),
                                        message: "\(response.errorMessage ?? "")")
-                        completionHandler(.failure(.networkResponseFaliure(response.errorCode,
+                        completionHandler(.failure(.networkResponseFailure(response.errorCode,
                                                                            response.errorMessage)))
                     }
                 } catch {
