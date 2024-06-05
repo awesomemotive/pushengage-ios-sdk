@@ -14,11 +14,12 @@ enum APIAction: Int {
     case addDynamicSegment = 2
     case addAttribute = 3
     case deleteAttribute = 4
-//    case trigger = 5
     case addProfileId = 5
     case getSubscriberDetails = 6
     case getAttribute = 7
     case setAttribute = 8
+    case sendGoal = 9
+    case triggerCampaigns = 10
     
     var input: String? {
         switch self {
@@ -38,26 +39,29 @@ enum APIAction: Int {
             return nil
         case .addProfileId:
             return "test@gmail.com"
+        case .sendGoal, .triggerCampaigns:
+            return ""
         }
     }
 }
 
-class PushServiceTestSample: UIViewController {
+class PushEngageViewController: UIViewController {
     
     @IBOutlet weak var requestPermissionButton: UIButton!
     @IBOutlet weak var textView: UITextView!
     @IBOutlet weak var tableView: UITableView!
-    let actions = ["Add Segment",
-                  "Remove Segments",
-                  "Add Dynamic Segments",
-                  "Add Subscriber Attributes",
-                  "Delete Attributes",
-//                  "Trigger",
-                  "Add Profile Id",
-                  "Get Subscriber Details",
-                  "Get Subscriber Attributes",
-                  "Set Subscriber Attributes"]
-        
+    let actions = ["Add To Segment",
+                   "Delete From Segment",
+                   "Add To Dynamic Segment",
+                   "Add Attributes",
+                   "Delete Attributes",
+                   "Add Profile ID",
+                   "Get Subscriber Details",
+                   "Get Attributes",
+                   "Set Attributes",
+                   "Send Goal",
+                   "Trigger Campaigns"]
+    
     private let activityIndicator: UIActivityIndicatorView = {
         if #available(iOSApplicationExtension 13.0, *) {
             let indicator = UIActivityIndicatorView(style: .large)
@@ -71,7 +75,7 @@ class PushServiceTestSample: UIViewController {
     }()
     
     override func viewDidLoad() {
-        navigationItem.title = "PushEngage Sample App"
+        navigationItem.title = "PushEngage"
         textView.text = nil
         textView.layer.cornerRadius = 12
         tableView.delegate = self
@@ -148,7 +152,7 @@ class PushServiceTestSample: UIViewController {
                 }
             }
         case .addDynamicSegment:
-            let segments = self.convertStringToDictionary(input)
+            let segments = input.convertStringToDictionary()
             PushEngage.addDynamicSegments([segments]) { [weak self] (response, error) in
                 DispatchQueue.main.async {
                     self?.hideLoader()
@@ -160,7 +164,7 @@ class PushServiceTestSample: UIViewController {
                 }
             }
         case .addAttribute:
-            let attributes = self.convertStringToDictionary(input)
+            let attributes = input.convertStringToDictionary()
             
             PushEngage.add(attributes: attributes) { [weak self] (response, error) in
                 DispatchQueue.main.async {
@@ -185,7 +189,7 @@ class PushServiceTestSample: UIViewController {
                 }
             }
         case .setAttribute:
-            let attributes = self.convertStringToDictionary(input)
+            let attributes = input.convertStringToDictionary()
             
             PushEngage.set(attributes: attributes) { [weak self] (response, error) in
                 DispatchQueue.main.async {
@@ -214,44 +218,12 @@ class PushServiceTestSample: UIViewController {
         }
     }
     
-    func convertStringToDictionary(_ input: String) -> [String: Any] {
-        var dictionary = [String: Any]()
-        
-        // Split the input string into key-value pairs
-        let keyValuePairs = input.components(separatedBy: ",")
-        
-        // Iterate through key-value pairs and add them to the dictionary
-        for pair in keyValuePairs {
-            // Split each pair into key and value
-            let components = pair.components(separatedBy: ":")
-            if components.count == 2 {
-                // Trim whitespace from key and value
-                let key = components[0].trimmingCharacters(in: .whitespaces)
-                let valueString = components[1].trimmingCharacters(in: .whitespaces)
-                
-                // Try to convert the value to appropriate types (String, Bool, Int, etc.)
-                if let boolValue = Bool(valueString) {
-                    dictionary[key] = boolValue
-                } else if let intValue = Int(valueString) {
-                    dictionary[key] = intValue
-                } else {
-                    dictionary[key] = valueString
-                }
-            } else {
-                // Invalid key-value pair format
-                return [:]
-            }
-        }
-        
-        return dictionary
-    }
-    
     func convertStringToArray(input: String) -> [String] {
         return input.components(separatedBy: ",")
     }
 }
 
-extension PushServiceTestSample: UITableViewDelegate , UITableViewDataSource {
+extension PushEngageViewController: UITableViewDelegate , UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return actions.count
@@ -277,18 +249,6 @@ extension PushServiceTestSample: UITableViewDelegate , UITableViewDataSource {
             showTextInputAlert(for: .deleteAttribute)
         case .removeSegment:
             showTextInputAlert(for: .removeSegment)
-//        case .trigger:
-//            self.showLoader()
-//            PushEngage.updateTrigger(status: false) { result, error in
-//                DispatchQueue.main.async { [weak self] in
-//                    self?.hideLoader()
-//                    if result {
-//                        self?.textView.text = "Trigger added successfully"
-//                    } else {
-//                        self?.textView.text = error?.localizedDescription
-//                    }
-//                }
-//            }
         case .addProfileId:
             showTextInputAlert(for: .addProfileId)
         case .getSubscriberDetails:
@@ -318,6 +278,10 @@ extension PushServiceTestSample: UITableViewDelegate , UITableViewDataSource {
             }
         case .setAttribute:
             showTextInputAlert(for: .setAttribute)
+        case .sendGoal:
+            self.navigationController?.pushViewController(GoalViewController(), animated: true)
+        case .triggerCampaigns:
+            self.navigationController?.pushViewController(TriggerViewController(), animated: true)
         case .none:
             break
         }

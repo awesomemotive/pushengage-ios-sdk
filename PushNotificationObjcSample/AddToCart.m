@@ -62,13 +62,13 @@
                                              [stackView.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor]]];
 }
 
-- (void)addToCartAction:(id)sender {
-    AddToCart * __block object =  self;
-    
-    TriggerCampaign *campaign = [[TriggerCampaign alloc] initWithCampaignName:@"Shopping"
-                                                         eventName:@"add to cart" notificationDetails:@[[[TriggerNotification alloc] initWithNotificationURL:[[Input alloc] initWithKey: @"url"value:@"www.google.com"] title:[[Input alloc] initWithKey:@"shoes" value:@"Puma shoes"] message:[[Input alloc] initWithKey:@"message" value:@"check out the sale 50%"] notificationImage:[[Input alloc] initWithKey:@"image_url" value:@"https://images.unsplash.com/photo-1494548162494-384bba4ab999?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80"] bigImage:nil actions:[[Input alloc] initWithKey:@"Okay" value:@"check out the sale 90%"]],
-        [[TriggerNotification alloc] initWithNotificationURL:[[Input alloc] initWithKey:@"checkout url" value:@"www.amazon.com"] title:[[Input alloc] initWithKey:@"imported shoes" value:@"Nike shoes"] message:[[Input alloc] initWithKey:@"messages" value:@"check out the sale 90%"] notificationImage:nil bigImage:nil actions:[[Input alloc] initWithKey:@"Grab a shoes" value:@"www.pushengage.com"]]
-         ] data:nil];
+//- (void)addToCartAction:(id)sender {
+//    AddToCart * __block object =  self;
+//    
+//    TriggerCampaign *campaign = [[TriggerCampaign alloc] initWithCampaignName:@"Shopping"
+//                                                         eventName:@"add to cart" notificationDetails:@[[[TriggerNotification alloc] initWithNotificationURL:[[Input alloc] initWithKey: @"url"value:@"www.google.com"] title:[[Input alloc] initWithKey:@"shoes" value:@"Puma shoes"] message:[[Input alloc] initWithKey:@"message" value:@"check out the sale 50%"] notificationImage:[[Input alloc] initWithKey:@"image_url" value:@"https://images.unsplash.com/photo-1494548162494-384bba4ab999?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80"] bigImage:nil actions:[[Input alloc] initWithKey:@"Okay" value:@"check out the sale 90%"]],
+//        [[TriggerNotification alloc] initWithNotificationURL:[[Input alloc] initWithKey:@"checkout url" value:@"www.amazon.com"] title:[[Input alloc] initWithKey:@"imported shoes" value:@"Nike shoes"] message:[[Input alloc] initWithKey:@"messages" value:@"check out the sale 90%"] notificationImage:nil bigImage:nil actions:[[Input alloc] initWithKey:@"Grab a shoes" value:@"www.pushengage.com"]]
+//         ] data:nil];
     
 //    [PushEngage createTriggerCampaignFor:campaign completionHandler:^(BOOL response) {
 //        dispatch_async(dispatch_get_main_queue(), ^{
@@ -80,7 +80,7 @@
 //            }
 //        });
 //    }];
-}
+//}
 
 - (void) showAlert:(NSString *) message {
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Info Alert"
@@ -94,12 +94,12 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
--(void)checkoutAction:(id)sender {
-    AddToCart * __block object =  self;
-    
-    TriggerCampaign *campaign = [[TriggerCampaign alloc] initWithCampaignName:@"Shopping"
-                                                         eventName:@"checkout"
-                                                         notificationDetails:nil data:@{@"revenue" : @"40"}];
+//-(void)checkoutAction:(id)sender {
+//    AddToCart * __block object =  self;
+//    
+//    TriggerCampaign *campaign = [[TriggerCampaign alloc] initWithCampaignName:@"Shopping"
+//                                                         eventName:@"checkout"
+//                                                         notificationDetails:nil data:@{@"revenue" : @"40"}];
 //    [PushEngage createTriggerCampaignFor:campaign completionHandler:^(BOOL response) {
 //        dispatch_async(dispatch_get_main_queue(), ^{
 //            if (response) {
@@ -110,7 +110,7 @@
 //            }
 //        });
 //    }];
-}
+//}
 
 
 @end

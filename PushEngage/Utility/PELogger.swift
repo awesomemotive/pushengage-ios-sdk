@@ -110,7 +110,7 @@ struct PELogger {
                                          loggerData: LoggerData(tag: tag,
                                                                 deviceTokenHash: subscriberHash,
                                                                 device: Utility.getDevice,
-                                                                timezone: Utility.timeOffSet,
+                                                                timezone: Utility.timeZone,
                                                                 error: message))
         DependencyInitialize.getRouter().request(.errorLogging(loggerData), completion: {_ in })
     }

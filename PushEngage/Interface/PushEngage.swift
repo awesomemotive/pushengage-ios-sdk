@@ -18,6 +18,11 @@ public typealias PENotificationDisplayNotification = (_ notification: PENotifica
 public typealias PENotificationWillShowInForeground
     = (PENotification, _ completion: PENotificationDisplayNotification) -> Void
 
+@objc public enum TriggerStatusType: Int {
+    case enabled = 1
+    case disabled = 0
+}
+
 @objcMembers
 @objc final public class PushEngage: NSObject {
     
@@ -340,16 +345,92 @@ public typealias PENotificationWillShowInForeground
         manager.add(dynamic: dynamicSegments, completionHandler: completionHandler)
     }
     
-    /// Update trigger status
-    /// Update the trigger status of the notification
+    /// Update trigger campaign status
     /// - Parameters:
-    ///   - status: boolean flag wheather user has accepted for trigger enabled or not
-    ///   - completionHandler: call back provide response boolean and Error type.
-    /// Private for now
-    @objc private static func updateTrigger(status: Bool,
-                                           completionHandler: ((_ response: Bool,
-                                                                _ error: Error?) -> Void)?) {
-        manager.updateTrigger(status: status, completionHandler: completionHandler)
+    ///   - status: status type to enable or disable trigger campaign status
+    ///   - completionHandler: A closure that provides a response indicating whether the operation was successful (`true` if successful, `false` otherwise) and an optional error object if any error occurs during the operation.
+    ///
+    /// Example usage:
+    /// ```
+    ///   PushEngage.automatedNotification(status: .enabled) { result, error in
+    ///      if result {
+    ///         print("Trigger enabled successfully")
+    ///      } else {
+    ///         print("Failure")
+    ///      }
+    ///   }
+    /// ```
+    @objc public static func automatedNotification(status: TriggerStatusType,
+                                                   completionHandler: ((_ response: Bool,
+                                                                        _ error: Error?) -> Void)?) {
+        manager.automatedNotification(status: status, completionHandler: completionHandler)
+    }
+    
+    /// Sends a goal event with the provided callback for handling the response.
+    ///  - Parameters:
+    ///     - goal: Goal object representing the goal to be tracked.
+    ///     - completionHandler: A closure that provides a response indicating whether the operation was successful (`true` if successful, `false` otherwise) and an optional error object if any error occurs during the operation.
+    ///
+    /// Example usage:
+    /// ```
+    ///   let goal = Goal(name: "revenue", count: 1, value: 10.0)
+    ///   PushEngage.sendGoal(goal: goal) { result, error in
+    ///      if result {
+    ///         print("Goal Added Successfully")
+    ///      } else {
+    ///         print("Failure")
+    ///      }
+    ///   }
+    /// ```
+    @objc public static func sendGoal(goal: Goal,
+                                      completionHandler: ((_ response: Bool,
+                                                           _ error: Error?) -> Void)?) {
+        manager.sendGoal(goal: goal, completionHandler: completionHandler)
+    }
+    
+    /// Sends a trigger event for a specific campaign with the provided callback for handling the response.
+    /// - Parameters:
+    ///   - triggerCampaign: The TriggerCampaign object representing the campaign event to be triggered.
+    ///   - completionHandler: A closure that provides a response indicating whether the operation was successful (`true` if successful, `false` otherwise) and an optional error object if any error occurs during the operation.
+    ///
+    /// Example usage:
+    /// ```
+    ///  let triggerCampaign = TriggerCampaign(campaignName: "name_of_campaign", eventName: "name_of_event", data: ["title": "New Subscriber"])
+    ///
+    ///   PushEngage.sendTriggerEvent(triggerCampaign: triggerCampaign) { result, error in
+    ///      if result {
+    ///         print("Send Trigger Alert Successful")
+    ///      } else {
+    ///         print("Failure")
+    ///      }
+    ///   }
+    /// ```
+    @objc public static func sendTriggerEvent(triggerCampaign: TriggerCampaign,
+                                              completionHandler: ((_ response: Bool,
+                                                                   _ error: Error?) -> Void)?) {
+        manager.sendTriggerEvent(trigger: triggerCampaign, completionHandler: completionHandler)
+    }
+    
+    /// Adds an alert to be triggered with the provided callback for handling the response.
+    ///  - Parameters:
+    ///     - triggerAlert: The TriggerAlert object representing the alert to be added.
+    ///     - completionHandler: A closure that provides a response indicating whether the operation was successful (`true` if successful, `false` otherwise) and an optional error object if any error occurs during the operation.
+    ///
+    /// Example usage:
+    /// ```
+    ///  let triggerAlert = TriggerAlert(type: .inventory, productId: "279a", link: "www.pushengage.com/products", price: 100.0, data: ["title": "New Subscriber"])
+    ///
+    ///   PushEngage.addAlert(triggerAlert: triggerAlert) { result, error in
+    ///      if result {
+    ///         print("Add Alert Successful")
+    ///      } else {
+    ///         print("Failure")
+    ///      }
+    ///   }
+    /// ```
+    @objc public static func addAlert(triggerAlert: TriggerAlert, completionHandler: ((_ response: Bool,
+                                                                                       _ error: Error?) -> Void)?) {
+        manager.addAlert(triggerAlert: triggerAlert, completionHandler: completionHandler)
     }
     
     /// Get Subscriber Details
@@ -383,17 +464,6 @@ public typealias PENotificationWillShowInForeground
         manager.getSubscriberDetails(for: keys, completionHandler: completionHandler)
     }
     
-    // Trigger Campiagn Handler
-    /// Use this method to create the trigger for the campiagn
-    /// - Parameters:
-    ///   - details: provide the insctance of the Trigger campaign object and pass the details on
-    ///   - completionHandler: call back provides the response as true or false.
-    /// Private for now
-    @objc private static func createTriggerCampaign(for details: TriggerCampaign,
-                                                   completionHandler: ((_ response: Bool) -> Void)?) {
-        manager.createCampaign(for: details, completionHandler: completionHandler)
-    }
-    
     /// Silent Push Notification Handler
     ///
     /// Use this method to set the silent notification handler to handle silent push notifications.
@@ -405,7 +475,7 @@ public typealias PENotificationWillShowInForeground
     /// that don't display any visible content to the user but allow your app to perform tasks in the background. When a silent
     /// push notification is received, the provided closure will be called, allowing you to process the notification's content
     /// and perform necessary background tasks.
-    @objc public static func silentPushHandler(_ completion: PESilentPushBackgroundHandler?) {
+    @objc private static func silentPushHandler(_ completion: PESilentPushBackgroundHandler?) {
         manager.setbackGroundSilentPushHandler(block: completion)
     }
     
