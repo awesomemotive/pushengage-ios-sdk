@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         self.window = UIWindow()
-        self.window?.rootViewController = UINavigationController(rootViewController: PushServiceTestSample())
+        self.window?.rootViewController = UINavigationController(rootViewController: PushEngageViewController())
         self.window?.makeKeyAndVisible()
 
         if #available(iOSApplicationExtension 10.0, *) {
@@ -36,8 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             application.applicationIconBadgeNumber = 0
         }
         
-        PushEngage.setEnvironment(environment: .staging)
-        PushEngage.setAppID(id: "3ca8257d-1f40-41e0-88bc-ea28dc6495ef")
+        PushEngage.setAppID(id: "Your_App_ID")
         PushEngage.setInitialInfo(for: application,
                                              with: launchOptions)
         
@@ -55,32 +54,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         // deeplinking screen
         PushEngage.setNotificationOpenHandler { (result) in
             let additionData = result.notification.additionalData
-            if result.notificationAction.actionID == "ShoesScreen" {
-                print(additionData ?? [])
-                let storyBoard = UIStoryboard(name: "Main", bundle: .main)
-                let viewController = storyBoard.instantiateViewController(withIdentifier: "SportViewController")
+            print(additionData ?? [:])
+            if result.notificationAction.actionID == "Trigger" {
+                let triggerViewController = TriggerViewController()
                 let navcontroller = application.windows.first?.rootViewController as? UINavigationController
-                navcontroller?.popToRootViewController(animated: true)
-                navcontroller?.pushViewController(viewController, animated: true)
-            } else if result.notificationAction.actionID == "SalesScreen" {
-                let storyBoard = UIStoryboard(name: "Main", bundle: .main)
-                let viewController = storyBoard.instantiateViewController(withIdentifier: "NotificationApiTestViewconttoller")
-                let navcontroller = application.windows.first?.rootViewController as? UINavigationController
-                navcontroller?.popToRootViewController(animated: true)
-                navcontroller?.pushViewController(viewController, animated: true)
-            } else if result.notificationAction.actionID == "pepay" {
-                let storyBoard = UIStoryboard(name: "Main", bundle: .main)
-                let viewController = storyBoard.instantiateViewController(withIdentifier: "PEPay")
-                let navcontroller = application.windows.first?.rootViewController as? UINavigationController
-                navcontroller?.popToRootViewController(animated: true)
-                navcontroller?.pushViewController(viewController, animated: true)
+                navcontroller?.pushViewController(triggerViewController, animated: true)
             }
-        }
-        
-        // Silent notification Handler.
-        PushEngage.silentPushHandler {notification, completion  in
-            // in case developer failed to set completion handler. After 25 sec handler will call and set.
-            completion?(.newData)
         }
         
         PushEngage.enableLogging = true

@@ -11,7 +11,18 @@
 		09A0C6F55F4A856FCF933870 /* libPods-PushNotificationObjcSample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 36087ABD7F73FF63E00D585D /* libPods-PushNotificationObjcSample.a */; };
 		1D01CFD62ACAD4CA008C5892 /* PEManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D01CFD52ACAD4CA008C5892 /* PEManager.swift */; };
 		1D4944D32ACE925700370E47 /* TextInputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4944D22ACE925700370E47 /* TextInputViewController.swift */; };
+		1D4D155F2B3173A900E63BD6 /* GoalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4D155D2B3173A900E63BD6 /* GoalViewController.swift */; };
+		1D4D15602B3173A900E63BD6 /* GoalViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1D4D155E2B3173A900E63BD6 /* GoalViewController.xib */; };
+		1D4D15622B3179C300E63BD6 /* SnackbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4D15612B3179C300E63BD6 /* SnackbarView.swift */; };
+		1D806BB82B303A67001F9D30 /* GoalModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D806BB62B3038D0001F9D30 /* GoalModel.swift */; };
+		1D9398C62B3BDF8A00E51E47 /* TriggerEntryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9398C42B3BDF8A00E51E47 /* TriggerEntryViewController.swift */; };
+		1D9398C72B3BDF8A00E51E47 /* TriggerEntryViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1D9398C52B3BDF8A00E51E47 /* TriggerEntryViewController.xib */; };
+		1D9398CA2B3BEA8700E51E47 /* DataCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9398C82B3BEA8700E51E47 /* DataCell.swift */; };
+		1D9398CB2B3BEA8700E51E47 /* DataCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1D9398C92B3BEA8700E51E47 /* DataCell.xib */; };
 		1DAC1FCB2B05DE2200538064 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DAC1FCA2B05DE2200538064 /* File.swift */; };
+		1DE7D0892B3548AF0060491D /* TriggerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE7D0872B3548AF0060491D /* TriggerViewController.swift */; };
+		1DE7D08A2B3548AF0060491D /* TriggerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DE7D0882B3548AF0060491D /* TriggerViewController.xib */; };
+		1DE7D08D2B356CDE0060491D /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE7D08C2B356CDE0060491D /* String+Extensions.swift */; };
 		40466AA499CE4A692C09E4F6 /* libPods-PushNotificationDemo-PushEngageNotificationExtension.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52921EE35743583EB3F05230 /* libPods-PushNotificationDemo-PushEngageNotificationExtension.a */; };
 		4623217C26583862005634FB /* PushEngageUNUserNotificationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4623217B26583862005634FB /* PushEngageUNUserNotificationCenter.swift */; };
 		4627676D2660242A00DF854B /* PENotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4627676C2660242A00DF854B /* PENotification.swift */; };
@@ -22,9 +33,7 @@
 		46358D41262EF6F100D40FBE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46358D3F262EF6F100D40FBE /* LaunchScreen.storyboard */; };
 		46358D50262EF76F00D40FBE /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46358D4F262EF76F00D40FBE /* NotificationService.swift */; };
 		46358D54262EF76F00D40FBE /* PushEngageNotificationExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 46358D4D262EF76F00D40FBE /* PushEngageNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		46358D9B262F052B00D40FBE /* SportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46358D9A262F052B00D40FBE /* SportViewController.swift */; };
-		46358DA2262F053D00D40FBE /* PushServiceTestSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46358DA0262F053D00D40FBE /* PushServiceTestSample.swift */; };
-		46358DA3262F053D00D40FBE /* NotificationApiTestViewconttoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46358DA1262F053D00D40FBE /* NotificationApiTestViewconttoller.swift */; };
+		46358DA2262F053D00D40FBE /* PushEngageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46358DA0262F053D00D40FBE /* PushEngageViewController.swift */; };
 		46358E4C262F18ED00D40FBE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46358E4B262F18ED00D40FBE /* Main.storyboard */; };
 		463D94CE2642AC790023FE7E /* PushEngageAppdelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463D94CD2642AC790023FE7E /* PushEngageAppdelegate.swift */; };
 		463DB641267A04E4003FDDC8 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463DB640267A04E4003FDDC8 /* Configuration.swift */; };
@@ -97,7 +106,7 @@
 		46BA8ECF261D6B520028D000 /* UserDefaultsType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46BA8EB0261D6B520028D000 /* UserDefaultsType.swift */; };
 		46BA8EF0261D93DB0028D000 /* TriggerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46BA8EEF261D93DB0028D000 /* TriggerModel.swift */; };
 		46BA8F0B261DF7EB0028D000 /* TriggerCampaignManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46BA8F0A261DF7EB0028D000 /* TriggerCampaignManager.swift */; };
-		46BA8F0F261E09DF0028D000 /* TriggerCampaignType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46BA8F0E261E09DF0028D000 /* TriggerCampaignType.swift */; };
+		46BA8F0F261E09DF0028D000 /* TriggerCampaignManagerType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46BA8F0E261E09DF0028D000 /* TriggerCampaignManagerType.swift */; };
 		46CD64E226393B8D00CD88D5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46CD64E126393B8D00CD88D5 /* ContentView.swift */; };
 		46F0B2AB26D756D100A1BEE9 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 467D68F02636A5A00081CC36 /* UserNotifications.framework */; };
 		46F0B2AC26D756D100A1BEE9 /* UserNotificationsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 467D68F22636A5A00081CC36 /* UserNotificationsUI.framework */; };
@@ -196,7 +205,18 @@
 		1A513C68E66FFE9526A7D23A /* Pods-PushNotificationObjcSample-NotificationContentExtensionObjcSample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PushNotificationObjcSample-NotificationContentExtensionObjcSample.release.xcconfig"; path = "Target Support Files/Pods-PushNotificationObjcSample-NotificationContentExtensionObjcSample/Pods-PushNotificationObjcSample-NotificationContentExtensionObjcSample.release.xcconfig"; sourceTree = "<group>"; };
 		1D01CFD52ACAD4CA008C5892 /* PEManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PEManager.swift; sourceTree = "<group>"; };
 		1D4944D22ACE925700370E47 /* TextInputViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputViewController.swift; sourceTree = "<group>"; };
+		1D4D155D2B3173A900E63BD6 /* GoalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalViewController.swift; sourceTree = "<group>"; };
+		1D4D155E2B3173A900E63BD6 /* GoalViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GoalViewController.xib; sourceTree = "<group>"; };
+		1D4D15612B3179C300E63BD6 /* SnackbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnackbarView.swift; sourceTree = "<group>"; };
+		1D806BB62B3038D0001F9D30 /* GoalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalModel.swift; sourceTree = "<group>"; };
+		1D9398C42B3BDF8A00E51E47 /* TriggerEntryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerEntryViewController.swift; sourceTree = "<group>"; };
+		1D9398C52B3BDF8A00E51E47 /* TriggerEntryViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TriggerEntryViewController.xib; sourceTree = "<group>"; };
+		1D9398C82B3BEA8700E51E47 /* DataCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCell.swift; sourceTree = "<group>"; };
+		1D9398C92B3BEA8700E51E47 /* DataCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DataCell.xib; sourceTree = "<group>"; };
 		1DAC1FCA2B05DE2200538064 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
+		1DE7D0872B3548AF0060491D /* TriggerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerViewController.swift; sourceTree = "<group>"; };
+		1DE7D0882B3548AF0060491D /* TriggerViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TriggerViewController.xib; sourceTree = "<group>"; };
+		1DE7D08C2B356CDE0060491D /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		200D4BD1D21FCB056A5E3A71 /* libPods-PushNotificationDemo-PushEngageNotificationContentExtenstion.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PushNotificationDemo-PushEngageNotificationContentExtenstion.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2676215DBBA448F9F89F3AAC /* Pods-PushNotificationObjcSample-NotificationContentExtensionObjcSample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PushNotificationObjcSample-NotificationContentExtensionObjcSample.debug.xcconfig"; path = "Target Support Files/Pods-PushNotificationObjcSample-NotificationContentExtensionObjcSample/Pods-PushNotificationObjcSample-NotificationContentExtensionObjcSample.debug.xcconfig"; sourceTree = "<group>"; };
 		267EBA8C7A502BC630B58CE7 /* libPods-PushNotificationObjcSample-NotificationContentExtensionObjcSample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PushNotificationObjcSample-NotificationContentExtensionObjcSample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -214,9 +234,7 @@
 		46358D4D262EF76F00D40FBE /* PushEngageNotificationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PushEngageNotificationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		46358D4F262EF76F00D40FBE /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		46358D51262EF76F00D40FBE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		46358D9A262F052B00D40FBE /* SportViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SportViewController.swift; sourceTree = "<group>"; };
-		46358DA0262F053D00D40FBE /* PushServiceTestSample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushServiceTestSample.swift; sourceTree = "<group>"; };
-		46358DA1262F053D00D40FBE /* NotificationApiTestViewconttoller.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationApiTestViewconttoller.swift; sourceTree = "<group>"; };
+		46358DA0262F053D00D40FBE /* PushEngageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushEngageViewController.swift; sourceTree = "<group>"; };
 		46358E4B262F18ED00D40FBE /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		46358E69262FF16000D40FBE /* PushNotificationDemo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PushNotificationDemo.entitlements; sourceTree = "<group>"; };
 		46358E6E262FF2C200D40FBE /* PushEngageNotificationExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PushEngageNotificationExtension.entitlements; sourceTree = "<group>"; };
@@ -301,7 +319,7 @@
 		46BA8EB0261D6B520028D000 /* UserDefaultsType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefaultsType.swift; sourceTree = "<group>"; };
 		46BA8EEF261D93DB0028D000 /* TriggerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerModel.swift; sourceTree = "<group>"; };
 		46BA8F0A261DF7EB0028D000 /* TriggerCampaignManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerCampaignManager.swift; sourceTree = "<group>"; };
-		46BA8F0E261E09DF0028D000 /* TriggerCampaignType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerCampaignType.swift; sourceTree = "<group>"; };
+		46BA8F0E261E09DF0028D000 /* TriggerCampaignManagerType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerCampaignManagerType.swift; sourceTree = "<group>"; };
 		46CD64E126393B8D00CD88D5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		46E3073A26768FF800C5D8B7 /* PushNotificationObjcSample-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PushNotificationObjcSample-Bridging-Header.h"; sourceTree = "<group>"; };
 		46F0B2AA26D756D100A1BEE9 /* NotificationContentExtensionObjcSample.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationContentExtensionObjcSample.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -409,6 +427,37 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1D2164082B344B9900757C4F /* TriggerCampaign */ = {
+			isa = PBXGroup;
+			children = (
+				1DE7D0872B3548AF0060491D /* TriggerViewController.swift */,
+				1DE7D0882B3548AF0060491D /* TriggerViewController.xib */,
+				1D9398C42B3BDF8A00E51E47 /* TriggerEntryViewController.swift */,
+				1D9398C52B3BDF8A00E51E47 /* TriggerEntryViewController.xib */,
+				1D9398C82B3BEA8700E51E47 /* DataCell.swift */,
+				1D9398C92B3BEA8700E51E47 /* DataCell.xib */,
+			);
+			path = TriggerCampaign;
+			sourceTree = "<group>";
+		};
+		1D4D15632B31A3A000E63BD6 /* Goal */ = {
+			isa = PBXGroup;
+			children = (
+				1D4D155D2B3173A900E63BD6 /* GoalViewController.swift */,
+				1D4D155E2B3173A900E63BD6 /* GoalViewController.xib */,
+			);
+			path = Goal;
+			sourceTree = "<group>";
+		};
+		1D4D15642B31A3B500E63BD6 /* HelperUI */ = {
+			isa = PBXGroup;
+			children = (
+				1D4944D22ACE925700370E47 /* TextInputViewController.swift */,
+				1D4D15612B3179C300E63BD6 /* SnackbarView.swift */,
+			);
+			path = HelperUI;
+			sourceTree = "<group>";
+		};
 		1D507DA16B88C6BD4901750F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -449,6 +498,14 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		1DE7D08B2B356CCD0060491D /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				1DE7D08C2B356CDE0060491D /* String+Extensions.swift */,
+			);
+			path = Helper;
+			sourceTree = "<group>";
+		};
 		4627676B266023FA00DF854B /* DomainModels */ = {
 			isa = PBXGroup;
 			children = (
@@ -460,11 +517,13 @@
 		46358D33262EF6F000D40FBE /* PushNotificationDemo */ = {
 			isa = PBXGroup;
 			children = (
+				1DE7D08B2B356CCD0060491D /* Helper */,
+				1D2164082B344B9900757C4F /* TriggerCampaign */,
+				1D4D15642B31A3B500E63BD6 /* HelperUI */,
+				1D4D15632B31A3A000E63BD6 /* Goal */,
 				46358E69262FF16000D40FBE /* PushNotificationDemo.entitlements */,
 				46358E4B262F18ED00D40FBE /* Main.storyboard */,
-				46358DA1262F053D00D40FBE /* NotificationApiTestViewconttoller.swift */,
-				46358DA0262F053D00D40FBE /* PushServiceTestSample.swift */,
-				46358D9A262F052B00D40FBE /* SportViewController.swift */,
+				46358DA0262F053D00D40FBE /* PushEngageViewController.swift */,
 				46358D34262EF6F000D40FBE /* AppDelegate.swift */,
 				46358D36262EF6F000D40FBE /* SceneDelegate.swift */,
 				46358D3D262EF6F100D40FBE /* Assets.xcassets */,
@@ -473,7 +532,6 @@
 				46358D3F262EF6F100D40FBE /* LaunchScreen.storyboard */,
 				46358D42262EF6F100D40FBE /* Info.plist */,
 				46FCDAE026A1C9ED0068C45D /* PEPay.swift */,
-				1D4944D22ACE925700370E47 /* TextInputViewController.swift */,
 			);
 			path = PushNotificationDemo;
 			sourceTree = "<group>";
@@ -658,6 +716,7 @@
 				46BA8E64261D6B380028D000 /* Postback.swift */,
 				46BA8EEF261D93DB0028D000 /* TriggerModel.swift */,
 				463DB642267A2639003FDDC8 /* SyncAPIResponse.swift */,
+				1D806BB62B3038D0001F9D30 /* GoalModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -783,7 +842,7 @@
 				46BA8EAE261D6B520028D000 /* SubscriberServiceType.swift */,
 				46BA8EAF261D6B520028D000 /* ApplicationServiceType.swift */,
 				46BA8EB0261D6B520028D000 /* UserDefaultsType.swift */,
-				46BA8F0E261E09DF0028D000 /* TriggerCampaignType.swift */,
+				46BA8F0E261E09DF0028D000 /* TriggerCampaignManagerType.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -1063,7 +1122,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				46358E4C262F18ED00D40FBE /* Main.storyboard in Resources */,
+				1D4D15602B3173A900E63BD6 /* GoalViewController.xib in Resources */,
 				4694EB6A26BC5D7200D8B40C /* sub.caf in Resources */,
+				1DE7D08A2B3548AF0060491D /* TriggerViewController.xib in Resources */,
+				1D9398CB2B3BEA8700E51E47 /* DataCell.xib in Resources */,
+				1D9398C72B3BDF8A00E51E47 /* TriggerEntryViewController.xib in Resources */,
 				46358D41262EF6F100D40FBE /* LaunchScreen.storyboard in Resources */,
 				4694EB6E26BC603400D8B40C /* test.caf in Resources */,
 				46358D3E262EF6F100D40FBE /* Assets.xcassets in Resources */,
@@ -1346,13 +1409,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D9398C62B3BDF8A00E51E47 /* TriggerEntryViewController.swift in Sources */,
 				46358D35262EF6F000D40FBE /* AppDelegate.swift in Sources */,
-				46358DA2262F053D00D40FBE /* PushServiceTestSample.swift in Sources */,
-				46358DA3262F053D00D40FBE /* NotificationApiTestViewconttoller.swift in Sources */,
+				1DE7D08D2B356CDE0060491D /* String+Extensions.swift in Sources */,
+				1DE7D0892B3548AF0060491D /* TriggerViewController.swift in Sources */,
+				46358DA2262F053D00D40FBE /* PushEngageViewController.swift in Sources */,
 				46358D37262EF6F000D40FBE /* SceneDelegate.swift in Sources */,
+				1D4D15622B3179C300E63BD6 /* SnackbarView.swift in Sources */,
 				1D4944D32ACE925700370E47 /* TextInputViewController.swift in Sources */,
-				46358D9B262F052B00D40FBE /* SportViewController.swift in Sources */,
+				1D4D155F2B3173A900E63BD6 /* GoalViewController.swift in Sources */,
 				46FCDAE126A1C9ED0068C45D /* PEPay.swift in Sources */,
+				1D9398CA2B3BEA8700E51E47 /* DataCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1405,6 +1472,7 @@
 				46BA8EB9261D6B520028D000 /* NotificationLifeCycleManager.swift in Sources */,
 				46BA8E7E261D6B380028D000 /* Postback.swift in Sources */,
 				46BA8E53261D6B160028D000 /* EnumTypes.swift in Sources */,
+				1D806BB82B303A67001F9D30 /* GoalModel.swift in Sources */,
 				46BA8EC7261D6B520028D000 /* NotificationServiceType.swift in Sources */,
 				46BA8E7F261D6B380028D000 /* PEError.swift in Sources */,
 				46BA8EC0261D6B520028D000 /* SubscriberServiceManager.swift in Sources */,
@@ -1443,7 +1511,7 @@
 				46BA8EBD261D6B520028D000 /* ApplicationService.swift in Sources */,
 				46BA8E4E261D6B160028D000 /* Extension.swift in Sources */,
 				46BA8ECE261D6B520028D000 /* ApplicationServiceType.swift in Sources */,
-				46BA8F0F261E09DF0028D000 /* TriggerCampaignType.swift in Sources */,
+				46BA8F0F261E09DF0028D000 /* TriggerCampaignManagerType.swift in Sources */,
 				46BA8E82261D6B380028D000 /* JSONParameterEncoder.swift in Sources */,
 				46BA8E84261D6B380028D000 /* NetworkRouterType.swift in Sources */,
 			);
@@ -1566,15 +1634,15 @@
 				CODE_SIGN_ENTITLEMENTS = PushNotificationDemo/PushNotificationDemo.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 38PU74KZ48;
 				INFOPLIST_FILE = PushNotificationDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.2;
+				MARKETING_VERSION = 0.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pushengage.PushNotificationDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1597,15 +1665,15 @@
 				CODE_SIGN_ENTITLEMENTS = PushNotificationDemo/PushNotificationDemo.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 38PU74KZ48;
 				INFOPLIST_FILE = PushNotificationDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.2;
+				MARKETING_VERSION = 0.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pushengage.PushNotificationDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

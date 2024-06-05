@@ -44,18 +44,9 @@ struct Utility {
         return version + "(" + build + ")"
     }
     
-    static var timeOffSet: String {
-        let timeZone = TimeZone(secondsFromGMT: TimeZone.autoupdatingCurrent.secondsFromGMT())
-        let timeZoneIdentifier = timeZone!.identifier
-        let timeOffset = String(timeZoneIdentifier.dropFirst(3))
-        var offset = ""
-        for (index, value) in timeOffset.enumerated() {
-            offset.append(value)
-            if timeOffset.count - index == 3 {
-                offset.append(":")
-            }
-        }
-        return offset
+    static var timeZone: String {
+        let identifier = TimeZone.current.identifier
+        return identifier
     }
     
     static func convert(data: Data) throws -> Parameters? {

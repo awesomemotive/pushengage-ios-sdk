@@ -14,6 +14,7 @@ import Foundation
     case parametersNil
     case encodingFailed
     case missingURL
+    case invalidInput
     case parsingError
     case invalidStatusCode(String?, Int?)
     case dataEncodeingFailed
@@ -28,7 +29,7 @@ import Foundation
     case mediaLengthExceeded
     case requestFailureException
     case dataNotFound
-    case networkResponseFaliure(Int?, String?)
+    case networkResponseFailure(Int?, String?)
     case dataTypeCastingError
     case requestTimeout
     case failedToLogError
@@ -39,6 +40,7 @@ import Foundation
     case permissionNotDetermined
     case notificationUserActionFailed(String?)
     case sponseredfailWithContent(attachmentString: String?, networkService: NetworkRouterType)
+    case custom(String)
 }
 
 extension PEError: LocalizedError {
@@ -87,7 +89,7 @@ extension PEError: LocalizedError {
             return .urlRequestException
         case .dataNotFound:
             return .dataNotFound
-        case .networkResponseFaliure(let status, let message):
+        case .networkResponseFailure(let status, let message):
             return String(format: .networkResponseFaliure,
                           "\(status ?? -100)", "\(message ?? "")")
         case .dataTypeCastingError:
@@ -109,6 +111,10 @@ extension PEError: LocalizedError {
         case .notificationUserActionFailed(let errorMessage):
             return String(format: .notificationUserActionFailed,
                           errorMessage ?? "")
+        case .invalidInput:
+            return .invalidInput
+        case .custom(let errorString):
+            return errorString
         }
     }
 }

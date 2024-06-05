@@ -4,7 +4,7 @@
 
 ### PushEngage iOS SDK
 ---
-|pod | v0.0.2
+|pod | v0.0.3
 |--- |--- |
 
 [PushEngage](https://www.pushengage.com/) now providing Mobile push notification so that your Application can interact with your Subscriber with Rich Notification (_iOS 10+_). So that your application can gain more traffic. And you can send Urgent notifications with images, badges, custom sound, deep linking , etc features along with that you can track view can click of the notifications for you anylatics from our **PushEngage** dashboard. 
@@ -34,14 +34,14 @@ Our SDK supports from iOS 9 and above
 ***
 ## Installation Guide
 
-Please follow the instructions as mentioned in the [Installation Guide Documentation]()
+Please follow the instructions as mentioned in the [Installation Guide Documentation](https://www.pushengage.com/documentation/how-to-set-up-ios-app-push-notifications-with-pushengage/)
 
 ## APNS Certificate Creation for Push notification.
 
-Please follow the instructions as mentioned in the [APNS certificate creation Guide.]()
+Please follow the instructions as mentioned in the [APNS certificate creation Guide.](https://www.pushengage.com/documentation/guide-to-creating-ios-apns-certificate/)
 
 ## iOS SDK public APIs information link.
 
-Please follow the instructions as mentioned in the [PushEngage iOS Public APIs]()
+Please follow the instructions as mentioned in the [PushEngage iOS Public APIs](https://pushengage.com/api/mobile-sdk/iOS-sdk)
 
 

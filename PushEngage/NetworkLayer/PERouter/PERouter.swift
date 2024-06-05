@@ -39,17 +39,19 @@ enum PERouter {
     case dynamicSegment(SubscriberDetails)
     case segmentHashArray(SubscriberDetails)
     case removeDynamicSegment(SubscriberDetails)
-    case updateTrigger(SubscriberDetails)
     case updateSubsciber(UpdateSubcriberInfoList)
     case notificationCycleStatus(NotificationCycleStatus)
     case sponseredNotification(SponsoredPush)
     case subscriberSync(siteKey: String)
     
-    // MARK: - Trigger campaigning
-    case triggerCampaigning(eventInfo: [String: Any])
+    // MARK: - Trigger campaign
+    case automatedNotification(SubscriberDetails)
+    case sendTriggerEvent(TriggerModel)
+    case addAlert([String: Any])
     
     // MARK: - Error logging  event
     case errorLogging(SDKServerLogger)
+    case sendGoal(SubscriberDetails)
     case none
     
     public func asURLRequest() throws -> URLRequest {
@@ -121,9 +123,6 @@ enum PERouter {
             try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: segmentArrayHash)
         case .removeDynamicSegment(let removeSegment):
             try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: removeSegment)
-        case .updateTrigger(let triggerInfo):
-            try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: triggerInfo)
-            try URLParameterEncoder.encode(urlRequest: &urlRequest, with: params ?? [:], isSortedDesc: true)
         case .updateSubsciber(let updatedInfo):
             try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: updatedInfo.info)
             try URLParameterEncoder.encode(urlRequest: &urlRequest, with: updatedInfo.parms)
@@ -135,15 +134,22 @@ enum PERouter {
         case .sponseredNotification(let sponserPostBack):
             try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: sponserPostBack)
         
-            // MARK: - Trigger Campaiginin
-        
-        case .triggerCampaigning:
-            try JSONParameterEncoder.encode(urlRequest: &urlRequest, for: params ?? [:])
-            
+            // MARK: - Trigger Campaign
+        case .automatedNotification(let triggerInfo):
+            try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: triggerInfo)
+            try URLParameterEncoder.encode(urlRequest: &urlRequest, with: params ?? [:], isSortedDesc: true)
+        case .sendTriggerEvent(let trigger):
+            try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: trigger)
+        case .addAlert(let alert):
+            try JSONParameterEncoder.encode(urlRequest: &urlRequest, for: alert)
+            try URLParameterEncoder.encode(urlRequest: &urlRequest, with: params ?? [:], isSortedDesc: true)
+
             // MARK: - Error logging
         case .errorLogging(let errorLoggingRequest):
             try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: errorLoggingRequest)
-            
+        case .sendGoal(let goal):
+            try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: goal)
+            try URLParameterEncoder.encode(urlRequest: &urlRequest, with: params ?? [:], isSortedDesc: true)
         default:
             break
         }
@@ -162,8 +168,10 @@ enum PERouter {
              .dynamicSegment,
              .segmentHashArray,
              .removeDynamicSegment,
-             .updateTrigger,
+             .automatedNotification,
              .sponseredNotification,
+             .sendGoal,
+             .addAlert,
              .errorLogging:
             return .post
         case .getImage,
@@ -176,9 +184,9 @@ enum PERouter {
         case .deleteAttributes:
             return .delete
         case .updateSubsciber,
-             .triggerCampaigning,
              .addSubscriberAttributes,
-             .subscriberUpgrade:
+             .subscriberUpgrade,
+             .sendTriggerEvent:
             return .put
         default:
             return .get
@@ -201,16 +209,16 @@ enum PERouter {
         case .subscriberUpgrade(let value):
             let parameter = ["subscription": value]
             return parameter
-        case .updateTrigger, .addSegments, .removeSegment:
-            let parameter = ["swv": NetworkConstants.sdkVersion,
-                             "bv": Utility.getOSInfo]
-            return parameter
+//        case .automatedNotification, .addSegments, .removeSegment, .sendGoal, .addAlert:
+//            let parameter = ["swv": NetworkConstants.sdkVersion,
+//                             "bv": Utility.getOSInfo]
+//            return parameter
         case .notificationCycleStatus(let notificationInfo):
             var parameter: [String: Any] = ["device_token_hash": notificationInfo.hash,
                                             "tag": notificationInfo.notificationId,
                                             "device_type": Utility.getOSInfo,
                                             "swv": NetworkConstants.sdkVersion,
-                                            "timezone": Utility.timeOffSet]
+                                            "timezone": Utility.timeZone]
             if let deviceValue = Utility.getDevice {
                 parameter.updateValue(deviceValue,
                                       forKey: "device")
@@ -220,9 +228,6 @@ enum PERouter {
                 parameter.updateValue(action,
                                       forKey: "action")
             }
-            return parameter
-        case .triggerCampaigning(let eventInfo):
-            let parameter = eventInfo
             return parameter
         default:
             return nil
@@ -234,9 +239,11 @@ enum PERouter {
         var url = URL(string: NetworkConstants.baseURL)!
         
         switch self {
-        case .triggerCampaigning:
+        case .sendTriggerEvent:
             let url = URL(string: NetworkConstants.triggerCampaignBaseURL)!
             return url
+        case .addAlert:
+            relativePath = NetworkConstants.addAlert
         case .getImage(let path):
             do {
                 let url = try Utility.urlUnWrapper(for: path)
@@ -285,7 +292,7 @@ enum PERouter {
             relativePath = NetworkConstants.segmentHashArray
         case .removeDynamicSegment:
             relativePath = NetworkConstants.dynamicRemoveSegment
-        case .updateTrigger:
+        case .automatedNotification:
             relativePath = NetworkConstants.updateTrigger
         case .updateSubsciber(let hash):
             relativePath = String(format: NetworkConstants.updateSubscriber, hash.hash)
@@ -305,8 +312,8 @@ enum PERouter {
         case .sponseredNotification:
             relativePath = NetworkConstants.sponsoreFetch
             
-            // MARK: - Error logging
-            
+        case .sendGoal:
+            relativePath = NetworkConstants.sendGoal
         case .errorLogging:
             url = URL(string: NetworkConstants.errorLoggingBaseURL)!
             relativePath = NetworkConstants.logs
@@ -321,9 +328,15 @@ enum PERouter {
     }
     
     private func getHeader() -> HTTPHeaders {
-        var myHeaders: HTTPHeaders = Dictionary()
-        // myHeaders[NetworkConstants.requestHeaderAuthorizationKey] = NetworkConstants.requestHeaderAuthorizationValue
-        myHeaders[NetworkConstants.requestHeaderContentTypeKey] = NetworkConstants.requestHeaderContentTypeValue
+        let userDefaults = DependencyInitialize.getUserDefaults()
+        var requestHeaders: HTTPHeaders = Dictionary()
+
+        requestHeaders[NetworkConstants.requestHeaderContentTypeKey] = NetworkConstants.requestHeaderContentTypeValue
+        requestHeaders[NetworkConstants.requestHeaderClientKey] = NetworkConstants.requestHeaderClientValue
+        requestHeaders[NetworkConstants.requestHeaderClientVersionKey] = Utility.getOSInfo
+        requestHeaders[NetworkConstants.requestHeaderSdkVersionKey] = NetworkConstants.sdkVersion
+        requestHeaders[NetworkConstants.requestHeaderAppIdKey] = userDefaults.siteKey
+        requestHeaders[NetworkConstants.requestHeaderUserAgentKey] = "iOS-\(Utility.getOSInfo)/sdk-\(NetworkConstants.sdkVersion)/app-\(userDefaults.siteKey ?? "")"
         switch self {
         case .getImage,
              .addSubscriber,
@@ -333,7 +346,8 @@ enum PERouter {
              .addSubscriberAttributes,
              .getSubscriberAttribute,
              .updateSubscriberStatus,
-             .addProfile, .deleteAttributes,
+             .addProfile,
+             .deleteAttributes,
              .subscriberUpgrade,
              .addTimeZone,
              .addSegments,
@@ -341,14 +355,15 @@ enum PERouter {
              .dynamicSegment,
              .segmentHashArray,
              .removeDynamicSegment,
-             .updateTrigger,
              .updateSubsciber,
              .notificationCycleStatus,
-             // MARK: - Trigger Campaigning
-             .triggerCampaigning:
-            return myHeaders
+             .sendGoal,
+             .automatedNotification,
+             .addAlert,
+             .sendTriggerEvent:
+            return requestHeaders
         case .sponseredNotification:
-            return myHeaders
+            return requestHeaders
         default:
             return Dictionary()
         }

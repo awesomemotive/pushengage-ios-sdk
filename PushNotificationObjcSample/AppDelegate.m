@@ -52,19 +52,8 @@ typedef void (^_Nullable SilentPushHandler)(UIBackgroundFetchResult);
             UINavigationController *navigationController = (UINavigationController *) application.windows.firstObject.rootViewController;
             [navigationController popToRootViewControllerAnimated:YES];
             [navigationController pushViewController:controller animated:YES];
-        } else if ([result.notificationAction.actionID isEqualToString: @"SalesScreen"]) {
-            SportsViewcontroller *controller = [SportsViewcontroller new];
-            UINavigationController *navigationController = (UINavigationController *) application.windows.firstObject.rootViewController;
-            [navigationController popToRootViewControllerAnimated:YES];
-            [navigationController pushViewController:controller animated:YES];
         }
     };
-    
-    [PushEngage silentPushHandler:^(PENotification * _Nonnull notification, SilentPushHandler completionblock) {
-        // use notification info for your updates of loacl storage or sync if need.
-        // and please ensure to set completionblock
-        completionblock(UIBackgroundFetchResultNewData);
-    }];
     
     application.applicationIconBadgeNumber = 0;
     [PushEngage setEnvironmentWithEnvironment:EnvironmentStaging];

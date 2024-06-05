@@ -12,21 +12,34 @@ struct NetworkResponse: Codable {
     let errorCode: Int?
     let errorMessage: String?
     let error: NetworkError?
+    let data: Data?
 
     enum CodingKeys: String, CodingKey {
         case errorCode = "error_code"
         case errorMessage = "error_message"
         case error
+        case data
+    }
+    
+    struct Data: Codable {
+        let success: Bool?
     }
 }
 
 struct NetworkError: Codable {
-    let message: String
-    let code: Int
+    let message: String?
+    let code: Int?
+    let details: NetworkErrorDetail?
     
     enum CodingKeys: String, CodingKey {
         case message
         case code
+        case details
+    }
+    
+    struct NetworkErrorDetail: Codable {
+        let message: String?
+        let path: String?
     }
 }
 
