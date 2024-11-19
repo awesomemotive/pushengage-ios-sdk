@@ -7,7 +7,7 @@
 |pod | v0.0.5
 |--- |--- |
 
-[PushEngage](https://www.pushengage.com/) now providing Mobile push notification so that your Application can interact with your Subscriber with Rich Notification (_iOS 10+_). So that your application can gain more traffic. And you can send Urgent notifications with images, badges, custom sound, deep linking , etc features along with that you can track view can click of the notifications for you anylatics from our **PushEngage** dashboard. 
+[PushEngage](https://www.pushengage.com/) now providing Mobile push notification so that your Application can interact with your Subscriber with Rich Notification (_iOS 10+_). So that your application can gain more traffic. And you can send Urgent notifications with images, badges, custom sound, deep linking , etc features along with that you can track view can click of the notifications for you analytics from our **PushEngage** dashboard. 
 
 ***
 
@@ -18,11 +18,10 @@ Our SDK supports **Swift** as well as **Objective-C** which are both native iOS 
 
 ## Platform 
 
-Our SDK supports from iOS 9 and above
+Our SDK supports from iOS 10 and above
 
-**Note :-** Rich Notifications are available only Supported from iOS 10+. for iOS 9 some feature will not be available.
 
-### Change the way how to interact with your Subcriber. Using Rich Notifications.
+### Change the way how to interact with your Subscriber using Rich Notifications.
 
 ***
 
