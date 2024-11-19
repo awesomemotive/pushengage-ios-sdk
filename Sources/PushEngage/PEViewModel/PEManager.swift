@@ -56,6 +56,7 @@ protocol NotificationManagerType {
                                    userInfo: [AnyHashable: Any],
                                    completionHandler: ((UIBackgroundFetchResult) -> Void)?) -> Bool
     func setbackGroundSilentPushHandler(block: PESilentPushBackgroundHandler?)
+    func willPresentNotification(center: UNUserNotificationCenter, notification: UNNotification, completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
 }
 
 protocol AttributeManagerType {
@@ -194,6 +195,11 @@ final class PEManager: PEManagerType {
         subscriberService.syncSiteInfo(for: siteKey) { _, _ in
             dispatchGroup.leave()
         }
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.application?.registerForRemoteNotifications()
+        }
+        
         _ = dispatchGroup.wait(timeout: DispatchTime.now() + NetworkConstants.requestTimeout)
     
         let siteStatus = SiteStatus(rawValue: userDefaultsService.siteStatus)
@@ -272,7 +278,7 @@ final class PEManager: PEManagerType {
                     self?.weeklySyncOperation(backgroundHandler: backgroundHandler, currentData: currentDate)
                 } else {
                     PELogger.debug(className: String(describing: PEManager.self),
-                                   message: "Weekly subsciber is"
+                                   message: "Weekly subscriber is"
                                   + " not called because this is day ->"
                                   + " \(lastResubDate != nil ? "\(currentDate.days(from: lastResubDate!))" : "not valid")"
                                   + " after last update.")
@@ -401,7 +407,7 @@ final class PEManager: PEManagerType {
     }
     
     func onClickRedirect(to launchURL: String?) {
-        if let url = launchURL, url.contains(NetworkConstants.https) || url.contains(NetworkConstants.http) {
+        if let url = launchURL, url.starts(with: NetworkConstants.https) || url.starts(with: NetworkConstants.http) {
             let url = URL(string: url)
             if #available(iOS 10.0, *) {
                 Utility.inAppPermissionStatus ? Utility.loadWKWebView(with: url)
@@ -645,6 +651,10 @@ extension PEManager {
                                                      completionHandler: completionHandler)
     }
     
+    func willPresentNotification(center: UNUserNotificationCenter, notification: UNNotification, completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        applicationService.willPresentNotification(center: center, notification: notification, completionHandler: completionHandler)
+    }
+    
     public func setNotificationOpenHandler(block: PENotificationOpenHandler?) {
         Self.notificationOpenHandler = block
         self.handleNotificationForUnprocessedEvent()
@@ -716,42 +726,51 @@ extension PEManager {
     }
     
     private func handleNotificationOpened(_ customDict: [AnyHashable: Any], with actionType: ActionType) {
-        let notifId = customDict[userInfo: PayloadConstants.custom]?[string: PayloadConstants.tag] ?? ""
+        let custom = customDict[userInfo: PayloadConstants.custom] as? [String: Any]
+        let notifId = custom?[string: PayloadConstants.tag] ?? ""
         let appState = application?.applicationState == .active
+
         PELogger.debug(className: String(describing: PEManager.self),
                        message: "notification opened for id \(notifId) and appstate is \(appState)")
-        let launchURL = customDict[userInfo: PayloadConstants.custom]?[string: PayloadConstants.launchUrlKey]
-        var actionId: String?
-        if actionType == .taken {
-             actionId = customDict[userInfo: PayloadConstants
-                        .custom]?[userInfo: PayloadConstants
-                        .additionalData]?[string: PayloadConstants
-                        .actionSelected]
-        }
         
         self.lastNotificationPayload = customDict
-        if actionId == .defaultActionIdentifer {
+
+        var actionId: String?
+        if actionType == .taken {
+             actionId = (custom?[userInfo: PayloadConstants.additionalData] as? [String: Any])?[string: PayloadConstants.actionSelected]
+        }
+
+        if actionId == .defaultActionIdentifier {
             PELogger.debug(className: String(describing: PEManager.self),
                            message: "__DEFAULT_ACTION__")
-            if let deepLink = customDict[userInfo: PayloadConstants.custom]?[string: PayloadConstants.deeplinking] {
-                if deepLink.contains(NetworkConstants.https) || deepLink.contains(NetworkConstants.http) {
-                    self.onClickRedirect(to: deepLink)
-                    actionId = nil
-                } else {
-                    actionId = deepLink
-                }
-            } else {
-                self.onClickRedirect(to: launchURL)
-                actionId = nil
-            }
+            
+            let deepLink = custom?[string: PayloadConstants.deeplinking]
+            let launchURL = custom?[string: PayloadConstants.launchUrlKey]
+            
+            actionId = handleDeepLinkOrLaunchURL(deepLink: deepLink, launchURL: launchURL)
+            
         }
         
-        if actionId?.contains(NetworkConstants.https) == true
-           || actionId?.contains(NetworkConstants.http) == true {
-            self.onClickRedirect(to: actionId)
+        let notification = PENotification(userInfo: lastNotificationPayload ?? [:])
+        
+        if Utility.autoHandleDeeplinkURL, (notification.isSponsered == 0), let url = actionId, url.starts(with: NetworkConstants.https) || url.starts(with: NetworkConstants.http) {
+            self.onClickRedirect(to: url)
             actionId = nil
         }
+        
         self.handleNotificationAction(for: actionType, actionId: actionId)
+    }
+    
+    private func handleDeepLinkOrLaunchURL(deepLink: String?, launchURL: String?) -> String? {
+        let urlToHandle = deepLink ?? launchURL
+        let notification = PENotification(userInfo: lastNotificationPayload ?? [:])
+        
+        if Utility.autoHandleDeeplinkURL, (notification.isSponsered == 0), let url = urlToHandle, url.starts(with: NetworkConstants.https) || url.starts(with: NetworkConstants.http) {
+            self.onClickRedirect(to: url)
+            return nil
+        } else {
+            return urlToHandle
+        }
     }
         
      private func handleNotificationAction(for actionType: ActionType, actionId: String?) {
@@ -770,8 +789,7 @@ extension PEManager {
                                                                  notificationId: notification.tag,
                                                                  actionid: clickedButton,
                                                                  completionHandler: nil)
-        if actionId == userDefaultsService.sponseredIdKey ,
-           notification.isSponsered == 1 {
+        if notification.isSponsered == 1 {
             self.onClickRedirect(to: notification.launchURL)
             PELogger.debug(className: String(describing: PEManager.self),
                            message: "Sponsered Notification.")

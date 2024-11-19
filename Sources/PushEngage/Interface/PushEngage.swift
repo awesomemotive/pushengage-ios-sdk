@@ -611,6 +611,22 @@ public typealias PENotificationWillShowInForeground
         manager.processiOS10Open(response: notification)
     }
     
+    /**
+     Handles the presentation of a notification while the app is in the foreground for devices running iOS 10.0 and above.
+
+     This method should be implemented in the application's UNUserNotificationCenterDelegate to manage how a notification is presented when the app is in the foreground. By default, notifications may not be shown when the app is active, but this method allows you to control whether they should be presented.
+
+     - Note: This method should only be implemented if the application chooses to handle the presentation of notifications manually and has disabled method swizzling for notification handling.
+
+     - Parameters:
+        - center: The UNUserNotificationCenter responsible for delivering the notification.
+        - notification: The UNNotification object containing the notification information that was delivered.
+        - completionHandler: A completion handler to execute with the desired notification presentation options. You can choose options like alert, sound, and badge to determine how the notification is presented.
+     */
+    @objc public static func willPresentNotification(center: UNUserNotificationCenter, notification: UNNotification, completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        manager.willPresentNotification(center: center, notification: notification, completionHandler: completionHandler)
+    }
+        
 }
 
 // MARK: - Method Swizzling
