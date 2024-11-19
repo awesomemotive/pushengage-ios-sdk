@@ -55,6 +55,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 let triggerViewController = TriggerViewController()
                 let navcontroller = application.windows.first?.rootViewController as? UINavigationController
                 navcontroller?.pushViewController(triggerViewController, animated: true)
+            } else {
+                let landingViewController = LandingViewController()
+                landingViewController.linkText = result.notificationAction.actionID
+                let navcontroller = application.windows.first?.rootViewController as? UINavigationController
+                navcontroller?.pushViewController(landingViewController, animated: true)
             }
         }
         
@@ -62,13 +67,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         return true
     }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+//        Uncomment below line if swizzling is not used
+//        PushEngage.willPresentNotification(center: center, notification: notification, completionHandler: completionHandler)
+    }
 
     
     @available(iOSApplicationExtension 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         print("HOST implemented the notification didRecive notification.")
-        //        Uncomment below line if swizzling is not used
-        //        PushEngage.didReceiveRemoteNotification(with: response)
+//        Uncomment below line if swizzling is not used
+//        PushEngage.didReceiveRemoteNotification(with: response)
         completionHandler()
     }
 
@@ -77,12 +87,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         print("HOST didRegisterForRemoteNotificationsWithDeviceToken is implemented device Token: -, \(deviceToken.description)")
         let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         print(token)
-        //        Uncomment below line if swizzling is not used
-        //        PushEngage.registerDeviceToServer(with: deviceToken)
+//        Uncomment below line if swizzling is not used
+//        PushEngage.registerDeviceToServer(with: deviceToken)
     }
     
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        //    Uncomment below line if swizzling is not used
-        //    PushEngage.receivedRemoteNotification(application: application, userInfo: userInfo, completionHandler: completionHandler)
+//    Uncomment below line if swizzling is not used
+//        PushEngage.receivedRemoteNotification(application: application, userInfo: userInfo, completionHandler: completionHandler)
     }
 }

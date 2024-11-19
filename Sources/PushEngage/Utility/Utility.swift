@@ -66,6 +66,11 @@ struct Utility {
         return permissionValue ?? false
     }
     
+    static var autoHandleDeeplinkURL: Bool {
+        let autoHandleEnabled = Bundle.main.object(forInfoDictionaryKey: InfoPlistConstants.pushEngageAutoHandleDeeplinkUrl) as? Bool
+        return autoHandleEnabled ?? false
+    }
+    
     static var isLocationPrivcyEnabled: Bool {
         if let path = Bundle.main.path(forResource: "Info", ofType: "plist") {
             let dictinory = NSDictionary(contentsOfFile: path)

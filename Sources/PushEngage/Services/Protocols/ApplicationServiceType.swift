@@ -13,6 +13,9 @@ protocol ApplicationServiceType {
     func receivedRemoteNotification(application: UIApplication,
                                     userInfo: [AnyHashable: Any],
                                     completionHandler: ((UIBackgroundFetchResult) -> Void)?) -> Bool
+    func willPresentNotification(center: UNUserNotificationCenter,
+                                 notification: UNNotification,
+                                 completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
     var notifydelegate: LastNotificationSetDelegate? { get set }
 }
 

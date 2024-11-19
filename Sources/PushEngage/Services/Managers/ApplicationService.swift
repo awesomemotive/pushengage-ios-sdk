@@ -23,10 +23,10 @@ final class ApplicationService: ApplicationServiceType {
     
     weak var notifydelegate: LastNotificationSetDelegate?
     
-     init(userDefault: UserDefaultsType,
-          subscriberService: SubscriberServiceType,
-          notificationLifeCycleService: NotificationLifeCycleServiceType,
-          networkService: NetworkRouterType) {
+    init(userDefault: UserDefaultsType,
+         subscriberService: SubscriberServiceType,
+         notificationLifeCycleService: NotificationLifeCycleServiceType,
+         networkService: NetworkRouterType) {
         self.userDefault = userDefault
         self.subscriberService = subscriberService
         self.notificationLifeCycleService = notificationLifeCycleService
@@ -41,14 +41,15 @@ final class ApplicationService: ApplicationServiceType {
         let existingDeviceToken = userDefault.deviceToken
         userDefault.deviceToken = token
         
-        if existingDeviceToken.isEmpty {
+        if existingDeviceToken.isEmpty || (userDefault.subscriberHash.isEmpty) {
             userDefault.istriedFirstTime = false
             subscriberService.retryAddSubscriberProcess { [weak self] _ in
                 self?.userDefault.istriedFirstTime = true
             }
         } else {
+            
             let siteStatus = SiteStatus(rawValue: userDefault.siteStatus)
-            if siteStatus == .active {
+            if siteStatus == .active && (existingDeviceToken != token) {
                 userDefault.istriedFirstTime = false
                 subscriberService.upgradeSubscription { [weak self] _, _ in
                     self?.userDefault.istriedFirstTime = true
@@ -87,6 +88,16 @@ final class ApplicationService: ApplicationServiceType {
             notifydelegate?.setLast(notification: userInfo, completionHandler: completionHandler)
         }
         return backgroundJobFired
+    }
+    
+    func willPresentNotification(center: UNUserNotificationCenter, notification: UNNotification, completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        let parseuserInfo = notification.request.content.userInfo
+
+        PushEngage.manager.handleWillPresentNotificationInForeground(with: parseuserInfo) { notification in
+            let notifiyDisplayType = notification
+                != nil ? UNNotificationPresentationOptions(rawValue: 7) : UNNotificationPresentationOptions(rawValue: 0)
+            completionHandler(notifiyDisplayType)
+        }
     }
     
     @available(iOS, deprecated: 9.0)

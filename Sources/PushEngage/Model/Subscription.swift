@@ -107,11 +107,13 @@ struct SubscriberUpgrade: Codable {
     let deviceTokenHash: String
     let subscription: Subscription
     let siteId: Int
+    let deviceType: String = "ios"
     
     enum CodingKeys: String, CodingKey {
         case deviceTokenHash = "device_token_hash"
         case subscription
         case siteId = "site_id"
+        case deviceType = "device_type"
     }
 }
 
