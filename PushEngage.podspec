@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
   spec.license =  { :type => "MIT", :file => "LICENSE" }
   spec.author  = { "PushEngage" => "care@pushengage.com" }
   spec.platform = :ios
-  spec.ios.deployment_target  = '9.0'
+  spec.ios.deployment_target  = '10.0'
   spec.requires_arc = true
   spec.source = { :git => "https://github.com/awesomemotive/pushengage-ios-sdk.git",
                   :tag => "#{spec.version}"
