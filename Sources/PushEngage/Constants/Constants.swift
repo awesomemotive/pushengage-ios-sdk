@@ -51,7 +51,7 @@ internal struct NetworkConstants {
     
     // MARK: - SDK version
     
-    static let sdkVersion = "0.0.4"
+    static let sdkVersion = "0.0.5"
 
     // MARK: - URL relative - path
     static let addSubscriberPath = "subscriber/add"
@@ -115,6 +115,7 @@ struct InfoPlistConstants {
     static let locationWhenInUse = "NSLocationAlwaysAndWhenInUseUsageDescription"
     static let loactionAllow = "NSLocationWhenInUseUsageDescription"
     static let pushEngageAppGroupKey = "PushEngage_App_Group_Key"
+    static let pushEngageAutoHandleDeeplinkUrl = "PushEngageAutoHandleDeeplinkURL"
 }
 
 struct UserDefaultConstant {
@@ -188,7 +189,7 @@ extension String {
     static let siteKeyNotAvailable = "Site key is not available."
     static let permissionNotDetermine = "Notification Permission is not Determined."
     static let notificationUserActionFailed = "Notification user action failed which is not retry able message: - %@."
-    static let defaultActionIdentifer = "com.apple.UNNotificationDefaultActionIdentifier"
+    static let defaultActionIdentifier = "com.apple.UNNotificationDefaultActionIdentifier"
     static let viewCountTrackingFailed = "viewCountTrackingFailed"
     static let clickCountTrackingFailed = "clickCountTrackingFailed"
     static let notificationRefetchFailed = "notificationRefetchFailed"
