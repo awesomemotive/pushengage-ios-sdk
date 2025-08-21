@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "PushEngage"
-  spec.version      = "0.0.5"
+  spec.version      = "0.0.6"
   spec.summary      = "iOS framework to support APNs Services PushEngage."
   spec.description  = "Provide the feature for Apple push notification."
   spec.homepage     = "https://github.com/awesomemotive/pushengage-ios-sdk.git"

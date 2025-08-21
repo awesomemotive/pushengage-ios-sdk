@@ -629,6 +629,15 @@ extension SubscriberServiceManager {
             completion?(.permissionNotDetermined)
             return
         }
+        
+        // Don't add subscriber if they manually unsubscribed
+        if userDefault.isManuallyUnsubscribed {
+            PELogger.debug(className: String(describing: SubscriberServiceManager.self),
+                           message: "User manually unsubscribed - skipping auto subscriber addition")
+            completion?(nil)
+            return
+        }
+        
         let permissionStatus = userDefault.notificationPermissionState
         if permissionStatus == .granted {
             self.addSubscriber(completionHandler: { response, error in
@@ -668,7 +677,14 @@ extension SubscriberServiceManager {
     
     private func updateSubsciberDeleteStatus() {
         let status = userDefault.notificationPermissionState
-        let result = status == .denied && userDefault.isDeleteSubscriberOnDisable == true
-        userDefault.isSubscriberDeleted = result ? true : false
+        let shouldDeleteDueToSettings = status == .denied && userDefault.isDeleteSubscriberOnDisable == true
+        
+        // Only mark as deleted due to settings if not manually unsubscribed
+        // Manual unsubscription takes precedence
+        if userDefault.isManuallyUnsubscribed {
+            userDefault.isSubscriberDeleted = true
+        } else {
+            userDefault.isSubscriberDeleted = shouldDeleteDueToSettings
+        }
     }
 }

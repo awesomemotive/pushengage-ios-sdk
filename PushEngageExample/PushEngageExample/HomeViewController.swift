@@ -16,10 +16,16 @@ enum APIAction: Int {
     case deleteAttribute = 4
     case addProfileId = 5
     case getSubscriberDetails = 6
-    case getAttribute = 7
-    case setAttribute = 8
-    case sendGoal = 9
-    case triggerCampaigns = 10
+    case getSubscriberId = 7
+    case getAttribute = 8
+    case setAttribute = 9
+    case sendGoal = 10
+    case triggerCampaigns = 11
+    case getSubscriptionStatus = 12
+    case getSubscriptionNotificationStatus = 13
+    case checkPermissionStatus = 14
+    case unsubscribe = 15
+    case subscribe = 16
     
     var input: String? {
         switch self {
@@ -35,7 +41,7 @@ enum APIAction: Int {
             return "name"
         case .setAttribute:
             return "name: PushEngage Sample"
-        case .getSubscriberDetails, .getAttribute:
+        case .getSubscriberDetails, .getSubscriberId, .getAttribute, .getSubscriptionStatus, .getSubscriptionNotificationStatus, .checkPermissionStatus, .unsubscribe, .subscribe:
             return nil
         case .addProfileId:
             return "test@gmail.com"
@@ -48,6 +54,7 @@ enum APIAction: Int {
 class HomeViewController: UIViewController {
     
     @IBOutlet weak var notificationRequestButton: UIButton!
+    // Removed unused IBOutlets for permission status and unsubscribe buttons
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var resultTextView: UITextView!
     
@@ -71,10 +78,16 @@ class HomeViewController: UIViewController {
                    "Delete Attributes",
                    "Add Profile Id",
                    "Get Subscriber Details",
+                   "Get Subscriber ID",
                    "Get Subscriber Attributes",
                    "Set Subscriber Attributes",
                    "Send Goal",
-                   "Trigger Campaigns"]
+                   "Trigger Campaigns",
+                   "Get Subscription Status",
+                   "Get Notification Status",
+                   "Check Permission Status",
+                   "Unsubscribe",
+                   "Subscribe"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -102,11 +115,25 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         
         notificationRequestButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(requestNotificationPermission)))
+        // Removed gesture recognizers for permission status and unsubscribe buttons since they're now in the table view
     }
 
     
     @objc private func requestNotificationPermission() {
-        PushEngage.requestNotificationPermission()
+        PushEngage.requestNotificationPermission { [weak self] response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    let errorMessage = "Error requesting notification permission: \(error.localizedDescription)"
+                    self?.resultTextView.text = errorMessage
+                } else if response {
+                    let successMessage = "Notification permission granted successfully!"
+                    self?.resultTextView.text = successMessage
+                } else {
+                    let deniedMessage = "Notification permission denied by user"
+                    self?.resultTextView.text = deniedMessage
+                }
+            }
+        }
     }
     
     func showLoader() {
@@ -287,6 +314,16 @@ extension HomeViewController: UITableViewDelegate , UITableViewDataSource {
                     }
                 }
             }
+        case .getSubscriberId:
+            PushEngage.getSubscriberId { response in
+                DispatchQueue.main.async { [weak self] in
+                    if let subscriberId = response {
+                        self?.resultTextView.text = "Subscriber ID: \(subscriberId)"
+                    } else {
+                        self?.resultTextView.text = "User is not subscribed (no subscriber ID available)"
+                    }
+                }
+            }
         case .getAttribute:
             self.showLoader()
             PushEngage.getSubscriberAttributes { [weak self] (info, error) in
@@ -305,6 +342,82 @@ extension HomeViewController: UITableViewDelegate , UITableViewDataSource {
             self.navigationController?.pushViewController(GoalViewController(), animated: true)
         case .triggerCampaigns:
             self.navigationController?.pushViewController(TriggerViewController(), animated: true)
+        case .getSubscriptionStatus:
+            self.showLoader()
+            PushEngage.getSubscriptionStatus { [weak self] (isSubscribed, error) in
+                DispatchQueue.main.async {
+                    self?.hideLoader()
+                    if let error = error {
+                        self?.resultTextView.text = "Error getting subscription status: \(error.localizedDescription)"
+                    } else {
+                        let message = """
+                        The user is currently \(isSubscribed ? "subscribed to" : "unsubscribed from") push notifications.
+                        """
+                        self?.resultTextView.text = message
+                    }
+                }
+            }
+        case .getSubscriptionNotificationStatus:
+            self.showLoader()
+            PushEngage.getSubscriptionNotificationStatus { [weak self] (canReceiveNotifications, error) in
+                DispatchQueue.main.async {
+                    self?.hideLoader()
+                    if let error = error {
+                        self?.resultTextView.text = "Error getting notification status: \(error.localizedDescription)"
+                    } else {
+                        let statusText = canReceiveNotifications ? "CAN RECEIVE" : "CANNOT RECEIVE"
+                        let message = """
+                        The user \(canReceiveNotifications ? "can receive" : "cannot receive") push notifications.
+                        """
+                        self?.resultTextView.text = message
+                    }
+                }
+            }
+        case .checkPermissionStatus:
+            let permissionStatus = PushEngage.getNotificationPermissionStatus()
+            
+            DispatchQueue.main.async { [weak self] in
+                let statusMessage: String
+                switch permissionStatus {
+                case "granted":
+                    statusMessage = "Notification permission status: GRANTED\nNotifications are allowed"
+                case "denied":
+                    statusMessage = "Notification permission status: DENIED\nNotifications are not allowed"
+                case "notYetRequested":
+                    statusMessage = "Notification permission status: NOT YET REQUESTED\nPermission has not been requested from the user"
+                default:
+                    statusMessage = "Unknown permission status: \(permissionStatus)"
+                }
+                self?.resultTextView.text = statusMessage
+            }
+        case .unsubscribe:
+            self.showLoader()
+            PushEngage.unsubscribe { [weak self] (response, error) in
+                DispatchQueue.main.async {
+                    self?.hideLoader()
+                    if let error = error {
+                        self?.resultTextView.text = "Error unsubscribing: \(error.localizedDescription)"
+                    } else if response {
+                        self?.resultTextView.text = "Successfully unsubscribed from push notifications\nYou will no longer receive notifications"
+                    } else {
+                        self?.resultTextView.text = "Failed to unsubscribe from push notifications"
+                    }
+                }
+            }
+        case .subscribe:
+            self.showLoader()
+            PushEngage.subscribe { [weak self] (response, error) in
+                DispatchQueue.main.async {
+                    self?.hideLoader()
+                    if let error = error {
+                        self?.resultTextView.text = "Error subscribing: \(error.localizedDescription)"
+                    } else if response {
+                        self?.resultTextView.text = "Successfully subscribed to push notifications\nYou will now receive notifications"
+                    } else {
+                        self?.resultTextView.text = "Failed to subscribe to push notifications"
+                    }
+                }
+            }
         case .none:
             break
         }

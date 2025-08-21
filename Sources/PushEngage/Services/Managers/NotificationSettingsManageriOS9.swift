@@ -53,27 +53,38 @@ final class NotificationSettingsManageriOS9: NotificationServiceType {
         
         if isStartNotificationCalled == .canCallForground {
             checkPermissionStatus()
+        } else {
+            // Always check permission status when app enters foreground, regardless of SDK state
+            // This ensures we detect permission changes made in iOS Settings
+            let currentStatus = getNotificationPermissionState()
+            if currentStatus != self.notificationPermissionStatus.value {
+                self.notificationPermissionStatus.value = currentStatus
+            }
         }
     }
     
     @discardableResult
     private func checkPermissionStatus() -> (response: Bool, status: PermissionStatus) {
         let status = self.getNotificationPermissionState()
+        
+        // Always update the observable to ensure permission changes are detected
+        if status != self.notificationPermissionStatus.value {
+            self.notificationPermissionStatus.value = status
+        }
+        
         switch status {
         case .denied, .granted:
             if self.userDefaultService.ispermissionAlerted == false {
                 return (true, status)
             } else {
-                self.notificationPermissionStatus.value = status
                 return (false, status)
             }
         case .notYetRequested:
-            self.notificationPermissionStatus.value = .notYetRequested
             return (false, status)
         }
     }
     
-    func handleNotificationPermission(for application: UIApplication) {
+    func handleNotificationPermission(for application: UIApplication, completion: @escaping (_ response: Bool, _ error: PEError?) -> Void) {
         self.application = application
         if isStartNotificationCalled == .notCalled {
             isStartNotificationCalled = .isCalled
@@ -88,6 +99,7 @@ final class NotificationSettingsManageriOS9: NotificationServiceType {
                 PELogger.debug(className: String(describing: NotificationSettingsManageriOS9.self),
                                message: "Added custom alert for the case where user already granted permission" +
                                         "but device token is not available to sdk because sdk come to app as update.")
+                completion(permissionResult.status == .granted, nil)
                 return
             }
             
@@ -96,6 +108,7 @@ final class NotificationSettingsManageriOS9: NotificationServiceType {
                 self?.promptForNotification(application) { [weak self] (response: Bool) -> Void in
                     self?.notificationPermissionStatus.value = response ? .granted : .denied
                     self?.registerToApns(for: application)
+                    completion(response, nil)
                 }
                 self?.userDefaultService.ispermissionAlerted = true
                 PELogger.debug(className: String(describing: NotificationSettingsManageriOS9.self),
@@ -104,9 +117,11 @@ final class NotificationSettingsManageriOS9: NotificationServiceType {
                 let rawValue = self?.notificationPermissionStatus.value.rawValue ?? ""
                 PELogger.debug(className: String(describing: NotificationSettingsManageriOS9.self),
                                message: "\(rawValue)")
+                completion(self?.notificationPermissionStatus.value == .granted, nil)
             default:
                 PELogger.debug(className: String(describing: NotificationSettingsManageriOS9.self),
                                message: "Notification status is nil")
+                completion(false, .permissionNotDetermined)
             }
         }
     }

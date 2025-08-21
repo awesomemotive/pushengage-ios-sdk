@@ -27,3 +27,9 @@ DerivedData/
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
+
+# Swift Package Manager
+.build/
+
+# Cursor editor files
+.cursor/
