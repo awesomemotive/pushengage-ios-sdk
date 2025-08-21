@@ -7,7 +7,7 @@
 
 import Foundation
 
-@objc public enum Environment: Int {
+@objc public enum PEEnvironment: Int {
     case staging = 0
     case production = 1
 }

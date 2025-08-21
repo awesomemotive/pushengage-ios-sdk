@@ -14,15 +14,19 @@ protocol DeviceManagerType {
     func setDeviceToken(token: String)
     func getDeviceHash() -> String
     func registerDeviceToServer(with deviceToken: Data)
-    func setEnvironment(_ environment: Environment)
+    func setEnvironment(_ environment: PEEnvironment)
 }
 
 protocol SubscriberManagerType {
-    func getSubscriberId() -> String
+    func getSubscriberId(completion: @escaping (_ response: String?) -> Void)
     func getSubscriberHash() -> String
     func checkSubscriber(completionHandler: ((_ response: CheckSubscriberData?, _ error: PEError?) -> Void)?)
     func getSubscriberDetails(for fields: [String]?,
                               completionHandler: ((_ response: SubscriberDetailsData?, _ error: PEError?) -> Void)?)
+    func getSubscriptionStatus(completionHandler: ((_ isSubscribed: Bool, _ error: PEError?) -> Void)?)
+    func getSubscriptionNotificationStatus(completionHandler: ((_ canReceiveNotifications: Bool, _ error: PEError?) -> Void)?)
+    func unsubscribe(completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?)
+    func subscribe(completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?)
 }
 
 protocol AppInfoManagerType {
@@ -34,7 +38,7 @@ protocol AppInfoManagerType {
 protocol NotificationManagerType {
     var notificationPermissionStatus: NotificationServiceType { get }
     func setBadgeCount(count: Int)
-    func handleNotificationPermission()
+    func handleNotificationPermission(completion: @escaping (_ response: Bool, _ error: Error?) -> Void)
     func setInitialInfo(for application: UIApplication, with launchOptions: [UIApplication.LaunchOptionsKey: Any]?)
     func getNotificationPermissionStatus() -> PermissionStatus
     func update(notificationType: Int)
@@ -191,7 +195,7 @@ final class PEManager: PEManagerType {
             return
         }
         dispatchGroup.enter()
-        let deleteOnDisablePrev = userDefaultsService.isDeleteSubscriberOnDisable
+        
         subscriberService.syncSiteInfo(for: siteKey) { _, _ in
             dispatchGroup.leave()
         }
@@ -208,9 +212,8 @@ final class PEManager: PEManagerType {
             return
         }
         
-        let shouldDeleteSubscriberOnDisable = shouldDeleteSubscriberOnDisableDiffer(backgroundHandler: backgroundHandler,
-                                                       deleteOnDisablePrev,
-                                                       now: currentData)
+        let shouldDeleteSubscriberOnDisable = shouldDeleteSubscriberNotificationDisable(backgroundHandler: backgroundHandler,
+            now: currentData)
         if shouldDeleteSubscriberOnDisable {
             self.updateSubscriberAction(backgroundHandler: backgroundHandler, now: currentData)
         } else {
@@ -220,21 +223,33 @@ final class PEManager: PEManagerType {
         }
     }
     
-    private func shouldDeleteSubscriberOnDisableDiffer(backgroundHandler: BackgroundTaskExpirationHandler,
-                                                   _ deleteOnDisablePrev: Bool?,
+    private func shouldDeleteSubscriberNotificationDisable(backgroundHandler: BackgroundTaskExpirationHandler,
                                                      now: Date) -> Bool {
         var continueFlag = false
         let dispatchGroup = DispatchGroup()
         dispatchGroup.enter()
-        if deleteOnDisablePrev != userDefaultsService.isDeleteSubscriberOnDisable {
-            let status = userDefaultsService.notificationPermissionState == .granted ? 0 : 1
+        
+        // Only update subscriber status if:
+        // 1. isDeleteSubscriberOnDisable is true AND
+        // 2. Notification permission is not granted
+        let shouldRemoveSubscriber = userDefaultsService.isDeleteSubscriberOnDisable == true && 
+                                   userDefaultsService.notificationPermissionState != .granted
+        
+        if shouldRemoveSubscriber {
+            let status = 1 // Set to 1 (unsubscribed) when conditions are met
             subscriberService.updateSubscriberStatus(status: status) { [weak self] _, error in
                 if case .invalidStatusCode(_, let code) = error, code == 404 {
+                    self?.userDefaultsService.isManuallyUnsubscribed = false
+                    self?.userDefaultsService.isSubscriberDeleted = false
                     self?.subscriberService.retryAddSubscriberProcess(completion: { _ in
                         backgroundHandler.end()
                     })
                     continueFlag = false
                 } else {
+                    // Successfully unsubscribed due to notification settings - update flags
+                    // Clear manual unsubscription flag since this is automatic unsubscription
+                    self?.userDefaultsService.isManuallyUnsubscribed = false
+                    self?.userDefaultsService.isSubscriberDeleted = true
                     continueFlag = true
                 }
                 dispatchGroup.leave()
@@ -324,7 +339,8 @@ final class PEManager: PEManagerType {
         }
         
         if userDefaultsService.notificationPermissionState == .granted,
-            userDefaultsService.isSubscriberDeleted {
+            userDefaultsService.isSubscriberDeleted,
+            !userDefaultsService.isManuallyUnsubscribed {
             subscriberService.retryAddSubscriberProcess { error in
                 if error != nil {
                     PELogger.error(className: String(describing: PEManager.self),
@@ -352,7 +368,7 @@ final class PEManager: PEManagerType {
         }.disposed(by: disposeBag)
     }
     
-    func setEnvironment(_ environment: Environment) {
+    func setEnvironment(_ environment: PEEnvironment) {
         userDefaultsService.environment = environment
     }
     
@@ -373,8 +389,18 @@ final class PEManager: PEManagerType {
         userDefaultsService.deviceToken = token
     }
     
-    func getSubscriberId() -> String {
-        userDefaultsService.subscriberHash
+    func getSubscriberId(completion: @escaping (_ response: String?) -> Void) {
+        self.getSubscriptionStatus { isSubscribed, error in
+            if error != nil {
+                completion(nil)
+                return
+            }
+            if isSubscribed && !self.userDefaultsService.subscriberHash.isEmpty {
+                completion(self.userDefaultsService.subscriberHash)
+                return
+            }
+            completion(nil)
+        }
     }
     
     func getSubscriberHash() -> String {
@@ -389,14 +415,17 @@ final class PEManager: PEManagerType {
         userDefaultsService.siteKey = key
     }
 
-    func handleNotificationPermission() {
+    func handleNotificationPermission(completion: @escaping (_ response: Bool, _ error: Error?) -> Void) {
         guard let application = application else {
             PELogger.debug(className: String(describing: PEManager.self),
                            message: "application is not available...")
+            completion(false, PEError.siteKeyNotAvailable)
             return
         }
         notificationService
-        .handleNotificationPermission(for: application)
+        .handleNotificationPermission(for: application) { response, error in
+            completion(response, error)
+        }
     }
     
     func setInitialInfo(for application: UIApplication,
@@ -553,12 +582,113 @@ final class PEManager: PEManagerType {
     // MARK: - get subscriber details
    func getSubscriberDetails(for fields: [String]?,
                              completionHandler: ((_ response: SubscriberDetailsData?, _ error: PEError?) -> Void)?) {
-        prerequesiteNetworkCallCheck {
+        let error = prerequesiteNetworkCallCheck {
             subscriberService.getSubscriber(for: fields, completionHandler: completionHandler)
+        }
+        if error != nil {
+            completionHandler?(nil, error)
         }
     }
     
-    // This API is not exposed to the Host Application.
+    // MARK: - get subscription status
+    func getSubscriptionStatus(completionHandler: ((_ isSubscribed: Bool, _ error: PEError?) -> Void)?) {
+        let siteStatus = SiteStatus(rawValue: userDefaultsService.siteStatus)
+        let permissionStatus = userDefaultsService.notificationPermissionState
+        let isManuallyUnsubscribed = userDefaultsService.isManuallyUnsubscribed
+        let isSubscriberDeleted = userDefaultsService.isSubscriberDeleted
+        let subscriberHash = userDefaultsService.subscriberHash
+        
+        if siteStatus != .active {
+            PELogger.debug(className: String(describing: PEManager.self),
+                           message: "getSubscriptionStatus - site not active")
+            completionHandler?(false, .stiteStatusNotActive)
+            return
+        }
+        
+        if isManuallyUnsubscribed {
+            PELogger.debug(className: String(describing: PEManager.self),
+                           message: "getSubscriptionStatus - manually unsubscribed")
+            completionHandler?(false, nil)
+            return
+        }
+        
+        if subscriberHash.isEmpty {
+            PELogger.debug(className: String(describing: PEManager.self),
+                           message: "getSubscriptionStatus - no subscriber hash, not subscribed yet")
+            completionHandler?(false, nil)
+            return
+        }
+        
+        if permissionStatus == .notYetRequested {
+            PELogger.debug(className: String(describing: PEManager.self),
+                           message: "getSubscriptionStatus - permission not requested, not subscribed")
+            completionHandler?(false, .permissionNotDetermined)
+            return
+        }
+        
+        if !isSubscriberDeleted && permissionStatus == .granted {
+            PELogger.debug(className: String(describing: PEManager.self),
+                           message: "getSubscriptionStatus - local data indicates subscribed, returning true")
+            completionHandler?(true, nil)
+            return
+        }
+        
+        subscriberService.getSubscriber(for: ["has_unsubscribed", "notification_disabled"]) { response, error in
+            if let error = error {
+                PELogger.error(className: String(describing: PEManager.self),
+                               message: "getSubscriptionStatus - API call failed: \(error.localizedDescription)")
+                completionHandler?(false, error)
+                return
+            }
+            
+            guard let subscriberData = response else {
+                completionHandler?(false, .parsingError)
+                return
+            }
+            
+            // - User is subscribed only when both hasUnsubscribed = 0 AND notification_disabled = 0
+            let isSubscribed = ((subscriberData.hasUnsubscribed ?? 0) == 0 ) && ((subscriberData.notificationDisabled ?? 0) == 0)
+            
+            PELogger.debug(className: String(describing: PEManager.self),
+                           message: "getSubscriptionStatus - hasUnsubscribed: \(subscriberData.hasUnsubscribed ?? -1), notificationDisabled: \(subscriberData.notificationDisabled ?? -1), result: isSubscribed: \(isSubscribed)")
+            completionHandler?(isSubscribed, nil)
+        }
+    }
+    
+    // MARK: - get subscription notification status
+    func getSubscriptionNotificationStatus(completionHandler: ((_ canReceiveNotifications: Bool, _ error: PEError?) -> Void)?) {
+        
+        // First check subscription status
+        getSubscriptionStatus { [weak self] isSubscribed, error in
+            if let error = error {
+                PELogger.error(className: String(describing: PEManager.self),
+                               message: "getSubscriptionNotificationStatus - subscription check failed: \(error.localizedDescription)")
+                completionHandler?(false, error)
+                return
+            }
+            
+            // If not subscribed, user cannot receive notifications
+            guard isSubscribed else {
+                PELogger.debug(className: String(describing: PEManager.self),
+                               message: "getSubscriptionNotificationStatus - user not subscribed, cannot receive notifications")
+                completionHandler?(false, nil)
+                return
+            }
+            
+            // Check notification permission status
+            let permissionStatus = self?.getNotificationPermissionStatus() ?? .notYetRequested
+            let hasNotificationPermission = permissionStatus == .granted
+            
+            // User can receive notifications only if subscribed AND has permission
+            let canReceiveNotifications = isSubscribed && hasNotificationPermission
+            
+            PELogger.debug(className: String(describing: PEManager.self),
+                           message: "getSubscriptionNotificationStatus - isSubscribed: \(isSubscribed), permissionStatus: \(permissionStatus.rawValue), canReceiveNotifications: \(canReceiveNotifications)")
+            
+            completionHandler?(canReceiveNotifications, nil)
+        }
+    }
+    
     func checkSubscriber(completionHandler: ((_ response: CheckSubscriberData?, _ error: PEError?) -> Void)?) {
         let error = prerequesiteNetworkCallCheck {
             subscriberService.checkSubscriber(completionHandler: completionHandler)
@@ -610,6 +740,77 @@ final class PEManager: PEManagerType {
         
         if error != nil {
             completionHandler?(false, error)
+        }
+    }
+    
+    // MARK: - Subscriber Status
+    func unsubscribe(completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
+        let error = prerequesiteNetworkCallCheck {
+            subscriberService.updateSubscriberStatus(status: 1) { [weak self] response, error in
+                if response {
+                    // Mark as manually unsubscribed to prevent automatic re-subscription
+                    self?.userDefaultsService.isManuallyUnsubscribed = true
+                    self?.userDefaultsService.isSubscriberDeleted = true
+                }
+                completionHandler?(response, error)
+            }
+        }
+        if error != nil {
+            completionHandler?(false, error)
+        }
+    }
+    
+    func subscribe(completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
+        let permissionStatus = userDefaultsService.notificationPermissionState
+        let subscriberHash = userDefaultsService.subscriberHash
+        
+        // If notification permission is granted AND we have subscriber data, call update
+        if permissionStatus == .granted && !subscriberHash.isEmpty {
+            PELogger.debug(className: String(describing: PEManager.self),
+                           message: "Permission granted and subscriber data exists - calling updateSubscriberStatus(status: 0)")
+            
+            subscriberService.updateSubscriberStatus(status: 0) { [weak self] response, error in
+                if case .invalidStatusCode(_, let code) = error, code == 404 {
+                    self?.userDefaultsService.isManuallyUnsubscribed = false
+                    self?.subscriberService.retryAddSubscriberProcess(completion: { error in
+                        if let error = error {
+                            PELogger.error(className: String(describing: PEManager.self),
+                                           message: "Retrying to add subscriber failed: \(error)")
+                            completionHandler?(false, error)
+                            return
+                        }
+                        completionHandler?(response, error)
+                    })
+                } else if response {
+                    // Clear flags after successful subscription
+                    self?.userDefaultsService.isManuallyUnsubscribed = false
+                    self?.userDefaultsService.isSubscriberDeleted = false
+                    PELogger.debug(className: String(describing: PEManager.self),
+                                   message: "Manual subscription successful via update")
+                    completionHandler?(response, error)
+                }
+            }
+        } else {
+            guard permissionStatus != .denied else {
+                completionHandler?(false, .permissionNotGranted)
+                return
+            }
+            guard permissionStatus == .notYetRequested else {
+                completionHandler?(false, .permissionNotDetermined)
+                return
+            }
+            // Go through notification permission request flow
+            PELogger.debug(className: String(describing: PEManager.self),
+                           message: "Permission not granted or no subscriber data - requesting notification permission. Permission: \(permissionStatus.rawValue), hasSubscriberHash: \(!subscriberHash.isEmpty)")
+            
+            handleNotificationPermission { [weak self] permissionGranted, error in
+                if let error = error {
+                    completionHandler?(false, error as? PEError ?? .permissionNotDetermined)
+                    return
+                }
+                
+                completionHandler?(permissionGranted, .permissionNotGranted)
+            }
         }
     }
     

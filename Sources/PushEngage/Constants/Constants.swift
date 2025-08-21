@@ -51,7 +51,7 @@ internal struct NetworkConstants {
     
     // MARK: - SDK version
     
-    static let sdkVersion = "0.0.5"
+    static let sdkVersion = "0.0.6"
 
     // MARK: - URL relative - path
     static let addSubscriberPath = "subscriber/add"
@@ -138,6 +138,7 @@ struct UserDefaultConstant {
     static let siteKey = "pe_site_key"
     static let locationCoordinates = "location_coordinates"
     static let isSubscriberDeleted = "is_subscriber_deleted"
+    static let isManuallyUnsubscribed = "is_manually_unsubscribed"
     static let isTriedFirstTime = "is_tried_first_time"
     static let sponsered = "pe_sponser"
     static let isSwizzled = "is_swizzled"
@@ -194,6 +195,7 @@ extension String {
     static let clickCountTrackingFailed = "clickCountTrackingFailed"
     static let notificationRefetchFailed = "notificationRefetchFailed"
     static let invalidInput = "One or more inputs provided are not valid."
+    static let permissionNotGranted = "Notification Permission is not Granted."
 }
 
 // MARK: - Registration Messages.

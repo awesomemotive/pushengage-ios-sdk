@@ -26,12 +26,18 @@
                       @"Delete Attributes",
                       @"Add Profile Id",
                       @"Get Subscriber Details",
+                      @"Get Subscriber ID",
                       @"Get Subscriber Attributes",
                       @"Set Subscriber Attributes",
                       @"Send Goal",
                       @"Trigger Campaigns",
                       @"Enable Automated Notification",
-                      @"Disable Automated Notification"];
+                      @"Disable Automated Notification",
+                      @"Check Permission Status",
+                      @"Unsubscribe",
+                      @"Subscribe",
+                      @"Get Subscription Status",
+                      @"Get Notification Status"];
     self.textView.text = nil;
     self.textView.layer.borderWidth = 0.5;
     self.textView.layer.borderColor = UIColor.blackColor.CGColor;
@@ -44,7 +50,83 @@
 
 - (void)requestPermissionTapped:(UITapGestureRecognizer *)sender {
     [self.requestPermissionButton sendActionsForControlEvents:UIControlEventTouchUpInside];
-    [PushEngage requestNotificationPermission];
+    
+    [PushEngage requestNotificationPermissionWithCompletion:^(BOOL response, NSError * _Nullable error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (error) {
+                NSString *errorMessage = [NSString stringWithFormat:@"❌ Error requesting notification permission: %@", error.localizedDescription];
+                self.textView.text = errorMessage;
+                NSLog(@"%@", errorMessage);
+            } else if (response) {
+                NSString *successMessage = @"✅ Notification permission granted successfully!";
+                self.textView.text = successMessage;
+                NSLog(@"%@", successMessage);
+            } else {
+                NSString *deniedMessage = @"❌ Notification permission denied by user";
+                self.textView.text = deniedMessage;
+                NSLog(@"%@", deniedMessage);
+            }
+        });
+    }];
+}
+
+- (void)checkPermissionStatus {
+    NSString *status = [PushEngage getNotificationPermissionStatus];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *statusMessage;
+        if ([status isEqualToString:@"granted"]) {
+            statusMessage = @"✅ Notification permission status: GRANTED\nNotifications are allowed";
+        } else if ([status isEqualToString:@"denied"]) {
+            statusMessage = @"❌ Notification permission status: DENIED\nNotifications are not allowed";
+        } else if ([status isEqualToString:@"notYetRequested"]) {
+            statusMessage = @"⏳ Notification permission status: NOT YET REQUESTED\nPermission has not been requested from the user";
+        } else {
+            statusMessage = [NSString stringWithFormat:@"❓ Unknown permission status: %@", status];
+        }
+        self.textView.text = statusMessage;
+        NSLog(@"%@", statusMessage);
+    });
+}
+
+- (void)unsubscribeFromNotifications {
+    [PushEngage unsubscribeWithCompletionHandler:^(BOOL response, NSError * _Nullable error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (error) {
+                NSString *errorMessage = [NSString stringWithFormat:@"❌ Error unsubscribing: %@", error.localizedDescription];
+                self.textView.text = errorMessage;
+                NSLog(@"%@", errorMessage);
+            } else if (response) {
+                NSString *successMessage = @"✅ Successfully unsubscribed from push notifications\nYou will no longer receive notifications";
+                self.textView.text = successMessage;
+                NSLog(@"%@", successMessage);
+            } else {
+                NSString *failureMessage = @"❌ Failed to unsubscribe from push notifications\nPlease try again";
+                self.textView.text = failureMessage;
+                NSLog(@"%@", failureMessage);
+            }
+        });
+    }];
+}
+
+- (void)subscribeToNotifications {
+    [PushEngage subscribeWithCompletionHandler:^(BOOL response, NSError * _Nullable error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (error) {
+                NSString *errorMessage = [NSString stringWithFormat:@"❌ Error subscribing: %@", error.localizedDescription];
+                self.textView.text = errorMessage;
+                NSLog(@"%@", errorMessage);
+            } else if (response) {
+                NSString *successMessage = @"✅ Successfully subscribed to push notifications\nYou will now receive notifications";
+                self.textView.text = successMessage;
+                NSLog(@"%@", successMessage);
+            } else {
+                NSString *failureMessage = @"❌ Failed to subscribe to push notifications\nPlease try again";
+                self.textView.text = failureMessage;
+                NSLog(@"%@", failureMessage);
+            }
+        });
+    }];
 }
 
 - (void) dismiss:(UITapGestureRecognizer *)sender {
@@ -191,6 +273,22 @@
             break;
         }
             
+        case getSubscriberId: {
+            NSString *subscriberId = [PushEngage getSubscriberId];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (subscriberId) {
+                    NSString *message = [NSString stringWithFormat:@"Subscriber ID: %@", subscriberId];
+                    self.textView.text = message;
+                    NSLog(@"%@", message);
+                } else {
+                    NSString *message = @"User is not subscribed (no subscriber ID available)";
+                    self.textView.text = message;
+                    NSLog(@"%@", message);
+                }
+            });
+            break;
+        }
+            
         case getAttribute: {
             [PushEngage getSubscriberAttributesWithCompletionHandler:^(NSDictionary<NSString *,id> * _Nullable response,
                                                                    NSError * _Nullable error) {
@@ -268,6 +366,62 @@
                         blockSelf.textView.text = error.localizedDescription;
                     } else {
                         blockSelf.textView.text = @"Trigger disabled successfully";
+                    }
+                    blockSelf = nil;
+                });
+            }];
+            break;
+        }
+        case checkPermissionStatus: {
+            [self checkPermissionStatus];
+            break;
+        }
+        case unsubscribe: {
+            [self unsubscribeFromNotifications];
+            break;
+        }
+        case subscribe: {
+            [self subscribeToNotifications];
+            break;
+        }
+        case getSubscriptionStatus: {
+            [PushEngage getSubscriptionStatusWithCompletionHandler:^(BOOL isSubscribed, NSError * _Nullable error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (error) {
+                        NSString *errorMessage = [NSString stringWithFormat:@"❌ Error getting subscription status: %@", error.localizedDescription];
+                        blockSelf.textView.text = errorMessage;
+                        NSLog(@"%@", errorMessage);
+                    } else {
+                        NSString *statusIcon = isSubscribed ? @"✅" : @"❌";
+                        NSString *statusText = isSubscribed ? @"SUBSCRIBED" : @"UNSUBSCRIBED";
+                        NSString *message = [NSString stringWithFormat:@"%@ Subscription Status: %@\n\nThe user is currently %@ push notifications.",
+                                           statusIcon, 
+                                           statusText,
+                                           isSubscribed ? @"subscribed to" : @"unsubscribed from"];
+                        blockSelf.textView.text = message;
+                        NSLog(@"%@", message);
+                    }
+                    blockSelf = nil;
+                });
+            }];
+            break;
+        }
+        case getSubscriptionNotificationStatus: {
+            [PushEngage getSubscriptionNotificationStatusWithCompletionHandler:^(BOOL canReceiveNotifications, NSError * _Nullable error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (error) {
+                        NSString *errorMessage = [NSString stringWithFormat:@"❌ Error getting notification status: %@", error.localizedDescription];
+                        blockSelf.textView.text = errorMessage;
+                        NSLog(@"%@", errorMessage);
+                    } else {
+                        NSString *statusIcon = canReceiveNotifications ? @"✅" : @"❌";
+                        NSString *statusText = canReceiveNotifications ? @"CAN RECEIVE" : @"CANNOT RECEIVE";
+                        NSString *message = [NSString stringWithFormat:@"%@ Notification Status: %@\n\nThe user %@ push notifications.\n\nThis combines both subscription status and notification permission:\n- Must be subscribed (has_unsubscribed = 0 AND notification_disabled = 0)\n- Must have notification permission granted",
+                                           statusIcon, 
+                                           statusText,
+                                           canReceiveNotifications ? @"can receive" : @"cannot receive"];
+                        blockSelf.textView.text = message;
+                        NSLog(@"%@", message);
                     }
                     blockSelf = nil;
                 });

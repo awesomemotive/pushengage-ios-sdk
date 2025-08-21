@@ -118,6 +118,10 @@ extension UserDefaults.Key {
         return .init(name: UserDefaultConstant.isSubscriberDeleted)
     }
     
+    static var isManuallyUnsubscribed: UserDefaults.Key<Bool> {
+        return .init(name: UserDefaultConstant.isManuallyUnsubscribed)
+    }
+    
     static var permissionState: UserDefaults.Key<String> {
         return .init(name: UserDefaultConstant.permissionState)
     }
