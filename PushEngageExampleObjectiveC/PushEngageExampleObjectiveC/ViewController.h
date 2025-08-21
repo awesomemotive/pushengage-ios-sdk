@@ -20,12 +20,18 @@ typedef NS_ENUM(NSUInteger, ApiAction) {
     deleteAttribute,
     addProfileId,
     getSubscriberDetails,
+    getSubscriberId,
     getAttribute,
     setAttributes,
     sendGoal,
     triggerCampaigns,
     enableAutomatedNotification,
-    disableAutomatedNotification
+    disableAutomatedNotification,
+    checkPermissionStatus,
+    unsubscribe,
+    subscribe,
+    getSubscriptionStatus,
+    getSubscriptionNotificationStatus
 };
 
 @end

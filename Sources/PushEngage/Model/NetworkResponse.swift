@@ -68,6 +68,8 @@ struct NetworkError: Codable {
     public let timezone, country, tsCreated, state: String?
     public let subscriptionURL: String?
     public let profileId: String?
+    public let hasUnsubscribed: Int?
+    public let notificationDisabled: Int?
 
     enum CodingKeys: String, CodingKey {
         case city, device, host
@@ -78,6 +80,8 @@ struct NetworkError: Codable {
         case state
         case subscriptionURL = "subscription_url"
         case profileId = "profile_id"
+        case hasUnsubscribed = "has_unsubscribed"
+        case notificationDisabled = "notification_disabled"
     }
 }
 

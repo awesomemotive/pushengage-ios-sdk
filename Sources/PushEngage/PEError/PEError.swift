@@ -38,6 +38,7 @@ import Foundation
     case profilealreadyExist
     case siteKeyNotAvailable
     case permissionNotDetermined
+    case permissionNotGranted
     case notificationUserActionFailed(String?)
     case sponseredfailWithContent(attachmentString: String?, networkService: NetworkRouterType)
     case custom(String)
@@ -115,6 +116,8 @@ extension PEError: LocalizedError {
             return .invalidInput
         case .custom(let errorString):
             return errorString
+        case .permissionNotGranted:
+            return .permissionNotGranted
         }
     }
 }

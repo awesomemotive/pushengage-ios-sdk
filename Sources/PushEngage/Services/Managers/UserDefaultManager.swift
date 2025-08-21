@@ -11,9 +11,9 @@ class UserDefaultManager: UserDefaultsType {
     
     private let userDefaultSharedContainer: UserDefaults? = .shared
     
-    var environment: Environment {
+    var environment: PEEnvironment {
         get {
-            Environment(rawValue: userDefaultSharedContainer?[.sdkEnvironment] ?? 1) ?? .production
+            PEEnvironment(rawValue: userDefaultSharedContainer?[.sdkEnvironment] ?? 1) ?? .production
         }
         set(value) {
             userDefaultSharedContainer?[.sdkEnvironment] = (value == .production) ? 1 : 0
@@ -110,7 +110,7 @@ class UserDefaultManager: UserDefaultsType {
                               key: UserDefaultConstant.pushEngageSyncApi)?.isEu ?? 0
     }
     
-    var isSubscriberDeleted: Bool {
+        var isSubscriberDeleted: Bool {
         get {
              userDefaultSharedContainer?[.isSubscriberDeleted] ?? false
         }
@@ -118,7 +118,16 @@ class UserDefaultManager: UserDefaultsType {
             userDefaultSharedContainer?[.isSubscriberDeleted] = newValue
         }
     }
-    
+
+    var isManuallyUnsubscribed: Bool {
+        get {
+             userDefaultSharedContainer?[.isManuallyUnsubscribed] ?? false
+        }
+        set {
+            userDefaultSharedContainer?[.isManuallyUnsubscribed] = newValue
+        }
+    }
+
     var isDeleteSubscriberOnDisable: Bool? {
          self.getObject(for: SyncAPIData.self,
                         key: UserDefaultConstant.pushEngageSyncApi)?

@@ -108,7 +108,7 @@ public typealias PENotificationWillShowInForeground
     /// Set the environment for the SDK, allowing developers to switch between different environments (e.g., staging, production).
     ///
     /// - Parameter environment: The desired environment to be set (e.g., .staging, .production).
-    @objc public static func setEnvironment(environment: Environment) {
+    @objc public static func setEnvironment(environment: PEEnvironment) {
         manager.setEnvironment(environment)
     }
     
@@ -123,8 +123,92 @@ public typealias PENotificationWillShowInForeground
     }
     
     /// Request notification permission
-    @objc public static func requestNotificationPermission() {
-        manager.handleNotificationPermission()
+    /// - Parameter completion: A closure that gets called with the result of the permission request.
+    ///                        Returns `true` if permission was granted, `false` if denied, and an optional error.
+    @objc public static func requestNotificationPermission(completion: @escaping (_ response: Bool, _ error: Error?) -> Void) {
+        manager.handleNotificationPermission(completion: completion)
+    }
+    
+    /// Get the current notification permission status
+    ///
+    /// Use this method to retrieve the current notification permission status for the application.
+    /// This method returns the permission status synchronously as a string.
+    ///
+    /// - Returns: A `String` indicating the current notification permission state:
+    ///   - `"granted"`: The application is authorized to post user notifications
+    ///   - `"denied"`: The application is not authorized to post user notifications  
+    ///   - `"notYetRequested"`: The user has not yet made a choice regarding notification permissions
+    ///
+    /// Example usage:
+    /// ```
+    /// let permissionStatus = PushEngage.getNotificationPermissionStatus()
+    /// switch permissionStatus {
+    /// case "granted":
+    ///     print("Notifications are allowed")
+    /// case "denied":
+    ///     print("Notifications are denied")
+    /// case "notYetRequested":
+    ///     print("Permission not yet requested")
+    /// default:
+    ///     print("Unknown permission status")
+    /// }
+    /// ```
+    @objc public static func getNotificationPermissionStatus() -> String {
+        return manager.getNotificationPermissionStatus().rawValue
+    }
+    
+    /// Get the current subscription status
+    ///
+    /// Use this method to check whether the user is currently subscribed to push notifications.
+    ///
+    /// - Parameter completionHandler: A closure that provides the subscription status as a boolean value,
+    ///                               along with an optional error if the operation fails.
+    ///                               Returns `true` if the user is subscribed, `false` if unsubscribed.
+    ///
+    /// Example usage:
+    /// ```
+    /// PushEngage.getSubscriptionStatus { isSubscribed, error in
+    ///     if let error = error {
+    ///         print("Failed to get subscription status: \(error.localizedDescription)")
+    ///     } else {
+    ///         if isSubscribed {
+    ///             print("User is subscribed to push notifications")
+    ///         } else {
+    ///             print("User is unsubscribed from push notifications")
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    @objc public static func getSubscriptionStatus(completionHandler: @escaping (_ isSubscribed: Bool, _ error: Error?) -> Void) {
+        manager.getSubscriptionStatus(completionHandler: completionHandler)
+    }
+    
+    /// Get whether the user can receive notifications
+    ///
+    /// Use this method to check whether the user can actually receive push notifications by verifying
+    /// both subscription status and notification permission. The user can receive notifications only if
+    /// they are subscribed AND the app has notification permission granted.
+    ///
+    /// - Parameter completionHandler: A closure that provides a boolean value indicating whether the user
+    ///                               can receive notifications, along with an optional error if the operation fails.
+    ///                               Returns `true` if the user can receive notifications, `false` otherwise.
+    ///
+    /// Example usage:
+    /// ```
+    /// PushEngage.getSubscriptionNotificationStatus { canReceiveNotifications, error in
+    ///     if let error = error {
+    ///         print("Failed to get notification status: \(error.localizedDescription)")
+    ///     } else {
+    ///         if canReceiveNotifications {
+    ///             print("User can receive push notifications")
+    ///         } else {
+    ///             print("User cannot receive push notifications")
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    @objc public static func getSubscriptionNotificationStatus(completionHandler: @escaping (_ canReceiveNotifications: Bool, _ error: Error?) -> Void) {
+        manager.getSubscriptionNotificationStatus(completionHandler: completionHandler)
     }
     
     /// Updates attributes of a subscriber. If an attribute with the specified key already exists, the existing value
@@ -377,6 +461,56 @@ public typealias PENotificationWillShowInForeground
         manager.automatedNotification(status: status, completionHandler: completionHandler)
     }
     
+    /// Unsubscribe Subscriber
+    ///
+    /// This method enables you to unsubscribe the current subscriber from receiving push notifications. 
+    /// Once unsubscribed, the subscriber will no longer receive any push notifications.
+    ///
+    /// - Parameter completionHandler: A closure that provides a response indicating whether the operation was successful (`true` if successful, `false` otherwise) and an optional error object if any error occurs during the operation.
+    ///
+    /// Example usage:
+    /// ```
+    /// PushEngage.unsubscribe { result, error in
+    ///     if result {
+    ///         print("Successfully unsubscribed from push notifications")
+    ///     } else {
+    ///         if let error = error {
+    ///             print("Failed to unsubscribe: \(error.localizedDescription)")
+    ///         } else {
+    ///             print("Unknown error occurred while unsubscribing")
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    @objc public static func unsubscribe(completionHandler: ((_ response: Bool,
+                                                              _ error: Error?) -> Void)?) {
+        manager.unsubscribe(completionHandler: completionHandler)
+    }
+    
+    /// Manually subscribe the user to receive push notifications.
+    ///
+    /// Use this method when you want to manually subscribe a user who has previously unsubscribed.
+    ///
+    /// - Parameter completionHandler: A completion handler that provides the response of the method call as a boolean value,
+    ///                               along with an optional error if the operation fails.
+    ///
+    /// Example usage:
+    /// ```
+    /// PushEngage.subscribe { response, error in
+    ///     if response {
+    ///         print("Successfully subscribed to notifications.")
+    ///     } else {
+    ///         if let error = error {
+    ///             print("Failed to subscribe: \(error.localizedDescription)")
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    @objc public static func subscribe(completionHandler: ((_ response: Bool,
+                                                            _ error: Error?) -> Void)?) {
+        manager.subscribe(completionHandler: completionHandler)
+    }
+    
     /// Sends a goal event with the provided callback for handling the response.
     ///  - Parameters:
     ///     - goal: Goal object representing the goal to be tracked.
@@ -442,6 +576,26 @@ public typealias PENotificationWillShowInForeground
     @objc public static func addAlert(triggerAlert: TriggerAlert, completionHandler: ((_ response: Bool,
                                                                                        _ error: Error?) -> Void)?) {
         manager.addAlert(triggerAlert: triggerAlert, completionHandler: completionHandler)
+    }
+    
+    /// Get Subscriber ID
+    ///
+    /// Use this method to retrieve the unique subscriber ID for a user. PushEngage generates this ID for every user
+    /// based on their subscription data. Sometimes, this ID is referred to as the 'subscriber_hash'. The subscriber ID
+    /// remains consistent unless there's a change in the user's subscription. If the user is not subscribed, it will return nil.
+    ///
+    /// - Returns: A `String?` representing the subscriber ID. Returns `nil` if the user is not subscribed.
+    ///
+    /// Example usage:
+    /// ```
+    /// if let subscriberId = PushEngage.getSubscriberId() {
+    ///     print("Subscriber ID: \(subscriberId)")
+    /// } else {
+    ///     print("User is not subscribed")
+    /// }
+    /// ```
+    @objc public static func getSubscriberId(completion: @escaping (_ response: String?) -> Void) {
+        manager.getSubscriberId(completion: completion)
     }
     
     /// Get Subscriber Details

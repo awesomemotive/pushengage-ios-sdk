@@ -25,8 +25,9 @@ protocol UserDefaultsType {
     var isGDPR: Int { get }
     var isSubscriberDeleted: Bool { get set }
     var isDeleteSubscriberOnDisable: Bool? { get }
+    var isManuallyUnsubscribed: Bool { get set }
     var istriedFirstTime: Bool { get set }
     var sponseredIdKey: String? { get }
     var isSwizzled: Bool { get set }
-    var environment: Environment { get set }
+    var environment: PEEnvironment { get set }
 }
