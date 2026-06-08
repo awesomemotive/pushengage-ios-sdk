@@ -47,7 +47,7 @@ struct NetworkError: Codable {
 // MARK: - SubsciberDetailsResponse
 
 @objcMembers
-@objc public class SubsciberDetailsResponse: NSObject, Codable {
+@objc public class SubsciberDetailsResponse: NSObject, Decodable {
     public let errorCode: Int?
     public let data: SubscriberDetailsData?
     public let errorMessage: String?
@@ -61,27 +61,31 @@ struct NetworkError: Codable {
 
 // MARK: - SubscriberDetailsData
 @objcMembers
-@objc public class SubscriberDetailsData: NSObject, Codable {
-    public let city, device, host, userAgent: String?
-    public let deviceType: String?
-    public let segments: [String]?
-    public let timezone, country, tsCreated, state: String?
-    public let subscriptionURL: String?
-    public let profileId: String?
-    public let hasUnsubscribed: Int?
-    public let notificationDisabled: Int?
+@objc public class SubscriberDetailsData: NSObject, Decodable {
 
-    enum CodingKeys: String, CodingKey {
-        case city, device, host
-        case userAgent = "user_agent"
-        case deviceType = "device_type"
-        case segments, timezone, country
-        case tsCreated = "ts_created"
-        case state
-        case subscriptionURL = "subscription_url"
-        case profileId = "profile_id"
-        case hasUnsubscribed = "has_unsubscribed"
-        case notificationDisabled = "notification_disabled"
+    /// Every field the server returned, keyed by the wire-format (snake_case)
+    /// name. Callers read fields by string lookup, e.g.
+    /// `data.rawFields["country"] as? String`. No fixed field list.
+    public let rawFields: [String: Any]
+
+    private struct DynamicKey: CodingKey {
+        var stringValue: String
+        var intValue: Int? { nil }
+        init(stringValue: String) { self.stringValue = stringValue }
+        init?(intValue: Int) { nil }
+    }
+
+    public required init(from decoder: Decoder) throws {
+        var raw: [String: Any] = [:]
+        if let dyn = try? decoder.container(keyedBy: DynamicKey.self) {
+            for key in dyn.allKeys {
+                if let decoded = try? dyn.decode(AnyCodable.self, forKey: key) {
+                    raw[key.stringValue] = decoded.value
+                }
+            }
+        }
+        self.rawFields = raw
+        super.init()
     }
 }
 

@@ -235,52 +235,6 @@ struct Utility {
         return true
     }
     
-    @available(iOS, deprecated: 9.0)
-    static func createUILocalNotification(for notification: PENotification) -> UILocalNotification {
-        let uiNotification =  UILocalNotification()
-        let category = UIMutableUserNotificationCategory()
-        category.identifier = UUID().uuidString
-        var actionArray = [UIMutableUserNotificationAction]()
-        for action in notification.actionButtons ?? [] {
-            let mutableAction = UIMutableUserNotificationAction()
-            mutableAction.title = action.title
-            mutableAction.identifier = action.id
-            mutableAction.activationMode = .foreground
-            mutableAction.isDestructive = false
-            mutableAction.isAuthenticationRequired = false
-            actionArray.append(mutableAction)
-            //   iOS 8 shows notification buttons in reverse in all cases but alerts.
-            //   This flips it so the first button is on the left.
-            if actionArray.count == 2 {
-                category.setActions([actionArray[1], actionArray[0]], for: .minimal)
-            }
-        }
-        category.setActions(actionArray, for: .default)
-        var currentCategories = UIApplication.shared.currentUserNotificationSettings?.categories
-        if currentCategories != nil {
-            currentCategories?.insert(category)
-        } else {
-            currentCategories = Set<UIUserNotificationCategory>()
-            currentCategories?.insert(category)
-        }
-        
-        let notificationSetting = UIUserNotificationSettings(types: .init(rawValue: 7),
-                                                             categories: currentCategories)
-        UIApplication.shared.registerUserNotificationSettings(notificationSetting)
-        uiNotification.category = category.identifier
-        uiNotification.alertTitle = notification.title
-        uiNotification.alertBody = notification.body
-        uiNotification.userInfo = notification.rawPayload
-        uiNotification.soundName = notification.sound
-        if uiNotification.soundName == nil {
-            uiNotification.soundName = UILocalNotificationDefaultSoundName
-        }
-        uiNotification.applicationIconBadgeNumber = notification.badge ?? 0
-        return uiNotification
-    }
-    
-    // for iOS 10+
-    
     @available(iOS 10.0, *)
     static func createUNNotificationRequest(notification: PENotification,
                                             networkService: NetworkRouterType?) -> UNNotificationRequest? {
@@ -343,6 +297,95 @@ struct Utility {
         }
     }
     
+    /// Composes the SDK User-Agent in the slash-delimited shape:
+    ///   iOS/<osVer>/<deviceModel>/<bundleId>/<appVer>/SDK/<sdkVer>/<flavor>[/<wrapperVer>]
+    /// The trailing wrapper-version slot is omitted when no wrapper plugin has
+    /// registered its version, so segment count signals native vs wrapped.
+    /// Mirrors the Android counterpart in `RestClient.buildUserAgent`.
+    static func buildUserAgent(userDefaults: UserDefaultsType) -> String {
+        let osVer       = sanitizeUaSegment(getCurrentDeviceVersion)
+        let deviceModel = sanitizeUaSegment(getHardwareIdentifier)
+        let bundleId    = sanitizeUaSegment(Bundle.main.bundleIdentifier)
+        let appVer      = sanitizeUaSegment(getAppShortVersion)
+        let sdkVer      = sanitizeUaSegment(NetworkConstants.sdkVersion)
+        let flavor      = sanitizeUaSegment(userDefaults.platform, default: PEPlatform.iOS)
+        let wrapperVer  = sanitizeUaSegment(userDefaults.wrapperVersion)
+
+        var ua = "iOS/\(osVer)/\(deviceModel)/\(bundleId)/\(appVer)/SDK/\(sdkVer)/\(flavor)"
+        if !wrapperVer.isEmpty {
+            ua += "/\(wrapperVer)"
+        }
+        return ua
+    }
+
+    /// Hardware identifier (e.g. "iPhone15,3", "iPad14,1") used in the
+    /// SDK User-Agent's device-model slot. Reads `SIMULATOR_MODEL_IDENTIFIER`
+    /// when running under the iOS Simulator so the value reflects the simulated
+    /// device rather than the host CPU arch; falls back to `utsname.machine`
+    /// on real devices.
+    static var getHardwareIdentifier: String {
+        if let simulated = ProcessInfo.processInfo.environment["SIMULATOR_MODEL_IDENTIFIER"],
+           !simulated.isEmpty {
+            return simulated
+        }
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        let machineMirror = Mirror(reflecting: systemInfo.machine)
+        let identifier = machineMirror.children.reduce(into: "") { partial, element in
+            guard let value = element.value as? Int8, value != 0 else { return }
+            partial.append(Character(UnicodeScalar(UInt8(value))))
+        }
+        return identifier
+    }
+
+    /// `CFBundleShortVersionString` from the host app's Info.plist (no build
+    /// suffix), used in the SDK User-Agent's app-version slot. Returns an
+    /// empty string when the key is absent (test bundles, framework targets).
+    static var getAppShortVersion: String {
+        return Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+    }
+
+    /// Sanitizes a single segment of the SDK User-Agent. Allowlists the RFC 7230
+    /// `tchar` set (alphanumerics plus ``!#$%&'*+-.^_`|~``) and replaces every
+    /// other character with `_`. Falls back to `fallback` when the input is nil
+    /// or empty. The allowlist approach is intentional: `platform` and
+    /// `wrapperVersion` are free-string user input from wrapper SDKs, so a
+    /// denylist would inevitably miss something the wire format can't carry
+    /// (`/` segment delimiter, CR/LF header injection, `;` parameter delimiter,
+    /// `,` list delimiter, `"`/`(`/`)` quoted-string structure, etc.).
+    static func sanitizeUaSegment(_ raw: String?, default fallback: String = "") -> String {
+        guard let raw, !raw.isEmpty else { return fallback }
+        var out = String.UnicodeScalarView()
+        out.reserveCapacity(raw.unicodeScalars.count)
+        for scalar in raw.unicodeScalars {
+            if isTchar(scalar) {
+                out.append(scalar)
+            } else {
+                out.append(UnicodeScalar(0x5F))
+            }
+        }
+        return String(out)
+    }
+
+    /// RFC 7230 `tchar` predicate — the character set that may appear unquoted
+    /// in HTTP header tokens.
+    private static func isTchar(_ scalar: UnicodeScalar) -> Bool {
+        let v = scalar.value
+        // ALPHA / DIGIT
+        if (0x30...0x39).contains(v) { return true } // 0-9
+        if (0x41...0x5A).contains(v) { return true } // A-Z
+        if (0x61...0x7A).contains(v) { return true } // a-z
+        // tchar marks: !#$%&'*+-.^_`|~
+        switch v {
+        case 0x21, 0x23, 0x24, 0x25, 0x26, 0x27,
+             0x2A, 0x2B, 0x2D, 0x2E,
+             0x5E, 0x5F, 0x60, 0x7C, 0x7E:
+            return true
+        default:
+            return false
+        }
+    }
+
     static func urlUnWrapper(for path: String) throws -> URL {
         guard let url = URL(string: path) else {
             throw PEError.missingURL
@@ -383,12 +426,30 @@ struct Utility {
         }
     }
     
+    /// Returns the current key window using the modern scene-based lookup on iOS 13+,
+    /// falling back to the deprecated `windows.first` on iOS 12. Returns `nil` inside
+    /// app extensions since `UIApplication.shared` is unavailable there.
+    static var keyWindow: UIWindow? {
+        #if !APPLICATION_EXTENSION_API_ONLY
+        if #available(iOS 13.0, *) {
+            return UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first { $0.isKeyWindow }
+        } else {
+            return UIApplication.shared.windows.first
+        }
+        #else
+        return nil
+        #endif
+    }
+
     static func loadWKWebView(with url: URL?) {
         if let link = url {
             DispatchQueue.main.async {
                 let wkWebView = WKWebViewController(url: link, title: Utility.getApplicationName)
                 let nav = UINavigationController(rootViewController: wkWebView)
-                UIApplication.shared.windows.first?.rootViewController?.present(nav, animated: true, completion: nil)
+                keyWindow?.rootViewController?.present(nav, animated: true, completion: nil)
             }
         }
     }
@@ -399,12 +460,14 @@ struct Utility {
             return
         }
         DispatchQueue.main.async {
+            #if !APPLICATION_EXTENSION_API_ONLY
             if UIApplication.shared.canOpenURL(link) {
                 UIApplication.shared.open(link) { (reponse) in
                     PELogger.info(className: String(describing: Utility.self),
                                   message: reponse.description)
                 }
             }
+            #endif
         }
     }
     

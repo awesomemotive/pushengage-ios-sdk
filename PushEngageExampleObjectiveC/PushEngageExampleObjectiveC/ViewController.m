@@ -37,7 +37,10 @@
                       @"Unsubscribe",
                       @"Subscribe",
                       @"Get Subscription Status",
-                      @"Get Notification Status"];
+                      @"Get Notification Status",
+                      @"Track Event",
+                      @"Identify",
+                      @"Logout"];
     self.textView.text = nil;
     self.textView.layer.borderWidth = 0.5;
     self.textView.layer.borderColor = UIColor.blackColor.CGColor;
@@ -150,11 +153,11 @@
     switch (action) {
         case addAttribute: {
             
-            [PushEngage addWithAttributes:@{@"name" : @"Abhishek",
-                                            @"gender" : @"male",
-                                            @"place" : @"banglore",
-                                            @"phoneNo" : @91231114}
-                               completionHandler:^(BOOL response, NSError * _Nullable error) {
+            [PushEngage addSubscriberAttributes:@{@"name" : @"Abhishek",
+                                                  @"gender" : @"male",
+                                                  @"place" : @"banglore",
+                                                  @"phoneNo" : @91231114}
+                              completionHandler:^(BOOL response, NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {
                         blockSelf.textView.text = @"Attribute(s) updated for subscriber successfully";
@@ -251,18 +254,23 @@
                                                    NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                         if (response) {
+                            NSDictionary *raw = response.rawFields;
+                            NSArray *segments = raw[@"segments"];
+                            NSString *segmentsString = [segments isKindOfClass:[NSArray class]]
+                                ? [segments componentsJoinedByString:@", "]
+                                : @"(null)";
                             NSString *responseString = [NSString stringWithFormat:@"device: %@, user_agent: %@, country: %@, ts_created: %@, state: %@, city: %@, host: %@, device_type: %@, timezone: %@, segments: %@",
-                                                        response.device ?: @"(null)",
-                                                        response.userAgent ?: @"(null)",
-                                                        response.country ?: @"(null)",
-                                                        response.tsCreated ?: @"(null)",
-                                                        response.state ?: @"(null)",
-                                                        response.city ?: @"(null)",
-                                                        response.host ?: @"(null)",
-                                                        response.deviceType ?: @"(null)",
-                                                        response.timezone ?: @"(null)",
-                                                        [response.segments componentsJoinedByString:@", "] ?: @"(null)"];
-                            
+                                                        raw[@"device"] ?: @"(null)",
+                                                        raw[@"user_agent"] ?: @"(null)",
+                                                        raw[@"country"] ?: @"(null)",
+                                                        raw[@"ts_created"] ?: @"(null)",
+                                                        raw[@"state"] ?: @"(null)",
+                                                        raw[@"city"] ?: @"(null)",
+                                                        raw[@"host"] ?: @"(null)",
+                                                        raw[@"device_type"] ?: @"(null)",
+                                                        raw[@"timezone"] ?: @"(null)",
+                                                        segmentsString];
+
                             self.textView.text = responseString;
                         } else {
                             self.textView.text = error.localizedDescription;
@@ -274,18 +282,20 @@
         }
             
         case getSubscriberId: {
-            NSString *subscriberId = [PushEngage getSubscriberId];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (subscriberId) {
-                    NSString *message = [NSString stringWithFormat:@"Subscriber ID: %@", subscriberId];
-                    self.textView.text = message;
-                    NSLog(@"%@", message);
-                } else {
-                    NSString *message = @"User is not subscribed (no subscriber ID available)";
-                    self.textView.text = message;
-                    NSLog(@"%@", message);
-                }
-            });
+            [PushEngage getSubscriberIdWithCompletion:^(NSString * _Nullable subscriberId) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (subscriberId) {
+                        NSString *message = [NSString stringWithFormat:@"Subscriber ID: %@", subscriberId];
+                        blockSelf.textView.text = message;
+                        NSLog(@"%@", message);
+                    } else {
+                        NSString *message = @"User is not subscribed (no subscriber ID available)";
+                        blockSelf.textView.text = message;
+                        NSLog(@"%@", message);
+                    }
+                    blockSelf = nil;
+                });
+            }];
             break;
         }
             
@@ -304,8 +314,8 @@
             break;
         }
         case setAttributes: {
-            [PushEngage setWithAttributes:@{@"gender" : @"male"}
-                               completionHandler:^(BOOL response, NSError * _Nullable error) {
+            [PushEngage setSubscriberAttributes:@{@"gender" : @"male"}
+                              completionHandler:^(BOOL response, NSError * _Nullable error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (response) {
                         blockSelf.textView.text = @"Attribute(s) set for subscriber successfully";
@@ -417,11 +427,68 @@
                         NSString *statusIcon = canReceiveNotifications ? @"✅" : @"❌";
                         NSString *statusText = canReceiveNotifications ? @"CAN RECEIVE" : @"CANNOT RECEIVE";
                         NSString *message = [NSString stringWithFormat:@"%@ Notification Status: %@\n\nThe user %@ push notifications.\n\nThis combines both subscription status and notification permission:\n- Must be subscribed (has_unsubscribed = 0 AND notification_disabled = 0)\n- Must have notification permission granted",
-                                           statusIcon, 
+                                           statusIcon,
                                            statusText,
                                            canReceiveNotifications ? @"can receive" : @"cannot receive"];
                         blockSelf.textView.text = message;
                         NSLog(@"%@", message);
+                    }
+                    blockSelf = nil;
+                });
+            }];
+            break;
+        }
+        case trackEvent: {
+            NSDictionary *properties = @{@"amount": @19.99,
+                                         @"currency": @"USD",
+                                         @"is_trial": @NO,
+                                         @"items": @3};
+            [PushEngage trackEventWithName:@"MySite.AddToCart"
+                                properties:properties
+                                 profileId:nil
+                                  provider:nil
+                                 eventType:nil
+                         completionHandler:^(BOOL response, NSError * _Nullable error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (response) {
+                        blockSelf.textView.text = [NSString stringWithFormat:@"✅ Event 'MySite.AddToCart' tracked with properties:\n%@", properties];
+                    } else {
+                        blockSelf.textView.text = error.localizedDescription;
+                    }
+                    blockSelf = nil;
+                });
+            }];
+            break;
+        }
+        case identify: {
+            NSDictionary *fields = @{@"email": @"test@example.com",
+                                     @"first_name": @"Alice",
+                                     @"profile_id": @"user-42"};
+            [PushEngage identifyWithFields:fields
+                         completionHandler:^(BOOL response, NSError * _Nullable error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (response) {
+                        blockSelf.textView.text = [NSString stringWithFormat:@"✅ Subscriber identified with fields:\n%@", fields];
+                    } else {
+                        blockSelf.textView.text = error.localizedDescription;
+                    }
+                    blockSelf = nil;
+                });
+            }];
+            break;
+        }
+        case logout: {
+            // Pass nil to use the default PII set (first_name, last_name, email,
+            // phone, gender, dob, profile_id); pass a non-empty array to
+            // clear specific fields only.
+            NSArray<NSString *> *fieldNames = @[@"email", @"profile_id"];
+            [PushEngage logoutWithFieldNames:fieldNames
+                           completionHandler:^(BOOL response, NSError * _Nullable error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (response) {
+                        blockSelf.textView.text = [NSString stringWithFormat:@"✅ Logged out fields:\n%@", fieldNames];
+                    } else {
+                        blockSelf.textView.text = error.localizedDescription;
                     }
                     blockSelf = nil;
                 });

@@ -214,19 +214,27 @@ class TriggerEntryViewController: UIViewController, UITableViewDataSource, UITab
             )
             PushEngage.addAlert(
                 triggerAlert: triggerAlert
-            ) {
-                response,
-                error in
-                if error != nil {
-                    self.showSnackbar(
-                        message: error?.localizedDescription ?? "",
-                        isSuccess: false
-                    )
-                } else {
-                    self.showSnackbar(
-                        message: "Add Alert Successfull",
-                        isSuccess: true
-                    )
+            ) { [weak self] response, error in
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    if let err = error {
+                        self.showSnackbar(
+                            message: err.localizedDescription,
+                            isSuccess: false
+                        )
+                        SdkEventLog.shared.append("Add Alert FAILED: \(err.localizedDescription)")
+                        self.showResponseSheet(title: "Add Alert — failed",
+                                               payload: err.localizedDescription)
+                    } else {
+                        self.showSnackbar(
+                            message: "Add Alert Successfull",
+                            isSuccess: true
+                        )
+                        SdkEventLog.shared.append("Add Alert OK: productId=\(self.productId.text ?? "-")")
+                        self.showResponseSheet(title: "Add Alert — success",
+                                               payload: ["productId": self.productId.text ?? "",
+                                                         "type": "\(self.selectedType)"])
+                    }
                 }
             }
         } else {
@@ -240,19 +248,27 @@ class TriggerEntryViewController: UIViewController, UITableViewDataSource, UITab
             )
             PushEngage.sendTriggerEvent(
                 triggerCampaign: triggerCampaign
-            ) {
-                response,
-                error in
-                if error != nil {
-                    self.showSnackbar(
-                        message: error?.localizedDescription ?? "",
-                        isSuccess: false
-                    )
-                } else {
-                    self.showSnackbar(
-                        message: "Send Trigger Alert Successfull",
-                        isSuccess: true
-                    )
+            ) { [weak self] response, error in
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    if let err = error {
+                        self.showSnackbar(
+                            message: err.localizedDescription,
+                            isSuccess: false
+                        )
+                        SdkEventLog.shared.append("Send Trigger Event FAILED: \(err.localizedDescription)")
+                        self.showResponseSheet(title: "Send Trigger Event — failed",
+                                               payload: err.localizedDescription)
+                    } else {
+                        self.showSnackbar(
+                            message: "Send Trigger Alert Successfull",
+                            isSuccess: true
+                        )
+                        SdkEventLog.shared.append("Send Trigger Event OK: campaign=\(self.campaignName.text ?? "-"), event=\(self.eventName.text ?? "-")")
+                        self.showResponseSheet(title: "Send Trigger Event — success",
+                                               payload: ["campaignName": self.campaignName.text ?? "",
+                                                         "eventName": self.eventName.text ?? ""])
+                    }
                 }
             }
         }

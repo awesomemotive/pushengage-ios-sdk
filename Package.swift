@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "PushEngage",
+    platforms: [.iOS(.v12)],
     products: [
         .library(
             name: "PushEngage",
@@ -12,6 +13,10 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "PushEngage", path: "Sources")
+            name: "PushEngage", path: "Sources"),
+        .testTarget(
+            name: "PushEngageTests",
+            dependencies: ["PushEngage"],
+            path: "Tests/PushEngageTests"),
     ]
 )

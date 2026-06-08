@@ -15,6 +15,8 @@ protocol DeviceManagerType {
     func getDeviceHash() -> String
     func registerDeviceToServer(with deviceToken: Data)
     func setEnvironment(_ environment: PEEnvironment)
+    func setPlatform(_ platform: String)
+    func setWrapperVersion(_ wrapperVersion: String)
 }
 
 protocol SubscriberManagerType {
@@ -44,7 +46,7 @@ protocol NotificationManagerType {
     func update(notificationType: Int)
     func setNotificationPermissionStatus(status: PermissionStatus)
     func setNotificationOpenHandler(block: PENotificationOpenHandler?)
-    func setNotificationWillShowInForgroundHandler(block: PENotificationWillShowInForeground?)
+    func setNotificationWillShowInForegroundHandler(block: PENotificationWillShowInForeground?)
     func receivedNotification(with userInfo: [AnyHashable: Any], isOpened: Bool)
     func handleWillPresentNotificationInForeground(with payLoad: [AnyHashable: Any],
                                                    completionHandler: @escaping PENotificationDisplayNotification)
@@ -104,6 +106,15 @@ protocol SwizzleManagerType {
     func updateSwizzledStatus(with status: Bool)
 }
 
+protocol EventManagerType {
+    func trackEvent(name: String,
+                    properties: Parameters?,
+                    profileId: String?,
+                    provider: String?,
+                    eventType: String?,
+                    completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?)
+}
+
 protocol PEManagerType: DeviceManagerType,
                         SubscriberManagerType,
                         AppInfoManagerType,
@@ -113,7 +124,8 @@ protocol PEManagerType: DeviceManagerType,
                         CampaignManagerType,
                         CustomUIManagerType,
                         SwizzleManagerType,
-                        GoalManagerType {}
+                        GoalManagerType,
+                        EventManagerType {}
 
 final class PEManager: PEManagerType {
     
@@ -185,13 +197,13 @@ final class PEManager: PEManagerType {
     /// - Parameters:
     ///     - backgroundHandler: Background operation handler
     ///     - currentData: Current device date
-    private func weeklySyncOperation(backgroundHandler: BackgroundTaskExpirationHandler,
+    private func weeklySyncOperation(backgroundHandler: BackgroundTaskExpirationHandler?,
                                      currentData: Date) {
         let dispatchGroup = DispatchGroup()
         guard let siteKey = userDefaultsService.siteKey else {
             PELogger.debug(className: String(describing: PEManager.self),
                            message: "site key is not available")
-            backgroundHandler.end()
+            backgroundHandler?.end()
             return
         }
         dispatchGroup.enter()
@@ -208,7 +220,7 @@ final class PEManager: PEManagerType {
     
         let siteStatus = SiteStatus(rawValue: userDefaultsService.siteStatus)
         if siteStatus != .active {
-            backgroundHandler.end()
+            backgroundHandler?.end()
             return
         }
         
@@ -223,7 +235,7 @@ final class PEManager: PEManagerType {
         }
     }
     
-    private func shouldDeleteSubscriberNotificationDisable(backgroundHandler: BackgroundTaskExpirationHandler,
+    private func shouldDeleteSubscriberNotificationDisable(backgroundHandler: BackgroundTaskExpirationHandler?,
                                                      now: Date) -> Bool {
         var continueFlag = false
         let dispatchGroup = DispatchGroup()
@@ -242,7 +254,7 @@ final class PEManager: PEManagerType {
                     self?.userDefaultsService.isManuallyUnsubscribed = false
                     self?.userDefaultsService.isSubscriberDeleted = false
                     self?.subscriberService.retryAddSubscriberProcess(completion: { _ in
-                        backgroundHandler.end()
+                        backgroundHandler?.end()
                     })
                     continueFlag = false
                 } else {
@@ -262,32 +274,29 @@ final class PEManager: PEManagerType {
         return continueFlag
     }
     
-    private func updateSubscriberAction(backgroundHandler: BackgroundTaskExpirationHandler,
+    private func updateSubscriberAction(backgroundHandler: BackgroundTaskExpirationHandler?,
                                         now: Date) {
         subscriberService.updateSubscriber { [weak self] _, error in
             PELogger.debug(className: String(describing: PEManager.self),
                            message: error == nil ? "successfully updated subsciber."
                            : "failed to update subscriber.")
             self?.userDefaultsService.lastSmartSubscribeDate = now
-            backgroundHandler.end()
+            backgroundHandler?.end()
         }
     }
     
     // MARK: - Smart Re-subscribe SEL.
     
     @objc private func smartResubscriber() {
-        
+
         DispatchQueue.global(qos: .background).async { [weak self] in
             let currentDate = Date()
-            guard let application = self?.application else {
-                return
-            }
             if self?.userDefaultsService.istriedFirstTime == false {
                 PELogger.debug(className: String(describing: PEManager.self),
                                message: "As first try is not done so no need to do smart-resusbcribe")
                 return
             }
-            BackgroundTaskExpirationHandler.run(application: application) { [weak self] backgroundHandler in
+            BackgroundTaskExpirationHandler.run { [weak self] backgroundHandler in
                 let lastResubDate = self?.userDefaultsService.lastSmartSubscribeDate
                 if lastResubDate == nil || (lastResubDate != nil && currentDate.days(from: lastResubDate!) >= 7) {
                     self?.weeklySyncOperation(backgroundHandler: backgroundHandler, currentData: currentDate)
@@ -297,7 +306,7 @@ final class PEManager: PEManagerType {
                                   + " not called because this is day ->"
                                   + " \(lastResubDate != nil ? "\(currentDate.days(from: lastResubDate!))" : "not valid")"
                                   + " after last update.")
-                    backgroundHandler.end()
+                    backgroundHandler?.end()
                 }
             }
         }
@@ -371,13 +380,44 @@ final class PEManager: PEManagerType {
     func setEnvironment(_ environment: PEEnvironment) {
         userDefaultsService.environment = environment
     }
-    
+
+    /// Stores the wrapper-flavor string for the SDK User-Agent. Wrappers
+    /// (Flutter, React Native, etc.) call this during their own init. Empty
+    /// string clears the stored value; UA composition then falls back to
+    /// the native `PEPlatform.iOS` flavor.
+    func setPlatform(_ platform: String) {
+        if platform.isEmpty {
+            userDefaultsService.platform = nil
+        } else {
+            userDefaultsService.platform = platform
+        }
+    }
+
+    /// Stores the wrapper-plugin version for the SDK User-Agent. Empty
+    /// string clears the stored value; UA composition then omits the
+    /// wrapper-version slot entirely.
+    func setWrapperVersion(_ wrapperVersion: String) {
+        if wrapperVersion.isEmpty {
+            userDefaultsService.wrapperVersion = nil
+        } else {
+            userDefaultsService.wrapperVersion = wrapperVersion
+        }
+    }
+
     func setBadgeCount(count: Int) {
         userDefaultsService.badgeCount = count
-        if #available(iOS 17, *) {
+        if #available(iOS 16, *) {
             UNUserNotificationCenter.current().setBadgeCount(count)
         } else {
-            UIApplication.shared.applicationIconBadgeNumber = count
+            #if !APPLICATION_EXTENSION_API_ONLY
+            if Thread.isMainThread {
+                UIApplication.shared.applicationIconBadgeNumber = count
+            } else {
+                DispatchQueue.main.async {
+                    UIApplication.shared.applicationIconBadgeNumber = count
+                }
+            }
+            #endif
         }
     }
     
@@ -464,7 +504,7 @@ final class PEManager: PEManagerType {
             block()
             return nil
         } else {
-            return siteStatus != .active ? .stiteStatusNotActive : .subscriberNotAvailable
+            return siteStatus != .active ? .siteStatusNotActive : .subscriberNotAvailable
         }
     }
     
@@ -518,8 +558,100 @@ final class PEManager: PEManagerType {
         }
     }
     
+    // MARK: - trackEvent
+
+    /// Sends a custom analytics event to the backend. Validation rules mirror
+    /// the Android contract:
+    /// - `name` must be non-empty
+    /// - `properties` keys must be non-blank
+    /// - `properties` values must be `String`, `NSNumber`, or `Bool` —
+    ///   collections, dictionaries, dates, and other types are rejected
+    ///   client-side so callers learn about the problem immediately rather
+    ///   than receiving a server 4xx.
+    /// - `provider` defaults to `"PushEngage"` when nil
+    /// - `eventType` defaults to `"PushEngage.CustomEvent"` when nil
+    func trackEvent(name: String,
+                    properties: Parameters?,
+                    profileId: String?,
+                    provider: String?,
+                    eventType: String?,
+                    completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
+
+        if name.isEmpty {
+            completionHandler?(false, PEError.custom("Event name is required"))
+            return
+        }
+
+        if let validationError = validateTrackEventProperties(properties) {
+            completionHandler?(false, validationError)
+            return
+        }
+
+        // appId resolves once syncSiteInfo has returned. If trackEvent fires
+        // before that (e.g., on a fresh install), we'd otherwise send
+        // `site_id: 0` and silently 4xx server-side. Reject locally.
+        guard userDefaultsService.appId != nil else {
+            completionHandler?(false, PEError.siteKeyNotAvailable)
+            return
+        }
+
+        let error = prerequesiteNetworkCallCheck {
+            // Validator already accepted each value as String / Number / Bool,
+            // so `TrackEventValue.from` should always succeed here. If anything
+            // ever slips through, drop the entry rather than crashing.
+            let typedData: [String: TrackEventValue] = (properties ?? [:])
+                .compactMapValues { TrackEventValue.from($0) }
+            let request = TrackEventRequest(
+                siteId: userDefaultsService.appId ?? 0,
+                deviceTokenHash: userDefaultsService.subscriberHash,
+                eventName: name,
+                provider: provider ?? TrackEventRequest.defaultProvider,
+                eventType: eventType ?? TrackEventRequest.defaultEventType,
+                profileId: profileId,
+                data: typedData
+            )
+            subscriberService.trackEvent(request: request, completionHandler: completionHandler)
+        }
+
+        if error != nil {
+            completionHandler?(false, error)
+        }
+    }
+
+    /// Validates `properties` against the same rules Android's
+    /// `PEManager.validateEventData` enforces: keys must be non-blank, values
+    /// must be `String` / `NSNumber` / `Bool`. Returns a descriptive `PEError`
+    /// when invalid, `nil` when the dictionary is acceptable (including nil).
+    private func validateTrackEventProperties(_ properties: Parameters?) -> PEError? {
+        guard let properties else { return nil }
+        for (key, value) in properties {
+            if key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return PEError.custom("TrackEvent properties keys must be non-blank")
+            }
+            // `NSNumber` covers Int, Double, Float, and (importantly) Bool when
+            // bridged from `Any`. Filter `NSDate` out explicitly because Date
+            // bridges to NSDate which is not in the allowlist.
+            if value is String { continue }
+            if value is Bool { continue }
+            if let number = value as? NSNumber, !(number is NSDate) {
+                let typeName = String(cString: number.objCType)
+                // CFBoolean bridges to NSNumber with objCType "c" — already handled by Bool branch.
+                // Allow integer, float, double types; reject everything else.
+                switch typeName {
+                case "c", "C", "s", "S", "i", "I", "l", "L", "q", "Q", "f", "d":
+                    continue
+                default:
+                    return PEError.custom("TrackEvent property '\(key)' has unsupported numeric type \(typeName); only String, Number, and Boolean are allowed")
+                }
+            }
+            let typeName = String(describing: type(of: value))
+            return PEError.custom("TrackEvent property '\(key)' has unsupported type \(typeName); only String, Number, and Boolean are allowed")
+        }
+        return nil
+    }
+
     // MARK: - add-profile-id
-    
+
     func addProfile(for id: String, completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
         
         let error = prerequesiteNetworkCallCheck {
@@ -601,7 +733,7 @@ final class PEManager: PEManagerType {
         if siteStatus != .active {
             PELogger.debug(className: String(describing: PEManager.self),
                            message: "getSubscriptionStatus - site not active")
-            completionHandler?(false, .stiteStatusNotActive)
+            completionHandler?(false, .siteStatusNotActive)
             return
         }
         
@@ -646,11 +778,12 @@ final class PEManager: PEManagerType {
                 return
             }
             
-            // - User is subscribed only when both hasUnsubscribed = 0 AND notification_disabled = 0
-            let isSubscribed = ((subscriberData.hasUnsubscribed ?? 0) == 0 ) && ((subscriberData.notificationDisabled ?? 0) == 0)
-            
+            let hasUnsubscribed = subscriberData.rawFields["has_unsubscribed"] as? Int ?? 0
+            let notificationDisabled = subscriberData.rawFields["notification_disabled"] as? Int ?? 0
+            let isSubscribed = hasUnsubscribed == 0 && notificationDisabled == 0
+
             PELogger.debug(className: String(describing: PEManager.self),
-                           message: "getSubscriptionStatus - hasUnsubscribed: \(subscriberData.hasUnsubscribed ?? -1), notificationDisabled: \(subscriberData.notificationDisabled ?? -1), result: isSubscribed: \(isSubscribed)")
+                           message: "getSubscriptionStatus - hasUnsubscribed: \(hasUnsubscribed), notificationDisabled: \(notificationDisabled), result: isSubscribed: \(isSubscribed)")
             completionHandler?(isSubscribed, nil)
         }
     }
@@ -751,6 +884,11 @@ final class PEManager: PEManagerType {
                     // Mark as manually unsubscribed to prevent automatic re-subscription
                     self?.userDefaultsService.isManuallyUnsubscribed = true
                     self?.userDefaultsService.isSubscriberDeleted = true
+                    // identify/logout cache is owned by the current subscriber
+                    // identity — wipe it so a future re-subscribe starts clean
+                    // and doesn't short-circuit identify against a previous
+                    // subscriber's cached values.
+                    self?.userDefaultsService.clearSubscriberFields()
                 }
                 completionHandler?(response, error)
             }
@@ -861,7 +999,7 @@ extension PEManager {
         self.handleNotificationForUnprocessedEvent()
     }
     
-    public func setNotificationWillShowInForgroundHandler(block: PENotificationWillShowInForeground?) {
+    public func setNotificationWillShowInForegroundHandler(block: PENotificationWillShowInForeground?) {
         Self.notificationWillShowInForeground = block
     }
     
@@ -997,7 +1135,7 @@ extension PEManager {
             return
         }
         
-        let actionCreated = PEnotificationAction(actionID: actionId, actionType: actionType)
+        let actionCreated = PENotificationAction(actionID: actionId, actionType: actionType)
         let notificationResult = PENotificationOpenResult(notification: notification,
                                                           notficationAction: actionCreated)
         if notification.tag == lastNotificationIdFromAction {

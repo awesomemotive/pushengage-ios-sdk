@@ -33,7 +33,7 @@ import Foundation
     case dataTypeCastingError
     case requestTimeout
     case failedToLogError
-    case stiteStatusNotActive
+    case siteStatusNotActive
     case subscriberNotAvailable
     case profilealreadyExist
     case siteKeyNotAvailable
@@ -99,7 +99,7 @@ extension PEError: LocalizedError {
             return  .requestTimeOut
         case .failedToLogError:
             return  .failedToLogError
-        case .stiteStatusNotActive:
+        case .siteStatusNotActive:
             return .siteStatusNotActive
         case .subscriberNotAvailable:
             return .subscriberNotAvailable

@@ -31,7 +31,10 @@ typedef NS_ENUM(NSUInteger, ApiAction) {
     unsubscribe,
     subscribe,
     getSubscriptionStatus,
-    getSubscriptionNotificationStatus
+    getSubscriptionNotificationStatus,
+    trackEvent,
+    identify,
+    logout
 };
 
 @end

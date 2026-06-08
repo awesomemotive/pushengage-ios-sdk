@@ -30,4 +30,15 @@ protocol UserDefaultsType {
     var sponseredIdKey: String? { get }
     var isSwizzled: Bool { get set }
     var environment: PEEnvironment { get set }
+    var platform: String? { get set }
+    var wrapperVersion: String? { get set }
+
+    /// Subscriber-fields cache for `identify` / `logout` short-circuit semantics.
+    /// Values are stringified (matches Android's `.toString()` comparison) so the
+    /// cache can compare identify payloads regardless of original numeric type.
+    var subscriberFields: [String: String] { get }
+    var subscriberFieldsCacheTimestamp: Date? { get }
+    func mergeSubscriberFields(_ fields: [String: String])
+    func removeSubscriberFields(_ names: [String])
+    func clearSubscriberFields()
 }

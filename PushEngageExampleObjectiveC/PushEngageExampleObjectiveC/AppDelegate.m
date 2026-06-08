@@ -56,7 +56,7 @@ typedef void (^_Nullable SilentPushHandler)(UIBackgroundFetchResult);
     };
     
     application.applicationIconBadgeNumber = 0;
-    [PushEngage setEnvironmentWithEnvironment:EnvironmentStaging];
+    [PushEngage setEnvironmentWithEnvironment:PEEnvironmentStaging];
     [PushEngage setAppIDWithId:@"3ca8257d-1f40-41e0-88bc-ea28dc6495ef"];
     [PushEngage setInitialInfoFor:application with:launchOptions];
     [PushEngage setNotificationOpenHandlerWithBlock:actionHandler];

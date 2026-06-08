@@ -148,10 +148,10 @@ import Foundation
 @objc public class PENotificationOpenResult: NSObject {
    
     public var notification: PENotification
-    public var notificationAction: PEnotificationAction
-    
+    public var notificationAction: PENotificationAction
+
     public init(notification: PENotification,
-                notficationAction: PEnotificationAction) {
+                notficationAction: PENotificationAction) {
         self.notification = notification
         self.notificationAction = notficationAction
         super.init()
@@ -159,15 +159,18 @@ import Foundation
 }
 
 @objcMembers
-@objc public class PEnotificationAction: NSObject {
-    
+@objc(PEnotificationAction) public class PENotificationAction: NSObject {
+
     internal (set) public var actionID: String?
     public var actionType: ActionType
-    
-    public init(actionID: String?,  
+
+    public init(actionID: String?,
                 actionType: ActionType) {
         self.actionID = actionID
         self.actionType = actionType
         super.init()
     }
 }
+
+@available(*, deprecated, renamed: "PENotificationAction")
+public typealias PEnotificationAction = PENotificationAction

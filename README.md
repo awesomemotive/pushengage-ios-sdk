@@ -54,7 +54,7 @@ Select the latest version and add to your target.
 Add to your `Podfile`:
 
 ```ruby
-pod 'PushEngage', '~> 0.0.6'
+pod 'PushEngage', '~> 0.1.0'
 ```
 
 Then run:
@@ -152,15 +152,16 @@ PushEngage.setNotificationOpenHandler { result in
 
 | Category | Methods |
 |----------|---------|
-| **Setup** | `setAppID`, `setInitialInfo`, `setEnvironment`, `enableLogging`, `swizzleInjection` |
+| **Setup** | `setAppID`, `setInitialInfo`, `setEnvironment`, `enableLogging`, `swizzleInjection`, `setBadgeCount`, `getSdkVersion` |
 | **Permissions** | `requestNotificationPermission`, `getNotificationPermissionStatus` |
 | **Subscription** | `subscribe`, `unsubscribe`, `getSubscriptionStatus`, `getSubscriptionNotificationStatus` |
-| **Subscriber Data** | `getSubscriberId`, `getSubscriberDetails`, `addProfile` |
-| **Attributes** | `add`, `set`, `getSubscriberAttributes`, `deleteSubscriberAttributes` |
+| **User Identity** | `identify`, `logout`, `addProfile` |
+| **Subscriber Data** | `getSubscriberId`, `getSubscriberDetails` |
+| **Attributes** | `addSubscriberAttributes`, `setSubscriberAttributes`, `getSubscriberAttributes`, `deleteSubscriberAttributes` |
 | **Segments** | `addSegments`, `removeSegments`, `addDynamicSegments` |
-| **Events** | `sendTriggerEvent`, `sendGoal`, `addAlert` |
+| **Events** | `sendTriggerEvent`, `sendGoal`, `trackEvent`, `addAlert` |
 | **Campaigns** | `automatedNotification` (enable/disable) |
-| **UI** | `setBadgeCount`, notification handlers (open, foreground) |
+| **Notification Handlers** | `setNotificationOpenHandler`, `setNotificationWillShowInForegroundHandler` |
 | **Extensions** | `getCustomUIPayLoad`, `didReceiveNotificationExtensionRequest`, `serviceExtensionTimeWillExpire` |
 | **AppDelegate Forwarding** | `registerDeviceToServer`, `receivedRemoteNotification`, `didReceiveRemoteNotification`, `willPresentNotification` (required when swizzling is disabled) |
 
@@ -209,5 +210,3 @@ Having trouble? We're here to help.
 ## License
 
 MIT -- see [LICENSE](LICENSE) for details.
-
-

@@ -31,5 +31,7 @@ protocol SubscriberServiceType {
     func updateSettingPermission(status: PermissionStatus)
     func sendGoal(goal: Goal, completionHandler: ((_ response: Bool,
                                                    _ error: PEError?) -> Void)?)
+    func trackEvent(request: TrackEventRequest,
+                    completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?)
 }
 
