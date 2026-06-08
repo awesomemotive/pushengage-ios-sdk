@@ -68,14 +68,10 @@ final class ApplicationService: ApplicationServiceType {
         
         if self.isAlertNotificationWithCustomAlert(info: userInfo)
             || peNotification.isSponsered == 1 {
-            if #available(iOS 10.0, *) {
-                backgroundJobFired = true
-                self.addNotificationRequest(application: application,
-                                            notification: peNotification,
-                                            completionHandler: completionHandler)
-            } else {
-                self.notificationForiOS9(peNotification)
-            }
+            backgroundJobFired = true
+            self.addNotificationRequest(application: application,
+                                        notification: peNotification,
+                                        completionHandler: completionHandler)
         } else if application.applicationState == .active {
             notifydelegate?.setLast(notification: userInfo, completionHandler: nil)
             if Utility.isNotifiyIsDisplayable(userInfo: userInfo) {
@@ -100,18 +96,12 @@ final class ApplicationService: ApplicationServiceType {
         }
     }
     
-    @available(iOS, deprecated: 9.0)
-    private func notificationForiOS9(_ notification: PENotification) {
-        let notification = Utility.createUILocalNotification(for: notification)
-        UIApplication.shared.scheduleLocalNotification(notification)
-    }
-    
     @available(iOS 10.0, *)
     func addNotificationRequest(application: UIApplication,
                                 notification: PENotification,
                                 completionHandler: ((UIBackgroundFetchResult) -> Void)?) {
         DispatchQueue.global(qos: .background).async { [weak self] in
-            BackgroundTaskExpirationHandler.run(application: application) { [weak self] (background) in
+            BackgroundTaskExpirationHandler.run { [weak self] (background) in
                 let request: UNNotificationRequest?
                     = notification.isSponsered == 1 ? self?.createSponseredNotification(notification: notification) :
                 Utility.createUNNotificationRequest(notification: notification, networkService: self?.networkService)
@@ -125,7 +115,7 @@ final class ApplicationService: ApplicationServiceType {
                         }
                     }
                 }
-                background.end()
+                background?.end()
             }
             self?.notificationLifeCycleService
                 .withRetrynotificationLifecycleUpdate(with: .viewed,

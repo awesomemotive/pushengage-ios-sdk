@@ -25,6 +25,7 @@ final class DataManager: DataSourceType {
         let permisionStatus = userDefaults.notificationPermissionState
         let result = permisionStatus == .denied ? (userDefaults.isDeleteSubscriberOnDisable ?? false ? 1 : 0) : nil
         var env: String?
+        #if !APPLICATION_EXTENSION_API_ONLY
         if let certEnv = UIApplication.shared.entitlements.value(forKey: .apsEnvironment) as? String {
             if certEnv == "development" {
                 env = "dev"
@@ -32,6 +33,7 @@ final class DataManager: DataSourceType {
                 env = "prod"
             }
         }
+        #endif
         let subscriptionInfo = SubscriptionInfo(siteID: userDefaults.appId,
                                                subscription: Subscription(endpoint: userDefaults.deviceToken,
                                                                           projectID: Utility.getBundleIdentifier),

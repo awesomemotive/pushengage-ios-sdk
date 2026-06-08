@@ -13,9 +13,10 @@ import UIKit
  we can reduce the the integration steps for the host application.
  */
 
-// This class hooks into the UIApplicationDelegate selectors to receive iOS 9.
-//   - UNUserNotificationCenter is used for iOS 10
-//   - Orignal implementations are called so other plugins and the developers AppDelegate is still called.
+// Hooks into UIApplicationDelegate selectors so the host app doesn't need manual
+// integration. The actual notification delivery is handled via UNUserNotificationCenter
+// (iOS 10+); these hooks cover token registration, silent pushes, and forwarding to
+// the host AppDelegate's original implementations.
 
 class PushEngageAppDelegate: NSObject {
     
@@ -66,10 +67,6 @@ class PushEngageAppDelegate: NSObject {
                                             .application(_:didReceiveRemoteNotification:fetchCompletionHandler:)),
                                           Self.delegateSubclasses ?? [], newClass, unWrappedDelegateClass)
 
-        if Utility.lesserThaniOS(version: "10.0") {
-            self.swizzleMethodBeforeiOS10(delegate)
-        }
-        
         // inject selector for pushEngageApplication(_:didRegisterForRemoteNotificationsWithDeviceToken:)
         selectorHelper
             .injectToActualClassAtRuntime(#selector(self
@@ -85,10 +82,6 @@ class PushEngageAppDelegate: NSObject {
                                           #selector(delegate
                                             .application(_:didFailToRegisterForRemoteNotificationsWithError:)),
                                           Self.delegateSubclasses ?? [], newClass, unWrappedDelegateClass)
-        
-        if Utility.lesserThaniOS(version: "10.0") {
-            self.swizzleForiOS9(delegate)
-        }
         
         self.setPushEngageDelegate(delegate)
     }
@@ -124,9 +117,7 @@ class PushEngageAppDelegate: NSObject {
             let isAlertNotification = userInfo[userInfo: "aps"]?[userInfo: "alert"] != nil
             let appState = application.applicationState
             
-            if Utility.lesserThaniOS(version: "10.0") && appState == .inactive && isAlertNotification {
-                Self.manager.receivedNotification(with: userInfo, isOpened: true)
-            } else if appState == .active && isAlertNotification {
+            if appState == .active && isAlertNotification {
                 Self.manager.receivedNotification(with: userInfo, isOpened: false)
             } else {
                 initiateBackgroundtask = Self.manager
@@ -149,127 +140,6 @@ class PushEngageAppDelegate: NSObject {
         }
     }
    
-    // Back work compatiblity
-    @available(iOS, deprecated: 9.0)
-    func swizzleMethodBeforeiOS10(_ delegate: UIApplicationDelegate) {
-
-        if Self.delegateClass == nil {
-            PELogger.debug(className: String(describing: PushEngageAppDelegate.self), message: "delegate class is nil")
-        } else {
-            selectorHelper
-                .injectToActualClassAtRuntime(#selector(
-                                              pushEngageLocalNotificationOpend(
-                                                _:handleActionWithIdentifier:for:completionHandler:)),
-                                              #selector(
-                                                delegate.application(_:handleActionWithIdentifier:for:completionHandler:)),
-                                              Self.delegateSubclasses ?? [],
-                                              PushEngageAppDelegate.self, Self.delegateClass!)
-            selectorHelper
-                .injectToActualClassAtRuntime(#selector(pushEngageDidRegisterUserNotifications(_:didRegister:)),
-                                              #selector(delegate.application(_:didRegister:)),
-                                              Self.delegateSubclasses ?? [],
-                                              PushEngageAppDelegate.self,
-                                              Self.delegateClass!)
-        }
-    }
-
-    @available(iOS, deprecated: 9.0)
-    @objc dynamic func pushEngageLocalNotificationOpend(_ application: UIApplication,
-                                                        handleActionWithIdentifier identifier: String?,
-                                                        for notification: UILocalNotification,
-                                                        completionHandler: @escaping () -> Void) {
-        if Self.manager.getAppId() != nil {
-            self.operationForLocalActionBased(notification: notification, with: identifier ?? "")
-        }
-        
-        if self
-            .responds(to: #selector(pushEngageLocalNotificationOpend(_:handleActionWithIdentifier:for:completionHandler:))) {
-            self.pushEngageLocalNotificationOpend(application,
-                                                  handleActionWithIdentifier: identifier,
-                                                  for: notification,
-                                                  completionHandler: completionHandler)
-        }
-        completionHandler()
-    }
-    
-    @available(iOS, deprecated: 9.0)
-    private func operationForLocalActionBased(notification: UILocalNotification,
-                                              with identifier: String) {
-        
-        guard var userInfo = notification.userInfo else {
-            return
-        }
-        
-        userInfo[userInfo: PayloadConstants.custom]?[userInfo: "ad"]?
-        .updateValue(identifier, forKey: "actionSelected")
-        
-//        let applicationStateisActive = UIApplication.shared.applicationState == .active
-        Self.manager.receivedNotification(with: userInfo, isOpened: true)
-        
-        // commented just because of the reference
-        
-//        if !applicationStateisActive {
-//            Self.viewModel.handleNotificationOpened(userInfo, with: .taken)
-//        }
-    }
-    
-    
-//  implemented for the iOS 9 compatible notification settings
-    @available(iOS, deprecated: 9.0)
-    @objc dynamic func pushEngageDidRegisterUserNotifications(_ application: UIApplication,
-                                                              didRegister
-                                                              notificationSettings: UIUserNotificationSettings) {
-        if Self.manager.getAppId() != nil {
-            Self.manager.update(notificationType: Int(notificationSettings.types.rawValue))
-        }
-
-        if self.responds(to: #selector(pushEngageDidRegisterUserNotifications(_:didRegister:))) {
-            self.pushEngageDidRegisterUserNotifications(application, didRegister: notificationSettings)
-        }
-    }
-    
-    @available(iOS, deprecated: 9.0)
-    private func swizzleForiOS9(_ delegate: UIApplicationDelegate) {
-        if Self.delegateClass == nil {
-            PELogger.debug(className: String(describing: PushEngageAppDelegate.self), message: "delegate class is nil")
-        } else {
-            selectorHelper
-                .injectToActualClassAtRuntime(#selector(pushEngageReciveRemoteNotification(_:didReceiveRemoteNotification:)),
-                                              #selector(delegate
-                                              .application(_:didReceiveRemoteNotification:)),
-                                              Self.delegateSubclasses ?? [],
-                                              PushEngageAppDelegate.self, Self.delegateClass!)
-            selectorHelper
-                .injectToActualClassAtRuntime(#selector(pushEngageLocalNotificationOpened(_:didReceive:)),
-                                              #selector(delegate.application(_:didReceive:)),
-                                              Self.delegateSubclasses ?? [],
-                                              PushEngageAppDelegate.self, Self.delegateClass!)
-
-        }
-    }
-    
-    @available(iOS, deprecated: 9.0)
-    @objc dynamic func pushEngageLocalNotificationOpened(_ application: UIApplication,
-                                                         didReceive notification: UILocalNotification) {
-        if Self.manager.getAppId() != nil {
-            self.operationForLocalActionBased(notification: notification, with: "__DEFAULT__")
-        }
-        
-        if self.responds(to: #selector(pushEngageLocalNotificationOpened(_:didReceive:))) {
-            self.pushEngageLocalNotificationOpened(application, didReceive: notification)
-        }
-    }
-    
-    @objc dynamic func pushEngageReciveRemoteNotification(_ application: UIApplication,
-                                                          didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
-        if Self.manager.getAppId() != nil {
-            Self.manager.receivedNotification(with: userInfo, isOpened: true)
-        }
-        
-        if self.responds(to: #selector(pushEngageReciveRemoteNotification(_:didReceiveRemoteNotification:))) {
-            self.pushEngageReciveRemoteNotification(application, didReceiveRemoteNotification: userInfo)
-        }
-    }
 }
 
 

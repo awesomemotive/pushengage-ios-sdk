@@ -8,8 +8,12 @@
 import Foundation
 
 class UserDefaultManager: UserDefaultsType {
-    
-    private let userDefaultSharedContainer: UserDefaults? = .shared
+
+    private let userDefaultSharedContainer: UserDefaults?
+
+    init(userDefaults: UserDefaults? = .shared) {
+        self.userDefaultSharedContainer = userDefaults
+    }
     
     var environment: PEEnvironment {
         get {
@@ -45,7 +49,23 @@ class UserDefaultManager: UserDefaultsType {
             userDefaultSharedContainer?[.subscriberHash] ?? ""
         }
         set(value) {
+            // When the subscriber identity changes, the identify/logout
+            // cache is no longer authoritative — wipe it. Same trigger as
+            // Android's `mergeSubscriberFields` clearing on hash rewrite.
+            let previous: String = userDefaultSharedContainer?[.subscriberHash] ?? ""
+
+            // Don't allow a transient parse-error path that writes "" to
+            // clobber a valid subscriberHash. Treat empty-overwrite as a
+            // no-op when there's a real previous value. Use `clear...` if
+            // you genuinely want to forget the subscriber.
+            if value.isEmpty && !previous.isEmpty {
+                return
+            }
+
             userDefaultSharedContainer?[.subscriberHash] = value
+            if previous != value {
+                clearSubscriberFields()
+            }
         }
     }
     
@@ -159,6 +179,56 @@ class UserDefaultManager: UserDefaultsType {
         set {
             userDefaultSharedContainer?[.isSwizzled] = newValue
         }
+    }
+
+    var platform: String? {
+        get {
+            userDefaultSharedContainer?[.platform]
+        }
+        set {
+            userDefaultSharedContainer?[.platform] = newValue
+        }
+    }
+
+    var wrapperVersion: String? {
+        get {
+            userDefaultSharedContainer?[.wrapperVersion]
+        }
+        set {
+            userDefaultSharedContainer?[.wrapperVersion] = newValue
+        }
+    }
+
+    var subscriberFields: [String: String] {
+        guard let data = userDefaultSharedContainer?[.subscriberFieldsCache] else { return [:] }
+        return (try? JSONDecoder().decode([String: String].self, from: data)) ?? [:]
+    }
+
+    var subscriberFieldsCacheTimestamp: Date? {
+        return userDefaultSharedContainer?[.subscriberFieldsCacheTimestamp]
+    }
+
+    func mergeSubscriberFields(_ fields: [String: String]) {
+        var current = subscriberFields
+        for (k, v) in fields { current[k] = v }
+        writeSubscriberFields(current, timestamp: Date())
+    }
+
+    func removeSubscriberFields(_ names: [String]) {
+        var current = subscriberFields
+        for n in names { current.removeValue(forKey: n) }
+        writeSubscriberFields(current, timestamp: Date())
+    }
+
+    func clearSubscriberFields() {
+        userDefaultSharedContainer?[.subscriberFieldsCache] = nil
+        userDefaultSharedContainer?[.subscriberFieldsCacheTimestamp] = nil
+    }
+
+    private func writeSubscriberFields(_ fields: [String: String], timestamp: Date) {
+        guard let data = try? JSONEncoder().encode(fields) else { return }
+        userDefaultSharedContainer?[.subscriberFieldsCache] = data
+        userDefaultSharedContainer?[.subscriberFieldsCacheTimestamp] = timestamp
     }
     
     func save<T: Codable>(object: T, for key: String) {

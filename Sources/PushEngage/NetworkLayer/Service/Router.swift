@@ -9,7 +9,7 @@ import Foundation
 
 class Router: NetworkRouterType {
 
-    private static let sessionManager: URLSession = {
+    private static func makeDefaultSession() -> URLSession {
         let config = URLSessionConfiguration.ephemeral
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
         if #available(iOS 11.0, *) {
@@ -18,9 +18,21 @@ class Router: NetworkRouterType {
         config.timeoutIntervalForRequest = NetworkConstants.requestTimeout
         config.timeoutIntervalForResource = NetworkConstants.responseTimeOut
         return URLSession(configuration: config)
-    }()
+    }
 
-    
+    // Process-wide default session. The DI container resolves `Router` with
+    // `.graph` scope, so every `resolve()` constructs a new instance; sharing
+    // one URLSession across them preserves the connection pool / TLS reuse
+    // that the original `static let` provided. Tests inject their own via
+    // `init(session:)` and bypass this default.
+    private static let sessionManager: URLSession = makeDefaultSession()
+
+    private let sessionManager: URLSession
+
+    init(session: URLSession? = nil) {
+        self.sessionManager = session ?? Router.sessionManager
+    }
+
     private var task: URLSessionTask?
     
     private static func validation(for range: Range<Int>, statusCode: URLResponse?) -> (Bool?, Int?) {
@@ -61,7 +73,7 @@ class Router: NetworkRouterType {
             do {
                 let request = try route.asURLRequest()
                 PELogger.logNetworkRequest(className: String(describing: Router.self), request: request)
-                task = Router.sessionManager.dataTask(with: request) { (data, response, error) in
+                task = sessionManager.dataTask(with: request) { (data, response, error) in
                     PELogger.logNetworkResponse(className: String(describing: Router.self),
                                                 response: (request, data, response))
                     if let error = error {
@@ -101,7 +113,7 @@ class Router: NetworkRouterType {
             do {
                 let request = try route.asURLRequest()
                 PELogger.logNetworkRequest(className: String(describing: Router.self), request: request)
-                task = Router.sessionManager.downloadTask(with: request) { (url, response, error ) in
+                task = sessionManager.downloadTask(with: request) { (url, response, error ) in
                     if let error = error {
                         PELogger.error(className: String(describing: Router.self),
                                        message: error.localizedDescription)

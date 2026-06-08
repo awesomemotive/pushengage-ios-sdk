@@ -185,4 +185,20 @@ extension UserDefaults.Key {
     static var isSwizzled: UserDefaults.Key<Bool> {
         return .init(name: UserDefaultConstant.isSwizzled)
     }
+
+    static var platform: UserDefaults.Key<String> {
+        return .init(name: UserDefaultConstant.platform)
+    }
+
+    static var wrapperVersion: UserDefaults.Key<String> {
+        return .init(name: UserDefaultConstant.wrapperVersion)
+    }
+
+    static var subscriberFieldsCache: UserDefaults.Key<Data> {
+        return .init(name: UserDefaultConstant.subscriberFieldsCache)
+    }
+
+    static var subscriberFieldsCacheTimestamp: UserDefaults.Key<Date> {
+        return .init(name: UserDefaultConstant.subscriberFieldsCacheTimestamp)
+    }
 }

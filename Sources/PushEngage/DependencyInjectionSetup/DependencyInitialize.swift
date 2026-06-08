@@ -49,11 +49,7 @@ internal final class DependencyInitialize {
             // MARK: - NotificationProtocol
             .register(NotificationServiceType.self) { resolved in
                 let userDefaultServices = resolved.resolve(UserDefaultsType.self)
-                if #available(iOS 10.0, *) {
-                    return NotificationSettingsManageriOS10(userDefaultService: userDefaultServices)
-                } else {
-                    return NotificationSettingsManageriOS9(userDefaultService: userDefaultServices)
-                }
+                return NotificationSettingsManageriOS10(userDefaultService: userDefaultServices)
             }
             
             // MARK: - SubscriberService

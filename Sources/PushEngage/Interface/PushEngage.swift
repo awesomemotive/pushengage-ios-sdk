@@ -68,6 +68,131 @@ public typealias PENotificationWillShowInForeground
     @objc public static func setBadgeCount(count: Int) {
         manager.setBadgeCount(count: count)
     }
+
+    /// Returns the SDK's release version string (e.g. `"0.1.0"`).
+    ///
+    /// Useful for surfacing the active SDK version in customer
+    /// support / about screens. The value is stable for a given
+    /// build and changes with each release.
+    ///
+    /// - Returns: A semver-formatted version string.
+    @objc public static func getSdkVersion() -> String {
+        return NetworkConstants.sdkVersion
+    }
+
+    /// Sets the wrapper-flavor segment of the SDK User-Agent. Wrappers
+    /// (React Native, Flutter, etc.) call this during their own init to
+    /// identify themselves to the backend. Pass one of the `PEPlatform`
+    /// constants for known wrappers, or any string for custom integrations
+    /// — the SDK does not gatekeep new wrappers. Empty string clears the
+    /// stored value; the UA then falls back to native `iOS`.
+    @objc public static func setPlatform(_ platform: String) {
+        manager.setPlatform(platform)
+    }
+
+    /// Sets the wrapper-plugin version for the SDK User-Agent. Empty
+    /// string clears the stored value; the wrapper-version slot is then
+    /// omitted from the UA entirely.
+    @objc public static func setWrapperVersion(_ wrapperVersion: String) {
+        manager.setWrapperVersion(wrapperVersion)
+    }
+
+    /// Sends a custom analytics event to the backend.
+    ///
+    /// Validation rules:
+    /// - `name` must be non-empty.
+    /// - `properties` keys must be non-blank.
+    /// - `properties` values must be `String`, `NSNumber` (Int/Double/Float),
+    ///   or `Bool`. Arrays, dictionaries, dates, and other types are
+    ///   rejected client-side via the completion handler.
+    /// - `provider` defaults to `"PushEngage"` when nil.
+    /// - `eventType` defaults to `"PushEngage.CustomEvent"` when nil.
+    ///
+    /// - Parameters:
+    ///   - name: Event name (required).
+    ///   - properties: Optional key/value payload sent in the request body.
+    ///   - profileId: Optional subscriber profile id to attribute the event to.
+    ///   - provider: Optional provider override.
+    ///   - eventType: Optional event-type override.
+    ///   - completionHandler: Completion fired with `(success, error)`.
+    ///
+    /// Example usage:
+    /// ```swift
+    /// PushEngage.trackEvent(name: "MySite.AddToCart",
+    ///                       properties: ["amount": 19.99, "currency": "USD"],
+    ///                       profileId: "user-42",
+    ///                       provider: nil,
+    ///                       eventType: nil) { success, error in
+    ///     if success { print("Event tracked") }
+    /// }
+    /// ```
+    @objc public static func trackEvent(name: String,
+                                        properties: Parameters?,
+                                        profileId: String?,
+                                        provider: String?,
+                                        eventType: String?,
+                                        completionHandler: ((_ response: Bool,
+                                                             _ error: Error?) -> Void)?) {
+        manager.trackEvent(name: name,
+                           properties: properties,
+                           profileId: profileId,
+                           provider: provider,
+                           eventType: eventType,
+                           completionHandler: completionHandler)
+    }
+
+    /// Lazily-constructed singleton handler for identify / logout. Created on
+    /// first access so the SDK doesn't eagerly resolve the network router at
+    /// `PushEngage` static-init time.
+    private static let subscriberFieldsHandler: PESubscriberFieldsHandler = {
+        PESubscriberFieldsHandler(networkRouter: DependencyInitialize.getRouter(),
+                                  userDefaults: DependencyInitialize.getUserDefaults())
+    }()
+
+    /// Identifies the current subscriber with up to 12 predefined fields:
+    /// `first_name`, `last_name`, `email`, `phone`, `gender`, `dob`,
+    /// `language`, `profile_id`, `country`, `city`, `state`, `zip`.
+    ///
+    /// Sends `PUT /subscriber/{hash}` with the supplied field map. Values must
+    /// be `String`, `NSNumber` (Int/Double/Float), or `Bool`; numeric
+    /// `profile_id` is auto-coerced to its `String` form before transmission
+    /// (web SDK parity).
+    ///
+    /// Repeat calls with the same payload short-circuit locally and fire the
+    /// success callback without a network round-trip; the cache is bounded by
+    /// a 24h TTL so dashboard-side edits surface within a day.
+    ///
+    /// - Parameters:
+    ///   - fields: Subscriber fields to upsert.
+    ///   - completionHandler: Completion fired with `(success, error)`.
+    @objc public static func identify(fields: Parameters,
+                                      completionHandler: ((_ response: Bool,
+                                                           _ error: Error?) -> Void)?) {
+        subscriberFieldsHandler.identify(fields: fields) { ok, error in
+            completionHandler?(ok, error)
+        }
+    }
+
+    /// Removes subscriber fields previously set via `identify`. `nil` or an
+    /// empty list defaults to the PII set
+    /// `[first_name, last_name, email, phone, gender, dob, profile_id]` —
+    /// matches the web SDK logout fallback.
+    ///
+    /// Sends `DELETE /subscriber/{hash}/fields` with `{"fields": [<names>]}`.
+    /// If none of the requested names are currently cached locally, fires the
+    /// success callback without a network round-trip.
+    ///
+    /// - Parameters:
+    ///   - fieldNames: Subscriber field names to remove, or `nil` for the
+    ///                 default PII set.
+    ///   - completionHandler: Completion fired with `(success, error)`.
+    @objc public static func logout(fieldNames: [String]?,
+                                    completionHandler: ((_ response: Bool,
+                                                         _ error: Error?) -> Void)?) {
+        subscriberFieldsHandler.logout(fieldNames: fieldNames) { ok, error in
+            completionHandler?(ok, error)
+        }
+    }
     
     /// This method is crucial for setting up the SDK. If the developer prefers not to handle the setup manually,
     /// calling this method in the `init` method of the Application AppDelegate is essential. Otherwise, the SDK
@@ -95,7 +220,7 @@ public typealias PENotificationWillShowInForeground
     ///
     /// - Parameter block: Pass the `PENotificationWillShowInForeground` block from the `AppDelegate` to handle notifications when the app is active.
     @objc public static func setNotificationWillShowInForegroundHandler(block: PENotificationWillShowInForeground?) {
-        manager.setNotificationWillShowInForgroundHandler(block: block)
+        manager.setNotificationWillShowInForegroundHandler(block: block)
     }
     
     /// Call this method in the `AppDelegate` to set the app push ID in the SDK, registering the subscriber to that specific app push ID.
@@ -271,7 +396,68 @@ public typealias PENotificationWillShowInForeground
                                                           _ error: Error?) -> Void)?) {
         manager.set(attributes: attributes, completionHandler: completionHandler)
     }
-    
+
+    /// Updates attributes of a subscriber. If an attribute with the specified key already exists, the existing value
+    /// will be replaced.
+    ///
+    /// - Parameters:
+    ///   - attributes: Attributes to be added. Should be in the format ["attributeName": attributeValue].
+    ///   - completionHandler: A closure that gets called after the update operation is completed.
+    ///                         Provides a response boolean indicating success or failure and an optional error.
+    ///
+    /// - Note: The `attributes` parameter supports [String: Any] type, for example: ["name": "Bob"].
+    ///
+    /// - Example usage:
+    ///   ```
+    ///   let attributes = ["name": "Bob", "age": 30]
+    ///   PushEngage.addSubscriberAttributes(attributes) { success, error in
+    ///       if success {
+    ///           print("Attributes added/updated successfully.")
+    ///       } else {
+    ///           if let error = error {
+    ///               print("Error occurred: \(error.localizedDescription)")
+    ///           } else {
+    ///               print("Unknown error occurred.")
+    ///           }
+    ///       }
+    ///   }
+    ///   ```
+    @objc public static func addSubscriberAttributes(_ attributes: Parameters,
+                                                     completionHandler: ((_ response: Bool,
+                                                                          _ error: Error?) -> Void)? = nil) {
+        manager.add(attributes: attributes, completionHandler: completionHandler)
+    }
+
+    /// Sets attributes of a subscriber replacing any previously associated attributes.
+    ///
+    /// - Parameters:
+    ///   - attributes: Attributes to be added. Should be in the format ["attributeName": attributeValue].
+    ///   - completionHandler: A closure that gets called after the update operation is completed.
+    ///                         Provides a response boolean indicating success or failure and an optional error.
+    ///
+    /// - Note: The `attributes` parameter supports [String: Any] type, for example: ["name": "Bob"].
+    ///
+    /// - Example usage:
+    ///   ```
+    ///   let attributes = ["name": "Bob", "age": 30]
+    ///   PushEngage.setSubscriberAttributes(attributes) { success, error in
+    ///       if success {
+    ///           print("Attributes added/updated successfully.")
+    ///       } else {
+    ///           if let error = error {
+    ///               print("Error occurred: \(error.localizedDescription)")
+    ///           } else {
+    ///               print("Unknown error occurred.")
+    ///           }
+    ///       }
+    ///   }
+    ///   ```
+    @objc public static func setSubscriberAttributes(_ attributes: Parameters,
+                                                     completionHandler: ((_ response: Bool,
+                                                                          _ error: Error?) -> Void)? = nil) {
+        manager.set(attributes: attributes, completionHandler: completionHandler)
+    }
+
     /// Retrieve the attributes of the subscriber.
     ///
     /// Use this method to get the attributes associated with the subscriber.

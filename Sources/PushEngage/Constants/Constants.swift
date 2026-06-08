@@ -50,12 +50,17 @@ internal struct NetworkConstants {
     static let cdnurl = PENetworkURLs.backendCdnBaseURL
     
     // MARK: - SDK version
-    
-    static let sdkVersion = "0.0.6"
+    //
+    // Keep in sync with `spec.version` in PushEngage.podspec and the README badge
+    // on every release. This string is sent to the PushEngage backend in the
+    // `X-Pe-Sdk-Version` HTTP header, in the User-Agent string, and in the
+    // `swv` field of subscribe/sync/trackEvent payloads; a mismatch with the
+    // actual shipped version corrupts server-side analytics.
+    static let sdkVersion = "0.1.0"
 
     // MARK: - URL relative - path
     static let addSubscriberPath = "subscriber/add"
-    static let getHashPath = "subscriber/%@/"
+    static let getHashPath = "subscriber/%@"
     static let checkSubscriberHash = "subscriber/check/%@"
     static let subscriberAttribute = "subscriber/%@/attributes"
     static let getSubscriberAttribute = "subscriber/%@/attributes"
@@ -80,6 +85,13 @@ internal struct NetworkConstants {
     
     // MARK: Goal tracking
     static let sendGoal = "goals"
+
+    // MARK: Track event
+    static let trackEvent = "events/track"
+
+    // MARK: identify / logout (subscriber fields)
+    static let identifySubscriber       = "subscriber/%@"
+    static let logoutSubscriberFields   = "subscriber/%@/fields"
     
     // MARK: - Error logging relative path
     static let logs = "logs"
@@ -142,6 +154,10 @@ struct UserDefaultConstant {
     static let isTriedFirstTime = "is_tried_first_time"
     static let sponsered = "pe_sponser"
     static let isSwizzled = "is_swizzled"
+    static let platform = "pe_platform"
+    static let wrapperVersion = "pe_wrapper_version"
+    static let subscriberFieldsCache = "pe_subscriber_fields_cache"
+    static let subscriberFieldsCacheTimestamp = "pe_subscriber_fields_cache_ts"
 }
 
 // MARK: - Query parms key
@@ -202,7 +218,7 @@ extension String {
 
 struct RegistrationMessages {
     static let appIDNotFound = "Please provide proper App ID."
-    static let notificationDisable = "To access the notification api please allow the notifications from."
-    static let registerationFailed = "Please check App ID or re-visit setup instructions."
+    static let notificationDisabled = "To access the notification api please allow the notifications from."
+    static let registrationFailed = "Please check App ID or re-visit setup instructions."
 }
 

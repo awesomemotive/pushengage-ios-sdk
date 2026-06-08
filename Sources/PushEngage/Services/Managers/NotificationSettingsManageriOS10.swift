@@ -22,12 +22,16 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
     // MARK: - Private varibles.
     private let notificationDefault = NotificationCenter.default
     private let serialQueue: DispatchQueue
-    private let nativeNotificattionInstance = UNUserNotificationCenter.current()
+    private let nativeNotificattionInstance: UNUserNotificationCenterProtocol
     private var userDefaultService: UserDefaultsType
     private var isStartNotificationCalled: StartRemoteNotifyStatus = .notCalled
 
-    init(userDefaultService: UserDefaultsType) {
+    init(userDefaultService: UserDefaultsType,
+         notificationCenter: UNUserNotificationCenterProtocol? = nil) {
         self.userDefaultService = userDefaultService
+        // Resolve lazily — UNUserNotificationCenter.current() reads the bundle proxy
+        // and is unavailable in some unit-test contexts. Tests inject a mock instead.
+        self.nativeNotificattionInstance = notificationCenter ?? UNUserNotificationCenter.current()
         self.serialQueue = DispatchQueue(label: "com.pushengage.notification.settings.iOS10")
         notificationDefault.addObserver(self,
                                         selector: #selector(willEnterForeground),
@@ -70,18 +74,18 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
     // provides the notification permission in completion block
     func getNotificationPermissionState(completionHandler:@escaping ((PermissionStatus) -> Void)) {
         var permission: PermissionStatus = .notYetRequested
-        
+
         serialQueue.async { [weak self] in
-            self?.nativeNotificattionInstance.getNotificationSettings { [weak self] (settings) in
-                switch settings.authorizationStatus {
-                case .authorized:
+            self?.nativeNotificattionInstance.peGetAuthorizationStatus { status in
+                switch status {
+                case .authorized, .provisional:
                     permission = .granted
                 case .denied:
                     permission = .denied
                 case .notDetermined:
                     permission = .notYetRequested
-                default:
-                    break
+                @unknown default:
+                    permission = .notYetRequested
                 }
                 completionHandler(permission)
             }
@@ -179,9 +183,9 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
         }
     }
     
-    /// method is responsible for registering the device for the remote notifications.
+    /// Uses the injected `application` parameter only (not `UIApplication.shared`),
+    /// so the body compiles in extension-safe mode without a `#if` guard.
     func registerToApns(for application: UIApplication?) {
-        
         if Utility.isBackgroundFetchEnable() {
             DispatchQueue.main.async {
                 application?.registerForRemoteNotifications()
@@ -194,18 +198,22 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
                                       "\(Utility.isBackgroundFetchEnable())")
         }
     }
-    
+
     /// Show the custom alert to the subcribers.
     func showPermissionAlert(custom message: String, for permissionStatus: PermissionStatus) {
         let alert = UIAlertController(title: "\(Utility.getApplicationName) Would like to send you " +
                                       "Notifications", message: message, preferredStyle: .alert)
         let allowButton = UIAlertAction(title: "Allow", style: .default) { [weak self] _ in
             self?.notificationPermissionStatus.value = .granted
+            #if !APPLICATION_EXTENSION_API_ONLY
             self?.registerToApns(for: UIApplication.shared)
+            #endif
         }
         let cancel = UIAlertAction(title: "Don't Allow", style: .destructive) { [weak self] _ in
             self?.notificationPermissionStatus.value = .denied
+            #if !APPLICATION_EXTENSION_API_ONLY
             self?.registerToApns(for: UIApplication.shared)
+            #endif
         }
         
         let dismiss = UIAlertAction(title: "Dismiss", style: .cancel)
@@ -222,8 +230,8 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
             alert.addAction(cancel)
         }
         DispatchQueue.main.async {
-            UIApplication.shared.windows.first?
-                         .rootViewController?.present(alert, animated: true, completion: nil)
+            Utility.keyWindow?
+                   .rootViewController?.present(alert, animated: true, completion: nil)
         }
     }
     
@@ -232,9 +240,11 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
             guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
                 return
             }
+            #if !APPLICATION_EXTENSION_API_ONLY
             if UIApplication.shared.canOpenURL(settingsUrl) {
                 UIApplication.shared.open(settingsUrl)
             }
+            #endif
         }
     }
     

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import UIKit
 
 @objc public enum SegmentActions: Int {
     case add
@@ -33,6 +32,30 @@ final class SubscriberServiceManager: SubscriberServiceType {
                 .geoFetch: userDefault.isLocationEnabled]
     }
     
+    func trackEvent(request: TrackEventRequest,
+                    completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
+        networkRouter.request(.trackEvent(request)) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let decodedData = try JSONDecoder().decode(NetworkResponse.self, from: data)
+                    if decodedData.error == nil && decodedData.errorCode == 0 && (decodedData.data?.success ?? true) {
+                        completionHandler?(true, nil)
+                    } else {
+                        completionHandler?(false, PEError.networkResponseFailure(decodedData.errorCode,
+                                                                                 decodedData.errorMessage))
+                    }
+                } catch {
+                    completionHandler?(false, PEError.parsingError)
+                }
+            case .failure(let error):
+                PELogger.error(className: String(describing: SubscriberServiceManager.self),
+                               message: error.errorDescription ?? "")
+                completionHandler?(false, error)
+            }
+        }
+    }
+
     func sendGoal(goal: Goal, completionHandler: ((_ response: Bool,
                                                    _ error: PEError?) -> Void)?) {
         if goal.name.isEmpty {
@@ -537,14 +560,14 @@ extension SubscriberServiceManager {
                 if let error = error {
                     completion?(false, error)
                     if Utility.retryCheck(error: error) == .allow {
-                        BackgroundTaskExpirationHandler.run(application: UIApplication.shared) { background in
+                        BackgroundTaskExpirationHandler.run { background in
                             DispatchQueue.global(qos: .background).async {
                                 self?.retry(3, delay: 300) { [weak self] result in
                                     self?.addSubscriberToServer(completion: result)
                                 } completion: { error in
                                     PELogger.debug(className: String(describing: SubscriberServiceManager.self),
                                                    message: error != nil ? "failed to add subcriber" : "successfull added")
-                                    background.end()
+                                    background?.end()
                                 }
                             }
                         }
@@ -583,12 +606,12 @@ extension SubscriberServiceManager {
 extension SubscriberServiceManager {
     
     func retryAddSubscriberProcess(completion: ((PEError?) -> Void)?) {
-        BackgroundTaskExpirationHandler.run(application: UIApplication.shared) { [weak self] background in
+        BackgroundTaskExpirationHandler.run { [weak self] background in
             retry(3, delay: 300) { [weak self] result in
                 self?.addSubscriberToServer(completion: result)
             } completion: { error in
                 completion?(error)
-                background.end()
+                background?.end()
             }
         }
     }
@@ -620,7 +643,7 @@ extension SubscriberServiceManager {
             userDefault.isSubscriberDeleted = true
             PELogger.debug(className: String(describing: SubscriberServiceType.self),
                            message: "site status is not active.")
-            completion?(.stiteStatusNotActive)
+            completion?(.siteStatusNotActive)
             return
         }
         if userDefault.notificationPermissionState == .notYetRequested {

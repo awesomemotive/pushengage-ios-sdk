@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import  UIKit
 
 final class NotificationLifeCycleManager: NotificationLifeCycleServiceType {
     
@@ -27,7 +26,7 @@ final class NotificationLifeCycleManager: NotificationLifeCycleServiceType {
                                               notificationId: String,
                                               actionid: String?,
                                               completionHandler: NotificationCallResponse<Bool>?) {
-        BackgroundTaskExpirationHandler.run(application: UIApplication.shared) { background in
+        BackgroundTaskExpirationHandler.run { background in
             retry(typeOf: Bool.self, 1, delay: 30) { [weak self] result in
                 self?.notificationLifecycleUpdate(with: action, deviceHash: deviceHash, notificationId: notificationId,
                                                   actionid: actionid, completionHandler: result)
@@ -35,7 +34,7 @@ final class NotificationLifeCycleManager: NotificationLifeCycleServiceType {
                 switch result {
                 case .success(let response):
                     completionHandler?(.success(response))
-                    background.end()
+                    background?.end()
                 case.failure(let error):
                     completionHandler?(.failure(error))
                     let name: String = action == .clicked ? .clickCountTrackingFailed
@@ -43,7 +42,7 @@ final class NotificationLifeCycleManager: NotificationLifeCycleServiceType {
                     PELogger.logError(message: error.localizedDescription,
                                       name: name, tag: notificationId,
                                       subscriberHash: deviceHash)
-                    background.end()
+                    background?.end()
                 }
             }
         }
@@ -51,7 +50,7 @@ final class NotificationLifeCycleManager: NotificationLifeCycleServiceType {
     
     func withRetrysponseredNotification(with notification: PENotification,
                                         completionHandler: @escaping NotificationCallResponse<SponsoredData>) {
-        BackgroundTaskExpirationHandler.run(application: UIApplication.shared) { background in
+        BackgroundTaskExpirationHandler.run { background in
             let sponseredData = datasource.getPostBackSubscriptionData(for: notification)
             retry(typeOf: SponsoredData.self, delay: 1) { [weak self] result in
                 self?.sponseredNotification(with: notification, completionHandler: result,
@@ -60,15 +59,15 @@ final class NotificationLifeCycleManager: NotificationLifeCycleServiceType {
                 switch result {
                 case .success(let result):
                     completionHandler(.success(result))
-                    background.end()
+                    background?.end()
                 case .failure(let error):
                     completionHandler(.failure(error))
                     PELogger.logError(message: error.localizedDescription,
                                       name: .notificationRefetchFailed,
                                       tag: sponseredData.tag ?? "",
                                       subscriberHash: self?.userDefault.subscriberHash ?? "")
-                    background.end()
-                 
+                    background?.end()
+
                 }
             }
         }

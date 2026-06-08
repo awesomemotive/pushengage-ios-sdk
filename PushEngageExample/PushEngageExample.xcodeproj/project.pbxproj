@@ -25,6 +25,7 @@
 		1D49F63E2B7A3A78006F781B /* DataCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1D49F6332B7A39AC006F781B /* DataCell.xib */; };
 		1D49F63F2B7A3A80006F781B /* GoalViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1D49F62C2B7A3991006F781B /* GoalViewController.xib */; };
 		1D49F6402B7A3A83006F781B /* GoalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D49F62D2B7A3991006F781B /* GoalViewController.swift */; };
+		1DEA01000A1100000A100022 /* TrackEventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEA01000A1100000A100021 /* TrackEventViewController.swift */; };
 		1D49F6412B7A3A8E006F781B /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D49F62F2B7A3992006F781B /* String+Extensions.swift */; };
 		1D49F6422B7A3A92006F781B /* TextInputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D49F6292B7A3991006F781B /* TextInputViewController.swift */; };
 		1D49F6432B7A3A95006F781B /* SnackbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D49F62A2B7A3991006F781B /* SnackbarView.swift */; };
@@ -36,6 +37,10 @@
 		1D696BDB2C638D7500566FD8 /* PushEngage in Frameworks */ = {isa = PBXBuildFile; productRef = 1D696BDA2C638D7500566FD8 /* PushEngage */; };
 		1D696BDD2C638D8500566FD8 /* PushEngage in Frameworks */ = {isa = PBXBuildFile; productRef = 1D696BDC2C638D8500566FD8 /* PushEngage */; };
 		1D976FDD2C296A2900F6FAB1 /* PushEngageNotificationServiceExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1D5CBDE02B7C9A6F0046F8B1 /* PushEngageNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1DEA01000A1100000A100001 /* SdkEventLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEA01000A1100000A100002 /* SdkEventLog.swift */; };
+		1DEA01000A1100000A100003 /* DemoPrefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEA01000A1100000A100004 /* DemoPrefs.swift */; };
+		1DEA01000A1100000A100005 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEA01000A1100000A100006 /* SettingsViewController.swift */; };
+		1DEA01000A1100000A100007 /* ResponseSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEA01000A1100000A100008 /* ResponseSheetViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,6 +95,7 @@
 		1D49F62A2B7A3991006F781B /* SnackbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnackbarView.swift; sourceTree = "<group>"; };
 		1D49F62C2B7A3991006F781B /* GoalViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GoalViewController.xib; sourceTree = "<group>"; };
 		1D49F62D2B7A3991006F781B /* GoalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalViewController.swift; sourceTree = "<group>"; };
+		1DEA01000A1100000A100021 /* TrackEventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackEventViewController.swift; sourceTree = "<group>"; };
 		1D49F62F2B7A3992006F781B /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		1D49F6332B7A39AC006F781B /* DataCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DataCell.xib; sourceTree = "<group>"; };
 		1D49F6342B7A39AC006F781B /* DataCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCell.swift; sourceTree = "<group>"; };
@@ -104,6 +110,10 @@
 		1D5CBDE22B7C9A6F0046F8B1 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		1D5CBDE42B7C9A6F0046F8B1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1D5CBDEC2B7C9AFA0046F8B1 /* PushEngageNotificationServiceExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PushEngageNotificationServiceExtension.entitlements; sourceTree = "<group>"; };
+		1DEA01000A1100000A100002 /* SdkEventLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdkEventLog.swift; sourceTree = "<group>"; };
+		1DEA01000A1100000A100004 /* DemoPrefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoPrefs.swift; sourceTree = "<group>"; };
+		1DEA01000A1100000A100006 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		1DEA01000A1100000A100008 /* ResponseSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseSheetViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -185,6 +195,7 @@
 				1D0968E22B7B49960014068D /* PushEngageExample.entitlements */,
 				1D49F6322B7A39AC006F781B /* TriggerCampaign */,
 				1D49F62B2B7A3991006F781B /* Goal */,
+				1DEA01000A1100000A100020 /* TrackEvent */,
 				1D49F62E2B7A3992006F781B /* Helper */,
 				1D49F6282B7A3991006F781B /* HelperUI */,
 				1D49F6262B7A3980006F781B /* AppDelegate.swift */,
@@ -192,6 +203,7 @@
 				1D49F5FE2B7A2BAB006F781B /* Info.plist */,
 				1D49F64A2B7A3C6F006F781B /* HomeViewController.swift */,
 				1D49F64B2B7A3C6F006F781B /* HomeViewController.xib */,
+				1DEA01000A1100000A100006 /* SettingsViewController.swift */,
 				1D1FC45C2CC66D2500AA1FEC /* LandingViewController.swift */,
 				1D1FC45D2CC66D2500AA1FEC /* LandingViewController.xib */,
 			);
@@ -203,6 +215,7 @@
 			children = (
 				1D49F6292B7A3991006F781B /* TextInputViewController.swift */,
 				1D49F62A2B7A3991006F781B /* SnackbarView.swift */,
+				1DEA01000A1100000A100008 /* ResponseSheetViewController.swift */,
 			);
 			path = HelperUI;
 			sourceTree = "<group>";
@@ -216,10 +229,20 @@
 			path = Goal;
 			sourceTree = "<group>";
 		};
+		1DEA01000A1100000A100020 /* TrackEvent */ = {
+			isa = PBXGroup;
+			children = (
+				1DEA01000A1100000A100021 /* TrackEventViewController.swift */,
+			);
+			path = TrackEvent;
+			sourceTree = "<group>";
+		};
 		1D49F62E2B7A3992006F781B /* Helper */ = {
 			isa = PBXGroup;
 			children = (
 				1D49F62F2B7A3992006F781B /* String+Extensions.swift */,
+				1DEA01000A1100000A100002 /* SdkEventLog.swift */,
+				1DEA01000A1100000A100004 /* DemoPrefs.swift */,
 			);
 			path = Helper;
 			sourceTree = "<group>";
@@ -406,6 +429,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
 			shellScript = "
 ";
 		};
@@ -427,12 +451,17 @@
 			files = (
 				1D49F6272B7A3980006F781B /* AppDelegate.swift in Sources */,
 				1D49F6412B7A3A8E006F781B /* String+Extensions.swift in Sources */,
+				1DEA01000A1100000A100001 /* SdkEventLog.swift in Sources */,
+				1DEA01000A1100000A100003 /* DemoPrefs.swift in Sources */,
+				1DEA01000A1100000A100005 /* SettingsViewController.swift in Sources */,
+				1DEA01000A1100000A100007 /* ResponseSheetViewController.swift in Sources */,
 				1D49F63A2B7A3A4F006F781B /* TriggerViewController.swift in Sources */,
 				1D49F63C2B7A3A6B006F781B /* TriggerEntryViewController.swift in Sources */,
 				1D49F6432B7A3A95006F781B /* SnackbarView.swift in Sources */,
 				1D49F64C2B7A3C6F006F781B /* HomeViewController.swift in Sources */,
 				1D49F6422B7A3A92006F781B /* TextInputViewController.swift in Sources */,
 				1D49F6402B7A3A83006F781B /* GoalViewController.swift in Sources */,
+				1DEA01000A1100000A100022 /* TrackEventViewController.swift in Sources */,
 				1D1FC45E2CC66D2500AA1FEC /* LandingViewController.swift in Sources */,
 				1D49F6392B7A3A4B006F781B /* DataCell.swift in Sources */,
 			);
@@ -678,7 +707,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.6;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pushengage.PushEngageExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -713,7 +742,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.6;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pushengage.PushEngageExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

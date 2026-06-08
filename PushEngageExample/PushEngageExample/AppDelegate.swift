@@ -23,16 +23,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         self.window = UIWindow()
+        // First-launch flow: no App ID configured yet → force the user into
+        // SettingsViewController. Once they save and force-quit, the next
+        // launch takes the normal Home root path below.
+        if !DemoPrefs.shared.isConfigured {
+            let settings = SettingsViewController()
+            settings.isInitialSetup = true
+            self.window?.rootViewController = UINavigationController(rootViewController: settings)
+            self.window?.makeKeyAndVisible()
+            return true
+        }
         self.window?.rootViewController = UINavigationController(rootViewController: HomeViewController())
         self.window?.makeKeyAndVisible()
 
         if #available(iOSApplicationExtension 10.0, *) {
             UNUserNotificationCenter.current().delegate = self
         }
-        
+
         PushEngage.setBadgeCount(count: 0)
-        
-        PushEngage.setAppID(id: "Your_App_ID")
+
+        // Demo configuration is sourced from DemoPrefs so the user can switch
+        // sites/environments at runtime via SettingsViewController. Order
+        // matters: setEnvironment must run before setAppID so the SDK picks
+        // the right base URLs when it registers.
+        PushEngage.setEnvironment(environment: DemoPrefs.shared.environment)
+        PushEngage.setAppID(id: DemoPrefs.shared.appId)
         PushEngage.setInitialInfo(for: application,
                                              with: launchOptions)
         

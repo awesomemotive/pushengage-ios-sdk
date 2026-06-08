@@ -52,6 +52,14 @@ enum PERouter {
     // MARK: - Error logging  event
     case errorLogging(SDKServerLogger)
     case sendGoal(SubscriberDetails)
+
+    // MARK: - Custom event tracking
+    case trackEvent(TrackEventRequest)
+
+    // MARK: - Subscriber fields (identify / logout)
+    case identifySubscriber((hash: String, fields: Parameters))
+    case logoutSubscriberFields((hash: String, fieldNames: [String]))
+
     case none
     
     public func asURLRequest() throws -> URLRequest {
@@ -81,7 +89,8 @@ enum PERouter {
         }()
         
         var urlRequest = URLRequest(url: url, cachePolicy:
-                                        .reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: 10.0)
+                                        .reloadIgnoringLocalAndRemoteCacheData,
+                                    timeoutInterval: NetworkConstants.requestTimeout)
         urlRequest.httpMethod = method.rawValue
         urlRequest.allHTTPHeaderFields = header
         
@@ -150,6 +159,13 @@ enum PERouter {
         case .sendGoal(let goal):
             try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: goal)
             try URLParameterEncoder.encode(urlRequest: &urlRequest, with: params ?? [:], isSortedDesc: true)
+        case .trackEvent(let event):
+            try JSONParameterEncoder.encode(urlRequest: &urlRequest, with: event)
+            try URLParameterEncoder.encode(urlRequest: &urlRequest, with: params ?? [:], isSortedDesc: true)
+        case .identifySubscriber(let info):
+            try JSONParameterEncoder.encode(urlRequest: &urlRequest, for: info.fields)
+        case .logoutSubscriberFields(let info):
+            urlRequest.httpBody = try JSONSerialization.data(withJSONObject: info.fieldNames, options: [])
         default:
             break
         }
@@ -172,7 +188,8 @@ enum PERouter {
              .sponseredNotification,
              .sendGoal,
              .addAlert,
-             .errorLogging:
+             .errorLogging,
+             .trackEvent:
             return .post
         case .getImage,
              .getSubscriberForfields,
@@ -181,12 +198,14 @@ enum PERouter {
              .notificationCycleStatus,
              .subscriberSync:
             return .get
-        case .deleteAttributes:
+        case .deleteAttributes,
+             .logoutSubscriberFields:
             return .delete
         case .updateSubsciber,
              .addSubscriberAttributes,
              .subscriberUpgrade,
-             .sendTriggerEvent:
+             .sendTriggerEvent,
+             .identifySubscriber:
             return .put
         default:
             return .get
@@ -314,6 +333,12 @@ enum PERouter {
             
         case .sendGoal:
             relativePath = NetworkConstants.sendGoal
+        case .trackEvent:
+            relativePath = NetworkConstants.trackEvent
+        case .identifySubscriber(let info):
+            relativePath = String(format: NetworkConstants.identifySubscriber, info.hash)
+        case .logoutSubscriberFields(let info):
+            relativePath = String(format: NetworkConstants.logoutSubscriberFields, info.hash)
         case .errorLogging:
             url = URL(string: NetworkConstants.errorLoggingBaseURL)!
             relativePath = NetworkConstants.logs
@@ -335,8 +360,10 @@ enum PERouter {
         requestHeaders[NetworkConstants.requestHeaderClientKey] = NetworkConstants.requestHeaderClientValue
         requestHeaders[NetworkConstants.requestHeaderClientVersionKey] = Utility.getOSInfo
         requestHeaders[NetworkConstants.requestHeaderSdkVersionKey] = NetworkConstants.sdkVersion
-        requestHeaders[NetworkConstants.requestHeaderAppIdKey] = userDefaults.siteKey
-        requestHeaders[NetworkConstants.requestHeaderUserAgentKey] = "iOS-\(Utility.getOSInfo)/sdk-\(NetworkConstants.sdkVersion)/app-\(userDefaults.siteKey ?? "")"
+        if let siteKey = userDefaults.siteKey, !siteKey.isEmpty {
+            requestHeaders[NetworkConstants.requestHeaderAppIdKey] = siteKey
+        }
+        requestHeaders[NetworkConstants.requestHeaderUserAgentKey] = Utility.buildUserAgent(userDefaults: userDefaults)
         switch self {
         case .getImage,
              .addSubscriber,
@@ -360,7 +387,10 @@ enum PERouter {
              .sendGoal,
              .automatedNotification,
              .addAlert,
-             .sendTriggerEvent:
+             .sendTriggerEvent,
+             .trackEvent,
+             .identifySubscriber,
+             .logoutSubscriberFields:
             return requestHeaders
         case .sponseredNotification:
             return requestHeaders
