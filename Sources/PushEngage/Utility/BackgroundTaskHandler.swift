@@ -7,44 +7,41 @@
 
 import Foundation
 import UIKit
+import PushEngageExtension
 
 // Wraps a unit of work in a UIApplication background task so it can complete if
-// the host app is suspended. In app-extension builds (APPLICATION_EXTENSION_API_ONLY=YES)
-// this becomes a no-op wrapper — extensions have their own fixed runtime budget and
-// cannot request background time — and `run` invokes the handler with `nil`.
+// the host app is suspended.
 
-class BackgroundTaskExpirationHandler {
+class BackgroundTaskExpirationHandler: BackgroundTaskType {
 
     private var identifier = UIBackgroundTaskIdentifier.invalid
 
     class func run(handler: (BackgroundTaskExpirationHandler?) -> Void) {
-        #if !APPLICATION_EXTENSION_API_ONLY
         let task = BackgroundTaskExpirationHandler()
         task.begin()
         handler(task)
-        #else
-        handler(nil)
-        #endif
     }
 
     func begin() {
-        #if !APPLICATION_EXTENSION_API_ONLY
         PELogger.debug(className: String(describing: BackgroundTaskExpirationHandler.self),
                        message: "task started....")
         self.identifier = UIApplication.shared.beginBackgroundTask {
             self.end()
         }
-        #endif
     }
 
     func end() {
-        #if !APPLICATION_EXTENSION_API_ONLY
         if identifier != UIBackgroundTaskIdentifier.invalid {
             UIApplication.shared.endBackgroundTask(identifier)
         }
         identifier = UIBackgroundTaskIdentifier.invalid
         PELogger.debug(className: String(describing: BackgroundTaskExpirationHandler.self),
                        message: "Background task ended")
-        #endif
+    }
+}
+
+struct AppBackgroundTaskProvider: BackgroundTaskProviderType {
+    func run(handler: (BackgroundTaskType?) -> Void) {
+        BackgroundTaskExpirationHandler.run { handler($0) }
     }
 }

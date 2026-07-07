@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Locks in `PERouter.identifySubscriber` (PUT subscriber/{hash} with field-map body)
 /// and `PERouter.logoutSubscriberFields` (DELETE subscriber/{hash}/fields with body).
 final class PERouterIdentifyLogoutTests: XCTestCase {

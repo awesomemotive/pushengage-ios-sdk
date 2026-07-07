@@ -9,7 +9,7 @@
 #import <UserNotifications/UserNotifications.h>
 #import <UserNotificationsUI/UserNotificationsUI.h>
 
-@import PushEngage;
+@import PushEngageExtension;
 @import UIKit;
 // https://stackoverflow.com/questions/50575558/ios-notification-content-extension-add-buttons-in-storyboard-and-handle-the-cli
 
@@ -36,7 +36,7 @@
 - (void)didReceiveNotification:(UNNotification *)notification {
     
     NotificationViewController * __block blockSelf = self;
-    CustomUIModel *object = [PushEngage getCustomUIPayLoadFor:notification.request];
+    CustomUIModel *object = [PushEngageExtension getCustomUIPayLoadFor:notification.request];
     dispatch_async(dispatch_get_main_queue(), ^{
         blockSelf.label.text = object.title;
         blockSelf.imageView.image = object.image;

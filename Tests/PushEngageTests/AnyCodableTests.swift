@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class AnyCodableTests: XCTestCase {
 
     private func decode(_ json: String) throws -> AnyCodable {

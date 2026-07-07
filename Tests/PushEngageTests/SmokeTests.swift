@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class SmokeTests: XCTestCase {
 
     func test_publicEntryPoint_exists() {

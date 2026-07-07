@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Unit tests for the host-info helpers used in UA composition:
 /// `Utility.getHardwareIdentifier` and `Utility.getAppShortVersion`.
 final class UtilityHostInfoTests: XCTestCase {

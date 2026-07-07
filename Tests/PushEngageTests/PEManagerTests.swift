@@ -2,7 +2,7 @@ import XCTest
 import UIKit
 import UserNotifications
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Tier 3 — `PEManager` orchestration. Wires all 7 service mocks through
 /// the SUT and verifies dispatch, the prerequisite gate, notification routing,
 /// and the queue-flush behavior relevant to Issue #1 (cold-boot notifications).
@@ -10,7 +10,6 @@ final class PEManagerTests: XCTestCase {
 
     private var applicationService: MockApplicationService!
     private var notificationService: MockNotificationService!
-    private var notificationExtensionService: MockNotificationExtensionService!
     private var subscriberService: MockSubscriberService!
     private var userDefaults: MockUserDefaultsService!
     private var lifecycle: MockNotificationLifeCycleService!
@@ -21,7 +20,6 @@ final class PEManagerTests: XCTestCase {
         super.setUp()
         applicationService = MockApplicationService()
         notificationService = MockNotificationService()
-        notificationExtensionService = MockNotificationExtensionService()
         subscriberService = MockSubscriberService()
         userDefaults = MockUserDefaultsService()
         lifecycle = MockNotificationLifeCycleService()
@@ -36,7 +34,6 @@ final class PEManagerTests: XCTestCase {
 
         sut = PEManager(applicationService: applicationService,
                         notificationService: notificationService,
-                        notificationExtensionService: notificationExtensionService,
                         subscriberService: subscriberService,
                         userDefaultService: userDefaults,
                         notificationLifeCycleService: lifecycle,
@@ -53,7 +50,6 @@ final class PEManagerTests: XCTestCase {
         lifecycle = nil
         userDefaults = nil
         subscriberService = nil
-        notificationExtensionService = nil
         notificationService = nil
         applicationService = nil
         super.tearDown()
@@ -106,8 +102,8 @@ final class PEManagerTests: XCTestCase {
     // MARK: - setBadgeCount  (Issue #7 — native API exists)
     //
     // The current production implementation calls UNUserNotificationCenter.setBadgeCount
-    // (iOS 16+) or, on iOS 12-15, UIApplication.shared.applicationIconBadgeNumber wrapped
-    // in `#if !APPLICATION_EXTENSION_API_ONLY`. Both system calls throw
+    // (iOS 16+) or, on iOS 12-15, UIApplication.shared.applicationIconBadgeNumber
+    // (app-module code; never compiled extension-safe since the module split). Both system calls throw
     // NSInternalInconsistencyException (`bundleProxyForCurrentProcess is nil`) when
     // invoked from inside an SPM-driven XCTest bundle with no app host.
     //
@@ -577,35 +573,6 @@ final class PEManagerTests: XCTestCase {
     // `handleWillPresentNotificationInForeground` checks `application?.applicationState`
     // which requires setInitialInfo to have persisted the app — see note above.
     // These tests will move to the app-hosted XCTest bundle in Tier 5.
-
-    // MARK: - Extension surface delegation
-
-    func test_didReceiveNotificationExtensionRequest_forwardsToExtensionService() {
-        let content = UNMutableNotificationContent()
-        let request = UNNotificationRequest(identifier: "id",
-                                            content: content,
-                                            trigger: nil)
-        sut.didReceiveNotificationExtensionRequest(request, bestContentHandler: content)
-        XCTAssertEqual(notificationExtensionService.didReceiveExtensionCallCount, 1)
-    }
-
-    func test_serviceExtensionTimeWillExpire_forwardsToExtensionService() {
-        let content = UNMutableNotificationContent()
-        let request = UNNotificationRequest(identifier: "id",
-                                            content: content,
-                                            trigger: nil)
-        _ = sut.serviceExtensionTimeWillExpire(request, content: content)
-        XCTAssertEqual(notificationExtensionService.serviceExtensionTimeWillExpireCallCount, 1)
-    }
-
-    func test_getCustomUIPayLoad_forwardsToExtensionService() {
-        let content = UNMutableNotificationContent()
-        let request = UNNotificationRequest(identifier: "id",
-                                            content: content,
-                                            trigger: nil)
-        _ = sut.getCustomUIPayLoad(for: request)
-        XCTAssertEqual(notificationExtensionService.getContentExtensionInfoCallCount, 1)
-    }
 
     // MARK: - Application service delegation
 

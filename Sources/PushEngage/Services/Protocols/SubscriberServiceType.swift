@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import PushEngageExtension
 
 typealias ServiceCallBack = (_ responseObject: Parameters?, _ error: PEError?) -> Void
 typealias SubscriberBoolCallBack = (_ : Bool, _ error: PEError?) -> Void

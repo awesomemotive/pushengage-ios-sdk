@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Unit tests for `Utility.buildUserAgent` — the slash-delimited SDK User-Agent
 /// composition. Shape must mirror the Android counterpart for cross-platform
 /// parsing parity:

@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class NotificationLifeCycleManagerTests: XCTestCase {
 
     private var network: MockNetworkRouter!
@@ -16,7 +16,8 @@ final class NotificationLifeCycleManagerTests: XCTestCase {
         userDefaults = MockUserDefaultsService()
         sut = NotificationLifeCycleManager(networkRouter: network,
                                            datasource: datasource,
-                                           userDefault: userDefaults)
+                                           userDefault: userDefaults,
+                                           backgroundTask: ExtensionBackgroundTaskProvider())
     }
 
     override func tearDown() {

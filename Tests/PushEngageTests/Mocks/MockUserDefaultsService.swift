@@ -1,6 +1,6 @@
 import Foundation
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class MockUserDefaultsService: UserDefaultsType {
 
     // Storage backing the property protocol
@@ -22,6 +22,7 @@ final class MockUserDefaultsService: UserDefaultsType {
     var istriedFirstTime: Bool = false
     private(set) var sponseredIdKey: String? = nil
     var isSwizzled: Bool = false
+    var isSdkLoggingEnabled: Bool = false
     var environment: PEEnvironment = .production
     var platform: String? = nil
     var wrapperVersion: String? = nil

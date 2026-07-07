@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Locks in `PERouter.trackEvent` route behaviour: URL contains
 /// `events/track`, method is POST, body is the JSON-encoded TrackEventRequest,
 /// and the standard headers are populated.

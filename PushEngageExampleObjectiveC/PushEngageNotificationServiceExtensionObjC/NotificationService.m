@@ -6,7 +6,7 @@
 //
 
 #import "NotificationService.h"
-@import PushEngage;
+@import PushEngageExtension;
 
 @interface NotificationService ()
 
@@ -24,7 +24,7 @@
     self.bestAttemptContent = [request.content mutableCopy];
     
     if (self.bestAttemptContent) {
-        [PushEngage didReceiveNotificationExtensionRequest:request bestContentHandler:self.bestAttemptContent];
+        [PushEngageExtension didReceiveNotificationExtensionRequest:request bestContentHandler:self.bestAttemptContent];
         contentHandler(self.bestAttemptContent);
     }
 }
@@ -32,9 +32,9 @@
 - (void)serviceExtensionTimeWillExpire {
 
     if (self.contentHandler && self.request && self.bestAttemptContent) {
-        UNNotificationContent *content = [PushEngage serviceExtensionTimeWillExpire:self.request content:self.bestAttemptContent];
+        UNNotificationContent *content = [PushEngageExtension serviceExtensionTimeWillExpire:self.request content:self.bestAttemptContent];
         if (content) {
-            self.contentHandler(self.bestAttemptContent);
+            self.contentHandler(content);
             return;
         }
     }

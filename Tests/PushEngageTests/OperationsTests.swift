@@ -1,7 +1,7 @@
 import XCTest
 import UserNotifications
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Tier 8 — operation lifecycle + concrete operations.
 
 final class OperationsTests: XCTestCase {
@@ -181,6 +181,32 @@ final class OperationsTests: XCTestCase {
         } else {
             XCTFail("Expected underlying-error failure, got \(String(describing: op.result))")
         }
+    }
+
+    func test_downloadAttachmentOperation_nonHttpsURL_cancelsWithoutNetwork() {
+        for badURL in ["file:///var/mobile/Library/secret.txt", "http://example.test/img.png"] {
+            let content = UNMutableNotificationContent()
+            let network = MockNetworkRouter()
+            let op = DownloadAttachmentOperation(inputValue: (attachmentString: badURL,
+                                                              contentToModifiy: content,
+                                                              networkService: network))
+            op.start()
+
+            XCTAssertTrue(op.isCancelled, "\(badURL): non-https attachment URL must be rejected")
+            XCTAssertEqual(network.downloadCallCount, 0,
+                           "\(badURL): must short-circuit before any network call")
+            XCTAssertTrue(content.attachments.isEmpty, "\(badURL): must not attach anything")
+        }
+    }
+
+    func test_sanitizedAttachmentFilename_stripsPathTraversalKeepsPlainNames() {
+        XCTAssertEqual(DownloadAttachmentOperation.sanitizedAttachmentFilename("../../../etc/passwd"), "passwd")
+        XCTAssertEqual(DownloadAttachmentOperation.sanitizedAttachmentFilename("a/b/c.png"), "c.png")
+        XCTAssertEqual(DownloadAttachmentOperation.sanitizedAttachmentFilename("photo.jpg"), "photo.jpg")
+        XCTAssertEqual(DownloadAttachmentOperation.sanitizedAttachmentFilename(nil), "attachment")
+        XCTAssertEqual(DownloadAttachmentOperation.sanitizedAttachmentFilename(""), "attachment")
+        XCTAssertEqual(DownloadAttachmentOperation.sanitizedAttachmentFilename("/"), "attachment")
+        XCTAssertEqual(DownloadAttachmentOperation.sanitizedAttachmentFilename(".."), "attachment")
     }
 
     // MARK: - SponseredNotifictaionOperation

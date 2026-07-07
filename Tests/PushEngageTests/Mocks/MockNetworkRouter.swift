@@ -1,6 +1,6 @@
 import Foundation
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Records every call and lets a test inject the response per call.
 /// Default behavior: returns `.failure(.networkNotReachable)` so an
 /// un-stubbed test fails loudly rather than silently hanging.

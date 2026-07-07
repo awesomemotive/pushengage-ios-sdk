@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Locks in the Android-parity public aliases on the `PushEngage` facade.
 ///
 /// The pre-existing `add(attributes:completionHandler:)` and
@@ -47,16 +47,19 @@ final class PushEngageAttributeAliasTests: XCTestCase {
                       "to Obj-C for parity with Android / RN / Flutter SDKs")
     }
 
-    // MARK: - Back-compat — original argument-label form must still exist
+    // MARK: - Back-compat — original add/set are deprecated but still present
     //
-    // The aliases are additive. Anyone already calling `PushEngage.add(attributes:)`
-    // / `PushEngage.set(attributes:)` must keep compiling.
+    // They must still compile so existing callers keep working (now with a
+    // deprecation warning + fix-it to the SubscriberAttributes form). The test
+    // methods are marked deprecated so exercising the deprecated API stays warning-free.
 
+    @available(*, deprecated)
     func test_originalAdd_signatureStillExists() {
         let _: (Parameters, ((Bool, Error?) -> Void)?) -> Void
             = PushEngage.add(attributes:completionHandler:)
     }
 
+    @available(*, deprecated)
     func test_originalSet_signatureStillExists() {
         let _: (Parameters, ((Bool, Error?) -> Void)?) -> Void
             = PushEngage.set(attributes:completionHandler:)

@@ -8,15 +8,23 @@ let package = Package(
     platforms: [.iOS(.v12)],
     products: [
         .library(
+            name: "PushEngageExtension",
+            targets: ["PushEngageExtension"]),
+        .library(
             name: "PushEngage",
             targets: ["PushEngage"]),
     ],
     targets: [
         .target(
-            name: "PushEngage", path: "Sources"),
+            name: "PushEngageExtension",
+            path: "Sources/PushEngageExtension"),
+        .target(
+            name: "PushEngage",
+            dependencies: ["PushEngageExtension"],
+            path: "Sources/PushEngage"),
         .testTarget(
             name: "PushEngageTests",
-            dependencies: ["PushEngage"],
+            dependencies: ["PushEngage", "PushEngageExtension"],
             path: "Tests/PushEngageTests"),
     ]
 )

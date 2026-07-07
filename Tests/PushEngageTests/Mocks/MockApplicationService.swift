@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 import UserNotifications
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class MockApplicationService: ApplicationServiceType {
 
     weak var notifydelegate: LastNotificationSetDelegate?

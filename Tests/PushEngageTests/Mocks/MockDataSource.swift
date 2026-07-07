@@ -1,6 +1,6 @@
 import Foundation
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class MockDataSource: DataSourceType {
 
     private(set) var getSubscriptionDataCallCount = 0

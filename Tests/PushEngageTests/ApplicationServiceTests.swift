@@ -1,7 +1,7 @@
 import XCTest
 import UIKit
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class ApplicationServiceTests: XCTestCase {
 
     private var userDefaults: MockUserDefaultsService!

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>PushEngageAutoHandleDeeplinkURL</key>
-	<false/>
+	<true/>
 	<key>PushEngageInAppEnabled</key>
 	<false/>
 	<key>PushEngage_App_Group_Key</key>

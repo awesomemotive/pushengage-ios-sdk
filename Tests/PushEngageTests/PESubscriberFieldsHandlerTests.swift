@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Unit tests for `PESubscriberFieldsHandler`. Mirrors the Android counterpart's
 /// validate-→ short-circuit → network → cache-mutate flow for both identify and
 /// logout. All network IO is stubbed via `MockNetworkRouter`; cache state lives

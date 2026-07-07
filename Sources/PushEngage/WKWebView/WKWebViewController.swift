@@ -10,16 +10,6 @@ import WebKit
 
 class WKWebViewController: UIViewController {
     
-    private lazy var serachBar: UISearchBar = {
-       let search = UISearchBar()
-        search.translatesAutoresizingMaskIntoConstraints = false
-        search.placeholder = "https://"
-        search.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        search.returnKeyType = .search
-        search.delegate = self
-        return search
-    }()
-    
     private lazy var back: UIButton = {
        let back = UIButton()
         back.translatesAutoresizingMaskIntoConstraints = false
@@ -38,13 +28,12 @@ class WKWebViewController: UIViewController {
         return next
     }()
     
-    // if serach bar is not match the criteria the just remove from Stackview.
     private lazy var stackview: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [back, serachBar, nextButton])
+        let stackView = UIStackView(arrangedSubviews: [back, nextButton])
         stackView.alignment = .center
         stackView.axis = .horizontal
         stackView.spacing = 10
-        stackView.distribution = .fill
+        stackView.distribution = .equalSpacing
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
@@ -120,19 +109,15 @@ extension WKWebViewController: WKNavigationDelegate {
         }
     }
     
+    static func isAllowedNavigationURL(_ url: URL?) -> Bool {
+        guard let scheme = url?.scheme?.lowercased() else { return false }
+        // "about" is required for the empty-document bootstrap of scripted iframes.
+        return scheme == "http" || scheme == "https" || scheme == "about"
+    }
+
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        decisionHandler(navigationAction.request.url != nil ? .allow : .cancel)
-    }
-}
-
-extension WKWebViewController: UISearchBarDelegate {
-    
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()
-        if let urlString = searchBar.text, let url = URL(string: urlString) {
-            webView.load(URLRequest(url: url))
-        }
+        decisionHandler(Self.isAllowedNavigationURL(navigationAction.request.url) ? .allow : .cancel)
     }
 }
 

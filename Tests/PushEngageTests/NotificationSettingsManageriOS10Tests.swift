@@ -2,14 +2,14 @@ import XCTest
 import UIKit
 import UserNotifications
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Tier 4 — `NotificationSettingsManageriOS10` permission state machine.
 ///
 /// Uses an injected `UNUserNotificationCenterProtocol` mock (see
 /// `MockUNUserNotificationCenter`) so the full authorization-status matrix
-/// can be exercised — including the **Issue #2 early-return path** where the
-/// SDK fires its custom alert and resolves the completion immediately while
-/// the OS dialog is still in flight.
+/// can be exercised — including the early-return path where, for an
+/// already-decided OS permission, the SDK registers silently on `.granted`
+/// (no UI) or reports `.denied` back to the host, without showing any alert.
 @available(iOS 10.0, *)
 final class NotificationSettingsManageriOS10Tests: XCTestCase {
 
@@ -84,9 +84,29 @@ final class NotificationSettingsManageriOS10Tests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
 
-    func test_getNotificationPermissionState_sync_returnsCorrectValue() {
+    /// Regression for the deadlock fix: the getter must return BEFORE the authorization
+    /// callback runs — i.e. it must not block waiting on it. Delivery is gated behind a
+    /// suspended queue so the ordering is deterministic: if the getter blocked on the
+    /// callback (the old semaphore behaviour), `callbackRan` would be true at the assert.
+    func test_getNotificationPermissionState_async_returnsBeforeCallback_doesNotBlock() {
         notificationCenter.stubbedAuthorizationStatus = .authorized
-        XCTAssertEqual(sut.getNotificationPermissionState(), .granted)
+        let gate = DispatchQueue(label: "test.gated.delivery")
+        gate.suspend()
+        notificationCenter.completionQueue = gate
+
+        var callbackRan = false
+        let exp = expectation(description: "callback")
+        sut.getNotificationPermissionState { status in
+            callbackRan = true
+            XCTAssertEqual(status, .granted)
+            exp.fulfill()
+        }
+
+        XCTAssertFalse(callbackRan,
+                       "Getter must return without waiting on the callback (non-blocking)")
+        gate.resume()
+        wait(for: [exp], timeout: 1.0)
+        XCTAssertTrue(callbackRan)
     }
 
     // MARK: - Observable subscribe / notify
@@ -118,52 +138,53 @@ final class NotificationSettingsManageriOS10Tests: XCTestCase {
 
     // MARK: - handleNotificationPermission — branch matrix
 
-    // Helper: wait for the main-queue dispatch inside handleNotificationPermission.
-    private func runMainLoop() {
-        let exp = expectation(description: "main loop tick")
-        DispatchQueue.main.async { exp.fulfill() }
-        wait(for: [exp], timeout: 1.0)
-    }
-
-    /// Issue #2 reference: system already returned a decision (.authorized) AND
-    /// `ispermissionAlerted == false`. The SDK shows its custom in-app alert and
-    /// fires completion(true, nil) **immediately** — without waiting for the user.
-    func test_handleNotificationPermission_alreadyGrantedAndNotAlerted_firesCompletionImmediately() {
+    /// Already-granted + `ispermissionAlerted == false`: the SDK registers for remote
+    /// notifications silently (no custom in-app alert) and fires completion(true, nil)
+    /// immediately. It must not trigger the system authorization prompt.
+    func test_handleNotificationPermission_alreadyGrantedAndNotAlerted_registersSilently() {
         notificationCenter.stubbedAuthorizationStatus = .authorized
         userDefaults.ispermissionAlerted = false
 
-        var completionCalled = false
         var receivedGranted: Bool?
         var receivedError: PEError?
+        let exp = expectation(description: "completion")
         sut.handleNotificationPermission(for: UIApplication.shared) { granted, error in
-            completionCalled = true
             receivedGranted = granted
             receivedError = error
+            exp.fulfill()
         }
-        runMainLoop()
+        wait(for: [exp], timeout: 2.0)
 
-        XCTAssertTrue(completionCalled)
         XCTAssertEqual(receivedGranted, true)
         XCTAssertNil(receivedError)
         XCTAssertTrue(userDefaults.ispermissionAlerted,
-                      "Early-return path must mark ispermissionAlerted=true")
+                      "Silent-register path must mark ispermissionAlerted=true")
         XCTAssertEqual(notificationCenter.requestAuthorizationCallCount, 0,
-                       "Custom-alert path must NOT trigger the system request")
+                       "Silent-register path must NOT trigger the system request")
     }
 
-    /// Issue #2 reference: same as above but denied.
-    func test_handleNotificationPermission_alreadyDeniedAndNotAlerted_firesCompletionImmediately() {
+    /// Already-denied + `ispermissionAlerted == false`: the SDK reports denied to the host
+    /// (completion(false, nil)) without showing any custom alert, and must not trigger the
+    /// system authorization prompt.
+    func test_handleNotificationPermission_alreadyDeniedAndNotAlerted_reportsDeniedToHost() {
         notificationCenter.stubbedAuthorizationStatus = .denied
         userDefaults.ispermissionAlerted = false
 
         var receivedGranted: Bool?
-        sut.handleNotificationPermission(for: UIApplication.shared) { granted, _ in
+        var receivedError: PEError?
+        let exp = expectation(description: "completion")
+        sut.handleNotificationPermission(for: UIApplication.shared) { granted, error in
             receivedGranted = granted
+            receivedError = error
+            exp.fulfill()
         }
-        runMainLoop()
+        wait(for: [exp], timeout: 2.0)
 
         XCTAssertEqual(receivedGranted, false)
+        XCTAssertNil(receivedError)
         XCTAssertTrue(userDefaults.ispermissionAlerted)
+        XCTAssertEqual(notificationCenter.requestAuthorizationCallCount, 0,
+                       "Already-denied path must NOT trigger the system request")
     }
 
     /// When the user has already been alerted, the early-return path is skipped
@@ -174,10 +195,12 @@ final class NotificationSettingsManageriOS10Tests: XCTestCase {
         userDefaults.ispermissionAlerted = true
 
         var receivedGranted: Bool?
+        let exp = expectation(description: "completion")
         sut.handleNotificationPermission(for: UIApplication.shared) { granted, _ in
             receivedGranted = granted
+            exp.fulfill()
         }
-        runMainLoop()
+        wait(for: [exp], timeout: 2.0)
 
         XCTAssertEqual(receivedGranted, true)
         XCTAssertEqual(notificationCenter.requestAuthorizationCallCount, 0,
@@ -189,12 +212,38 @@ final class NotificationSettingsManageriOS10Tests: XCTestCase {
         userDefaults.ispermissionAlerted = true
 
         var receivedGranted: Bool?
+        let exp = expectation(description: "completion")
         sut.handleNotificationPermission(for: UIApplication.shared) { granted, _ in
             receivedGranted = granted
+            exp.fulfill()
         }
-        runMainLoop()
+        wait(for: [exp], timeout: 2.0)
 
         XCTAssertEqual(receivedGranted, false)
+    }
+
+    /// Regression for the deadlock fix: the entire permission flow must complete even when
+    /// the authorization callback is delivered asynchronously on a background queue (the
+    /// real `getNotificationSettings` behaviour). Previously this path blocked the caller on
+    /// a semaphore; it must now be fully non-blocking.
+    func test_handleNotificationPermission_backgroundDelivery_completesWithoutBlocking() {
+        notificationCenter.stubbedAuthorizationStatus = .authorized
+        notificationCenter.completionQueue = DispatchQueue(label: "test.bg.delivery")
+        userDefaults.ispermissionAlerted = true
+
+        var receivedGranted: Bool?
+        var completedOnMain = false
+        let exp = expectation(description: "completion")
+        sut.handleNotificationPermission(for: UIApplication.shared) { granted, _ in
+            receivedGranted = granted
+            completedOnMain = Thread.isMainThread
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 2.0)
+
+        XCTAssertEqual(receivedGranted, true)
+        XCTAssertTrue(completedOnMain,
+                      "completion must be delivered on the main queue even for background-delivered callbacks")
     }
 
     /// Fresh install: status is .notDetermined. SUT calls the system requestAuthorization,
@@ -264,16 +313,44 @@ final class NotificationSettingsManageriOS10Tests: XCTestCase {
         // Initial observable: .notYetRequested. System now reports .authorized.
         notificationCenter.stubbedAuthorizationStatus = .authorized
 
+        // The foreground handler reads the status asynchronously and updates the observable
+        // on the main queue; wait on the value change rather than an arbitrary delay.
+        let exp = expectation(description: "observable updates to granted")
+        let token = sut.notificationPermissionStatus.subscribe { status in
+            if status == .granted { exp.fulfill() }
+        }
+
         NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification,
                                         object: nil)
 
-        // The foreground handler calls getNotificationPermissionState which uses
-        // a semaphore + 100ms timeout. Give it a moment.
-        let exp = expectation(description: "observable updates")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { exp.fulfill() }
         wait(for: [exp], timeout: 1.0)
-
+        token.dispose()
         XCTAssertEqual(sut.notificationPermissionStatus.value, .granted,
                        "willEnterForeground must sync the observable to the live system state")
+    }
+
+    /// After `handleNotificationPermission` has run (state == .isCalled), a foreground event
+    /// transitions to .canCallForeground and routes through `checkPermissionStatus`, which
+    /// must sync the observable to the live system state.
+    func test_willEnterForeground_afterStartCalled_syncsObservableViaCheckPermissionStatus() {
+        notificationCenter.stubbedAuthorizationStatus = .authorized
+        userDefaults.ispermissionAlerted = true
+        let started = expectation(description: "handleNotificationPermission completes")
+        sut.handleNotificationPermission(for: UIApplication.shared) { _, _ in started.fulfill() }
+        wait(for: [started], timeout: 2.0)
+
+        // System permission now changed to denied (e.g. via iOS Settings).
+        notificationCenter.stubbedAuthorizationStatus = .denied
+        let exp = expectation(description: "observable updates to denied")
+        let token = sut.notificationPermissionStatus.subscribe { status in
+            if status == .denied { exp.fulfill() }
+        }
+
+        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification,
+                                        object: nil)
+
+        wait(for: [exp], timeout: 1.0)
+        token.dispose()
+        XCTAssertEqual(sut.notificationPermissionStatus.value, .denied)
     }
 }

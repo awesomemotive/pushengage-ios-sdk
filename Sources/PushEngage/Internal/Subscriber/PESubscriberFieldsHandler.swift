@@ -22,6 +22,7 @@
 //
 
 import Foundation
+import PushEngageExtension
 
 internal final class PESubscriberFieldsHandler {
 

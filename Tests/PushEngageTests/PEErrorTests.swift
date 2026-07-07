@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class PEErrorTests: XCTestCase {
 
     func test_localizedDescription_isNonEmpty_forEveryCase() {

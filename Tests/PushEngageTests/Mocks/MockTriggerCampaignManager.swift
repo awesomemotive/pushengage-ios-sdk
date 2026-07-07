@@ -1,6 +1,6 @@
 import Foundation
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class MockTriggerCampaignManager: TriggerCampaignManagerType {
 
     private(set) var sendTriggerEventCallCount = 0

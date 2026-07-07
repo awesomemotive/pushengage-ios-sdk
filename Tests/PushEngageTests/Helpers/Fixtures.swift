@@ -1,6 +1,6 @@
 import Foundation
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Reusable APNs payloads and domain-model factories for tests.
 enum Fixtures {
 

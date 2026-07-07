@@ -645,11 +645,14 @@ private final class ConfigCardView: UIView {
         }
         cardContainer.translatesAutoresizingMaskIntoConstraints = false
 
+        // The closing (bottom/trailing) edges yield at 999 so the throwaway
+        // 0×1 tableHeaderView measuring pass in `makeWrapped` has a legal
+        // solution; in the real layout nothing competes with them.
         NSLayoutConstraint.activate([
             cardContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            cardContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            almostRequired(cardContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20)),
             cardContainer.topAnchor.constraint(equalTo: topAnchor, constant: 12),
-            cardContainer.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12),
+            almostRequired(cardContainer.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12)),
 
             envLabel.leadingAnchor.constraint(equalTo: cardContainer.leadingAnchor, constant: 14),
             envLabel.topAnchor.constraint(equalTo: cardContainer.topAnchor, constant: 14),
@@ -663,10 +666,15 @@ private final class ConfigCardView: UIView {
             appIdLabel.topAnchor.constraint(equalTo: envLabel.bottomAnchor, constant: 16),
 
             appIdValue.leadingAnchor.constraint(equalTo: cardContainer.leadingAnchor, constant: 14),
-            appIdValue.trailingAnchor.constraint(equalTo: cardContainer.trailingAnchor, constant: -14),
+            almostRequired(appIdValue.trailingAnchor.constraint(equalTo: cardContainer.trailingAnchor, constant: -14)),
             appIdValue.topAnchor.constraint(equalTo: appIdLabel.bottomAnchor, constant: 4),
-            appIdValue.bottomAnchor.constraint(equalTo: cardContainer.bottomAnchor, constant: -14)
+            almostRequired(appIdValue.bottomAnchor.constraint(equalTo: cardContainer.bottomAnchor, constant: -14))
         ])
+    }
+
+    private func almostRequired(_ constraint: NSLayoutConstraint) -> NSLayoutConstraint {
+        constraint.priority = UILayoutPriority(999)
+        return constraint
     }
 
     required init?(coder: NSCoder) { fatalError("not used") }

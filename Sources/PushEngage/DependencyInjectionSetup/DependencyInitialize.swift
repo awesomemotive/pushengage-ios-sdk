@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import PushEngageExtension
 
 // Custom Dependency Initializer to inject dependencies to the Class.
 
@@ -31,13 +32,13 @@ internal final class DependencyInitialize {
             // MARK: - UserDefaultProtocol
             
             .register(UserDefaultsType.self) {_ in
-                UserDefaultManager()
+                PECoreServices.getUserDefaults()
             }
-            
+
             // MARK: - NetworkRouter
-            
+
             .register(NetworkRouterType.self) { _ in
-                Router()
+                PECoreServices.getRouter()
             }
             
             // MARK: - DataSourceProtocol
@@ -78,7 +79,8 @@ internal final class DependencyInitialize {
                 let userdefault = resolver.resolve(UserDefaultsType.self)
                 return NotificationLifeCycleManager(networkRouter: networkRouter,
                                                     datasource: datasource,
-                                                    userDefault: userdefault)
+                                                    userDefault: userdefault,
+                                                    backgroundTask: AppBackgroundTaskProvider())
             }
             
             // MARK: - ApplicationProtocol
@@ -92,17 +94,6 @@ internal final class DependencyInitialize {
                                           subscriberService: subscriberService,
                                           notificationLifeCycleService: notificationLifeCycleService,
                                           networkService: networkService)
-            }
-            
-            // MARK: - NotificationExtensionProtocol
-            
-            .register(NotificationExtensionType.self) { resolver in
-                let networkRouter = resolver.resolve(NetworkRouterType.self)
-                let userDefaultService = resolver.resolve(UserDefaultsType.self)
-                let notificationCycleService = resolver.resolve(NotificationLifeCycleServiceType.self)
-                return NotificationExtensionManager(networkService: networkRouter,
-                                                    notifcationLifeCycleService: notificationCycleService,
-                                                    userDefaultDatasource: userDefaultService)
             }
             
             // MARK: - TriggerCampaignProtocol
@@ -121,7 +112,6 @@ internal final class DependencyInitialize {
             .register(PEManagerType.self) { resolver in
                 let applicationService = resolver.resolve(ApplicationServiceType.self)
                 let notificationService = resolver.resolve(NotificationServiceType.self)
-                let notificationExtensionService = resolver.resolve(NotificationExtensionType.self)
                 let subscriberService = resolver.resolve(SubscriberServiceType.self)
                 let userDefaultService = resolver.resolve(UserDefaultsType.self)
                 let notificationLifeCycleService = resolver.resolve(NotificationLifeCycleServiceType.self)
@@ -129,7 +119,6 @@ internal final class DependencyInitialize {
                 
                 return PEManager(applicationService: applicationService,
                                    notificationService: notificationService,
-                                   notificationExtensionService: notificationExtensionService,
                                    subscriberService: subscriberService,
                                    userDefaultService: userDefaultService,
                                    notificationLifeCycleService: notificationLifeCycleService,

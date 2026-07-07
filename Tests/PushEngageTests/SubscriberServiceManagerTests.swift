@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class SubscriberServiceManagerTests: XCTestCase {
 
     private var datasource: MockDataSource!
