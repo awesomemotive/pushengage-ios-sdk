@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Unit tests for `Utility.sanitizeUaSegment`. Mirrors Android's
 /// `PEUtilities.sanitizeUaSegment` semantics — replace every character outside
 /// the RFC 7230 `tchar` allowlist (alphanumerics + ``!#$%&'*+-.^_`|~``) with

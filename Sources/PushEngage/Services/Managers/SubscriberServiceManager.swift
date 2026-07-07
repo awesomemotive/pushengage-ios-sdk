@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import PushEngageExtension
 
 @objc public enum SegmentActions: Int {
     case add
@@ -176,7 +177,7 @@ final class SubscriberServiceManager: SubscriberServiceType {
             case .success(let data):
                 PELogger.debug(className: String(describing: SubscriberServiceManager.self), data: data)
                 do {
-                    let decodedObject = try JSONDecoder().decode(SubsciberDetailsResponse.self, from: data)
+                    let decodedObject = try JSONDecoder().decode(SubscriberDetailsResponse.self, from: data)
                     decodedObject.errorCode == 0 ? completionHandler?(decodedObject.data, nil)
                     : completionHandler?(nil, .networkResponseFailure(decodedObject.errorCode,
                                                                       decodedObject.errorMessage))

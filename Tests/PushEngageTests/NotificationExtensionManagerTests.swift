@@ -1,7 +1,7 @@
 import XCTest
 import UserNotifications
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class NotificationExtensionManagerTests: XCTestCase {
 
     private var network: MockNetworkRouter!

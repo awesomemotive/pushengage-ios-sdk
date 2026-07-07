@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Unit tests for `PESubscriberFieldsValidator`. Mirrors the Android counterpart
 /// `PESubscriberFieldsValidatorTest` so cross-platform docs apply unchanged.
 final class PESubscriberFieldsValidatorTests: XCTestCase {

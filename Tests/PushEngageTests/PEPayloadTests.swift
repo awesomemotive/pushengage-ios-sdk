@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Verifies the JSON Codable round-trip for the wire payload (`PEPayload`).
 final class PEPayloadTests: XCTestCase {
 

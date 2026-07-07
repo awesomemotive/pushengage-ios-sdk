@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Unit tests for `PEManager.trackEvent(...)`. Mirrors Android's
 /// `PEManager.trackEvent` validation contract:
 ///   - empty event name → 400-equivalent callback failure, no dispatch
@@ -13,7 +13,6 @@ final class PEManagerTrackEventTests: XCTestCase {
 
     private var applicationService: MockApplicationService!
     private var notificationService: MockNotificationService!
-    private var notificationExtensionService: MockNotificationExtensionService!
     private var subscriberService: MockSubscriberService!
     private var userDefaults: MockUserDefaultsService!
     private var lifecycle: MockNotificationLifeCycleService!
@@ -24,7 +23,6 @@ final class PEManagerTrackEventTests: XCTestCase {
         super.setUp()
         applicationService = MockApplicationService()
         notificationService = MockNotificationService()
-        notificationExtensionService = MockNotificationExtensionService()
         subscriberService = MockSubscriberService()
         userDefaults = MockUserDefaultsService()
         lifecycle = MockNotificationLifeCycleService()
@@ -40,7 +38,6 @@ final class PEManagerTrackEventTests: XCTestCase {
 
         sut = PEManager(applicationService: applicationService,
                         notificationService: notificationService,
-                        notificationExtensionService: notificationExtensionService,
                         subscriberService: subscriberService,
                         userDefaultService: userDefaults,
                         notificationLifeCycleService: lifecycle,
@@ -53,7 +50,6 @@ final class PEManagerTrackEventTests: XCTestCase {
         lifecycle = nil
         userDefaults = nil
         subscriberService = nil
-        notificationExtensionService = nil
         notificationService = nil
         applicationService = nil
         super.tearDown()

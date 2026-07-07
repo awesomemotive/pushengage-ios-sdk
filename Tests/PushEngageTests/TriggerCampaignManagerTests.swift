@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class TriggerCampaignManagerTests: XCTestCase {
 
     private var userDefaults: MockUserDefaultsService!

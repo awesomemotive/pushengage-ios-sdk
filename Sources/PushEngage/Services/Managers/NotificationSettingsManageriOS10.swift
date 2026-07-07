@@ -7,6 +7,7 @@
 
 import UserNotifications
 import UIKit
+import PushEngageExtension
 
 @available(iOS 10.0, *)
 final class NotificationSettingsManageriOS10: NotificationServiceType {
@@ -43,40 +44,28 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
         if isStartNotificationCalled == .isCalled {
             isStartNotificationCalled = .canCallForeground
         }
-        
+
         if isStartNotificationCalled == .canCallForeground {
-            checkPermissionStatus()
+            checkPermissionStatus { _, _ in }
         } else {
             // Always check permission status when app enters foreground, regardless of SDK state
             // This ensures we detect permission changes made in iOS Settings
-            let currentStatus = getNotificationPermissionState()
-            if currentStatus != self.notificationPermissionStatus.value {
-                self.notificationPermissionStatus.value = currentStatus
+            getNotificationPermissionState { [weak self] currentStatus in
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    if currentStatus != self.notificationPermissionStatus.value {
+                        self.notificationPermissionStatus.value = currentStatus
+                    }
+                }
             }
         }
-    }
-
-    /// method provide the permission status Syncronysly.
-    /// - Returns: enum PermissionStatus.
-    func getNotificationPermissionState() -> PermissionStatus {
-        var returnStatus: PermissionStatus =  .notYetRequested
-        let semaphore = DispatchSemaphore(value: 0)
-        serialQueue.sync { [weak self] in
-            self?.getNotificationPermissionState { (status) in
-                returnStatus = status
-                semaphore.signal()
-            }
-        }
-        _ = semaphore.wait(timeout: DispatchTime.now() + Double(Int64(100 * NSEC_PER_MSEC)))
-        return returnStatus
     }
 
     // provides the notification permission in completion block
     func getNotificationPermissionState(completionHandler:@escaping ((PermissionStatus) -> Void)) {
-        var permission: PermissionStatus = .notYetRequested
-
         serialQueue.async { [weak self] in
             self?.nativeNotificattionInstance.peGetAuthorizationStatus { status in
+                let permission: PermissionStatus
                 switch status {
                 case .authorized, .provisional:
                     permission = .granted
@@ -109,28 +98,30 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
                        message: "promted Notification authorization request alert.")
     }
     
-    /// this method handled the senerio where our sdk goes as the update to the application
-    /// that time we are trying to prompt the alert even if notification is already allowed so that
-    /// our SDK also know the status of permission and register the user so this will be custom alert will be
-    /// shown if func return response value as true.
-    @discardableResult
-    private func checkPermissionStatus() -> (response: Bool, status: PermissionStatus) {
-        let status = getNotificationPermissionState()
-        
-        // Always update the observable to ensure permission changes are detected
-        if status != self.notificationPermissionStatus.value {
-            self.notificationPermissionStatus.value = status
-        }
-        
-        switch status {
-        case .denied, .granted:
-            if self.userDefaultService.ispermissionAlerted == false {
-                return (true, status)
-            } else {
-                return (false, status)
+    /// Reports, via `completion` on the main queue, whether the caller should act:
+    /// `response == true` the first time a .granted/.denied status is observed while
+    /// `ispermissionAlerted == false`. For .granted the caller registers for remote
+    /// notifications silently (no alert); for .denied the caller shows the custom
+    /// "enable notifications in Settings" alert.
+    private func checkPermissionStatus(completion: @escaping (_ response: Bool, _ status: PermissionStatus) -> Void) {
+        getNotificationPermissionState { [weak self] status in
+            DispatchQueue.main.async {
+                guard let self = self else {
+                    completion(false, status)
+                    return
+                }
+                // Always update the observable to ensure permission changes are detected
+                if status != self.notificationPermissionStatus.value {
+                    self.notificationPermissionStatus.value = status
+                }
+
+                switch status {
+                case .denied, .granted:
+                    completion(self.userDefaultService.ispermissionAlerted == false, status)
+                case .notYetRequested:
+                    completion(false, status)
+                }
             }
-        case .notYetRequested:
-            return (false, status)
         }
     }
     
@@ -139,27 +130,36 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
         if isStartNotificationCalled == .notCalled {
             isStartNotificationCalled = .isCalled
         }
-        let permissionResult = self.checkPermissionStatus()
-        DispatchQueue.main.async { [weak self] in
-            
-            if permissionResult.response == true {
-                
-                // show the custom permission alert to user case
-                // when SDK goes as update to the pre existing Application or already installed.
-                
-                self?.showPermissionAlert(custom: "Notification may include alerts, sound and icon badges.",
-                                          for: permissionResult.status)
-                self?.userDefaultService.ispermissionAlerted = true
-                PELogger.debug(className: String(describing: NotificationSettingsManageriOS10.self),
-                               message: "Added custom alert for the case where user already granted permission" +
-                                        " but device token is not available to sdk because sdk come to app as update.")
-                completion(permissionResult.status == .granted, nil)
+        checkPermissionStatus { [weak self] response, status in
+            guard let self = self else {
+                completion(false, .permissionNotDetermined)
                 return
             }
-            
-            switch self?.notificationPermissionStatus.value {
-            case .notYetRequested :
-                self?.promptAuthorizationForNotification(with: application) { [weak self] response in
+
+            if response == true {
+
+                self.userDefaultService.ispermissionAlerted = true
+
+                // Permission has already been decided at the OS level — do not show any
+                // SDK-drawn UI. For granted, register for remote notifications silently (the
+                // device token then arrives via didRegisterForRemoteNotificationsWithDeviceToken
+                // and the subscriber is registered). For denied, report the status back through
+                // the completion handler so the host can decide how to respond.
+                if status == .granted {
+                    self.registerToApns(for: application)
+                    PELogger.debug(className: String(describing: NotificationSettingsManageriOS10.self),
+                                   message: "Notification permission already granted — registering for remote notifications.")
+                } else {
+                    PELogger.debug(className: String(describing: NotificationSettingsManageriOS10.self),
+                                   message: "Notification permission denied.")
+                }
+                completion(status == .granted, nil)
+                return
+            }
+
+            switch self.notificationPermissionStatus.value {
+            case .notYetRequested:
+                self.promptAuthorizationForNotification(with: application) { [weak self] response in
                     if self?.userDefaultService.isSwizzled == false {
                         self?.notificationPermissionStatus.value = response ? .granted : .denied
                     }
@@ -169,16 +169,12 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
                     PELogger.debug(className: String(describing: NotificationSettingsManageriOS10.self),
                                    message: "subscriber responded to the prompted alert.")
                 }
-                
+
             case .denied, .granted:
-                let rawValue = self?.notificationPermissionStatus.value.rawValue ?? ""
+                let rawValue = self.notificationPermissionStatus.value.rawValue
                 PELogger.debug(className: String(describing: NotificationSettingsManageriOS10.self),
                                message: "\(rawValue)")
-                completion(self?.notificationPermissionStatus.value == .granted, nil)
-            default:
-                PELogger.debug(className: String(describing: NotificationSettingsManageriOS10.self),
-                               message: "Notification status is nil")
-                completion(false, .permissionNotDetermined)
+                completion(self.notificationPermissionStatus.value == .granted, nil)
             }
         }
     }
@@ -193,60 +189,13 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
                                message: "Device Successfully asked user to Register with the APNS Server.")
             }
         } else {
-            PELogger.debug(className: String(describing: NotificationSettingsManageriOS10.self),
-                             message: "User didn't allow the notificaion. or background fetch" +
-                                      "\(Utility.isBackgroundFetchEnable())")
+            PELogger.error(className: String(describing: NotificationSettingsManageriOS10.self),
+                           message: "Skipping remote notification registration: the 'remote-notification' " +
+                                    "background mode is missing from UIBackgroundModes. It is required by the " +
+                                    "PushEngage integration — enable it so the device can register with APNs.")
         }
     }
 
-    /// Show the custom alert to the subcribers.
-    func showPermissionAlert(custom message: String, for permissionStatus: PermissionStatus) {
-        let alert = UIAlertController(title: "\(Utility.getApplicationName) Would like to send you " +
-                                      "Notifications", message: message, preferredStyle: .alert)
-        let allowButton = UIAlertAction(title: "Allow", style: .default) { [weak self] _ in
-            self?.notificationPermissionStatus.value = .granted
-            #if !APPLICATION_EXTENSION_API_ONLY
-            self?.registerToApns(for: UIApplication.shared)
-            #endif
-        }
-        let cancel = UIAlertAction(title: "Don't Allow", style: .destructive) { [weak self] _ in
-            self?.notificationPermissionStatus.value = .denied
-            #if !APPLICATION_EXTENSION_API_ONLY
-            self?.registerToApns(for: UIApplication.shared)
-            #endif
-        }
-        
-        let dismiss = UIAlertAction(title: "Dismiss", style: .cancel)
-         
-        if case .denied = permissionStatus {
-            // only available for iOS 10+
-            alert.addAction(self.settingsButton())
-            alert.title = "Notifications are not allowed"
-            alert.message = "Please go to Settings and enable the notification permission."
-            alert.addAction(dismiss)
-            
-        } else {
-            alert.addAction(allowButton)
-            alert.addAction(cancel)
-        }
-        DispatchQueue.main.async {
-            Utility.keyWindow?
-                   .rootViewController?.present(alert, animated: true, completion: nil)
-        }
-    }
-    
-    private func settingsButton() -> UIAlertAction {
-        return UIAlertAction(title: "Settings", style: .default) { (_) in
-            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
-                return
-            }
-            #if !APPLICATION_EXTENSION_API_ONLY
-            if UIApplication.shared.canOpenURL(settingsUrl) {
-                UIApplication.shared.open(settingsUrl)
-            }
-            #endif
-        }
-    }
     
     // hanlded for notificationSetting iOS 9.
     func onNotificationPromptResponse(notification type: Int) { }

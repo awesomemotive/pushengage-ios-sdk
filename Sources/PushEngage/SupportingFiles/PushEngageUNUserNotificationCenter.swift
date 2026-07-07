@@ -7,6 +7,7 @@
 
 import UIKit
 import UserNotifications
+import PushEngageExtension
 
 // method Swizzling of UNUsernotificationCenterDelegate method for iOS 10+ 
 
@@ -314,7 +315,6 @@ class PushEngageUNUserNotificationCenter: NSObject {
                                         userText: String?,
                                         fromPresentNotification: Bool,
                                         withCompletionHandler completionHandler: @escaping () -> Void) {
-        #if !APPLICATION_EXTENSION_API_ONLY
         let sharedApp = UIApplication.shared
         guard let delegate = sharedApp.delegate else {
             completionHandler()
@@ -377,9 +377,6 @@ class PushEngageUNUserNotificationCenter: NSObject {
         } else {
             completionHandler()
         }
-        #else
-        completionHandler()
-        #endif
     }
 
 }

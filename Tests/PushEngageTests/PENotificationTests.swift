@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class PENotificationTests: XCTestCase {
 
     // MARK: - Basic parsing
@@ -23,6 +23,25 @@ final class PENotificationTests: XCTestCase {
         let notification = PENotification(userInfo: Fixtures.basicAlertPayload)
         XCTAssertEqual(notification.tag, "tag-abc-123")
         XCTAssertEqual(notification.launchURL, "https://example.com/article/123")
+    }
+
+    // MARK: - Timeout timer lifetime
+
+    func test_timeOutTimerSetup_retainsNotificationUntilTimeoutFires() {
+        weak var weakNote: PENotification?
+        autoreleasepool {
+            let note = PENotification(userInfo: Fixtures.basicAlertPayload)
+            note.timeOutTimerSetup()
+            weakNote = note
+        }
+        XCTAssertNotNil(weakNote,
+                        "The pending timeout timer must keep the notification alive for the display window")
+
+        autoreleasepool {
+            weakNote?.timeoutTimer?.fire()
+        }
+        XCTAssertNil(weakNote,
+                     "Firing the timeout invalidates the timer, which must release the notification")
     }
 
     func test_init_parsesAdditionalData() {
@@ -49,12 +68,18 @@ final class PENotificationTests: XCTestCase {
 
     func test_init_detectsSponsoredFlag() {
         let notification = PENotification(userInfo: Fixtures.sponsoredPayload)
-        XCTAssertEqual(notification.isSponsered, 1)
+        XCTAssertEqual(notification.isSponsored, 1)
     }
 
     func test_init_defaultsSponsoredFlagToZero() {
         let notification = PENotification(userInfo: Fixtures.basicAlertPayload)
-        XCTAssertEqual(notification.isSponsered, 0)
+        XCTAssertEqual(notification.isSponsored, 0)
+    }
+
+    @available(*, deprecated)
+    func test_deprecatedIsSponseredAlias_mirrorsIsSponsored() {
+        let notification = PENotification(userInfo: Fixtures.sponsoredPayload)
+        XCTAssertEqual(notification.isSponsered, notification.isSponsored)
     }
 
     // MARK: - Silent push
@@ -115,7 +140,7 @@ final class PENotificationTests: XCTestCase {
         XCTAssertEqual(notification.tag, "", "Missing pe block produces empty tag, not nil/crash")
         XCTAssertNil(notification.launchURL)
         XCTAssertNil(notification.deeplinking)
-        XCTAssertEqual(notification.isSponsered, 0)
+        XCTAssertEqual(notification.isSponsored, 0)
     }
 
     func test_init_handlesEmptyUserInfo_gracefully() {

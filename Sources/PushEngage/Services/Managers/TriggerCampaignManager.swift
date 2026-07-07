@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import PushEngageExtension
 
 final class TriggerCampaignManager: TriggerCampaignManagerType {
     

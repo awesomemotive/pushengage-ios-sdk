@@ -9,7 +9,7 @@ import UIKit
 import UserNotifications
 import UserNotificationsUI
 import SwiftUI
-import PushEngage
+import PushEngageExtension
 
 @available(iOSApplicationExtension 13.0, *)
 class NotificationViewController: UIViewController, UNNotificationContentExtension {
@@ -24,7 +24,7 @@ class NotificationViewController: UIViewController, UNNotificationContentExtensi
     func didReceive(_ notification: UNNotification) {
         print(notification.request.content.categoryIdentifier)
         if(notification.request.content.categoryIdentifier == "customNotification"){
-            let payLoad = PushEngage.getCustomUIPayLoad(for: notification.request)
+            let payLoad = PushEngageExtension.getCustomUIPayLoad(for: notification.request)
             let view = ContentView(payLoadInfo: payLoad)
             hostingView = UIHostingController(rootView: view)
             addChild(hostingView!)

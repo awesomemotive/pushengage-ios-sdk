@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class UserDefaultManagerTests: XCTestCase {
 
     private var suiteName: String!

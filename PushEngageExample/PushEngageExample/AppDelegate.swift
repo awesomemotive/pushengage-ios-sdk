@@ -66,13 +66,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         PushEngage.setNotificationOpenHandler { (result) in
             let additionData = result.notification.additionalData
             print(additionData ?? [:])
-            if result.notificationAction.actionID == "Trigger" {
+            // actionID is nil when the SDK already opened the URL itself
+            // (PushEngageAutoHandleDeeplinkURL = YES in Info.plist).
+            guard let actionId = result.notificationAction.actionID else {
+                return
+            }
+            if actionId == "Trigger" {
                 let triggerViewController = TriggerViewController()
                 let navcontroller = application.windows.first?.rootViewController as? UINavigationController
                 navcontroller?.pushViewController(triggerViewController, animated: true)
             } else {
                 let landingViewController = LandingViewController()
-                landingViewController.linkText = result.notificationAction.actionID
+                landingViewController.linkText = actionId
                 let navcontroller = application.windows.first?.rootViewController as? UINavigationController
                 navcontroller?.pushViewController(landingViewController, animated: true)
             }

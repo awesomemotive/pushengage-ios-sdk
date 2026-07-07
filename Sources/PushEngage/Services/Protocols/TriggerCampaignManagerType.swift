@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import PushEngageExtension
 
 typealias TriggerWithBoolCallBack = (_ response: Bool) -> Void
 

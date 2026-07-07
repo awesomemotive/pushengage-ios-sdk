@@ -20,13 +20,13 @@
 		1DF220802B7F252C00C87B41 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2207E2B7F252C00C87B41 /* SceneDelegate.m */; };
 		1DF220992B7F328F00C87B41 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DF220982B7F328F00C87B41 /* NotificationService.m */; };
 		1DF2209D2B7F328F00C87B41 /* PushEngageNotificationServiceExtensionObjC.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1DF220952B7F328F00C87B41 /* PushEngageNotificationServiceExtensionObjC.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		1DF220A22B7F334400C87B41 /* PushEngage in Frameworks */ = {isa = PBXBuildFile; productRef = 1DF220A12B7F334400C87B41 /* PushEngage */; };
+		1DF220A22B7F334400C87B41 /* PushEngageExtension in Frameworks */ = {isa = PBXBuildFile; productRef = 1DF220A12B7F334400C87B41 /* PushEngageExtension */; };
 		1DF220B62B7F391700C87B41 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF220B52B7F391700C87B41 /* UserNotifications.framework */; };
 		1DF220B82B7F391700C87B41 /* UserNotificationsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF220B72B7F391700C87B41 /* UserNotificationsUI.framework */; };
 		1DF220BC2B7F391700C87B41 /* NotificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DF220BB2B7F391700C87B41 /* NotificationViewController.m */; };
 		1DF220C32B7F391700C87B41 /* PushEngageNotificationContentExtensionObjC.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1DF220B32B7F391700C87B41 /* PushEngageNotificationContentExtensionObjC.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1DF220CB2B7F3A2300C87B41 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1DF220C92B7F3A2300C87B41 /* MainInterface.storyboard */; };
-		1DF220CD2B7F3A3500C87B41 /* PushEngage in Frameworks */ = {isa = PBXBuildFile; productRef = 1DF220CC2B7F3A3500C87B41 /* PushEngage */; };
+		1DF220CD2B7F3A3500C87B41 /* PushEngageExtension in Frameworks */ = {isa = PBXBuildFile; productRef = 1DF220CC2B7F3A3500C87B41 /* PushEngageExtension */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -240,7 +240,7 @@
 			);
 			name = PushEngageNotificationServiceExtensionObjC;
 			packageProductDependencies = (
-				1DF220A12B7F334400C87B41 /* PushEngage */,
+				1DF220A12B7F334400C87B41 /* PushEngageExtension */,
 			);
 			productName = PushEngageNotificationServiceExtensionObjC;
 			productReference = 1DF220952B7F328F00C87B41 /* PushEngageNotificationServiceExtensionObjC.appex */;
@@ -260,7 +260,7 @@
 			);
 			name = PushEngageNotificationContentExtensionObjC;
 			packageProductDependencies = (
-				1DF220CC2B7F3A3500C87B41 /* PushEngage */,
+				1DF220CC2B7F3A3500C87B41 /* PushEngageExtension */,
 			);
 			productName = PushEngageNotificationContentExtensionObjC;
 			productReference = 1DF220B32B7F391700C87B41 /* PushEngageNotificationContentExtensionObjC.appex */;
@@ -747,13 +747,13 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = PushEngage;
 		};
-		1DF220A12B7F334400C87B41 /* PushEngage */ = {
+		1DF220A12B7F334400C87B41 /* PushEngageExtension */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = PushEngage;
+			productName = PushEngageExtension;
 		};
-		1DF220CC2B7F3A3500C87B41 /* PushEngage */ = {
+		1DF220CC2B7F3A3500C87B41 /* PushEngageExtension */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = PushEngage;
+			productName = PushEngageExtension;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

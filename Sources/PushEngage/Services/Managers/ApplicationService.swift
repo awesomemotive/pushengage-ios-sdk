@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import UserNotifications
+import PushEngageExtension
 
 protocol LastNotificationSetDelegate: AnyObject {
     func setLast(notification infoDict: [AnyHashable: Any], completionHandler: ((UIBackgroundFetchResult) -> Void)?)
@@ -67,7 +68,7 @@ final class ApplicationService: ApplicationServiceType {
         let peNotification = PENotification(userInfo: userInfo)
         
         if self.isAlertNotificationWithCustomAlert(info: userInfo)
-            || peNotification.isSponsered == 1 {
+            || peNotification.isSponsored == 1 {
             backgroundJobFired = true
             self.addNotificationRequest(application: application,
                                         notification: peNotification,
@@ -103,7 +104,7 @@ final class ApplicationService: ApplicationServiceType {
         DispatchQueue.global(qos: .background).async { [weak self] in
             BackgroundTaskExpirationHandler.run { [weak self] (background) in
                 let request: UNNotificationRequest?
-                    = notification.isSponsered == 1 ? self?.createSponseredNotification(notification: notification) :
+                    = notification.isSponsored == 1 ? self?.createSponseredNotification(notification: notification) :
                 Utility.createUNNotificationRequest(notification: notification, networkService: self?.networkService)
                 if let notificationRequest = request {
                     

@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Locks in the request-header shape emitted by `PERouter.asURLRequest()`.
 /// In particular, asserts that the User-Agent has migrated from the old
 /// inline dash-delimited format (`iOS-…/sdk-…/app-…`) to the new

@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Locks in the URL shape produced by `PERouter.getSubscriberForfields`.
 ///
 /// Historically this route used `NetworkConstants.getHashPath = "subscriber/%@/"`,

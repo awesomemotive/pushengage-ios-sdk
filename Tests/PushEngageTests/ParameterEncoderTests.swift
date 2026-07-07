@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class ParameterEncoderTests: XCTestCase {
 
     // MARK: - URLParameterEncoder

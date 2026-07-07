@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class MockNotificationService: NotificationServiceType {
 
     // MARK: - handleNotificationPermission
@@ -26,15 +26,6 @@ final class MockNotificationService: NotificationServiceType {
     func resolveDeferredPermission(_ granted: Bool, error: PEError? = nil) {
         deferredCompletion?(granted, error)
         deferredCompletion = nil
-    }
-
-    // MARK: - getNotificationPermissionState
-    private(set) var getNotificationPermissionStateCallCount = 0
-    var stubbedPermissionState: PermissionStatus = .notYetRequested
-
-    func getNotificationPermissionState() -> PermissionStatus {
-        getNotificationPermissionStateCallCount += 1
-        return stubbedPermissionState
     }
 
     // MARK: - registerToApns

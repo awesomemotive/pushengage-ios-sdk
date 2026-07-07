@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import PushEngageExtension
 
 /*
  * This class is PushEngageAppdelegate which is swizzled with the UIApplicationDelegate so that

@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://cocoapods.org/pods/PushEngage"><img src="https://img.shields.io/cocoapods/v/PushEngage.svg?style=flat-square" alt="CocoaPods"/></a>
   <a href="https://swift.org/package-manager/"><img src="https://img.shields.io/badge/SPM-compatible-brightgreen.svg?style=flat-square" alt="Swift Package Manager"/></a>
-  <a href="#"><img src="https://img.shields.io/badge/platform-iOS%2010%2B-blue.svg?style=flat-square" alt="Platform"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/platform-iOS%2012%2B-blue.svg?style=flat-square" alt="Platform"/></a>
   <a href="#"><img src="https://img.shields.io/badge/language-Swift%20%7C%20Objective--C-orange.svg?style=flat-square" alt="Language"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg?style=flat-square" alt="License"/></a>
 </p>
@@ -47,20 +47,71 @@ In Xcode, go to **File > Add Package Dependencies** and enter:
 https://github.com/awesomemotive/pushengage-ios-sdk
 ```
 
-Select the latest version and add to your target.
+Select the latest version, then link **PushEngage** to your app target and **PushEngageExtension** to your Notification Service / Content Extension target(s).
 
 ### CocoaPods
 
 Add to your `Podfile`:
 
 ```ruby
-pod 'PushEngage', '~> 0.1.0'
+# In your app target
+pod 'PushEngage', '~> 1.0.0'
+
+# In your Notification Service Extension (and Notification Content Extension) target(s)
+pod 'PushEngageExtension', '~> 1.0.0'
 ```
+
+> **Upgrading from 0.1.x:** the SDK is now split into two modules, and your
+> notification extension targets need three changes:
+>
+> 1. **Dependency** — CocoaPods: replace `pod 'PushEngage'` with
+>    `pod 'PushEngageExtension'` in the extension target(s); SPM: link the
+>    `PushEngageExtension` product instead of `PushEngage`.
+> 2. **Import** — `import PushEngage` → `import PushEngageExtension`
+>    (Objective-C: `@import PushEngage;` → `@import PushEngageExtension;`).
+> 3. **Call sites** — method names are unchanged, but the class is renamed:
+>    replace the `PushEngage` prefix with `PushEngageExtension`, e.g.
+>    `PushEngage.didReceiveNotificationExtensionRequest(...)` becomes
+>    `PushEngageExtension.didReceiveNotificationExtensionRequest(...)`
+>    (Objective-C: `[PushEngage ...]` → `[PushEngageExtension ...]`).
+>
+> App-target code is unchanged — keep `pod 'PushEngage'` / the `PushEngage`
+> product there, and all existing app APIs work as before.
+
+> **Objective-C with modules disabled:** if an app target builds with
+> `CLANG_ENABLE_MODULES = NO` (or uses Objective-C++), also
+> `#import <PushEngageExtension/PushEngageExtension-Swift.h>` where you use the
+> notification model types (`PENotification`, `PENotificationOpenResult`,
+> `SubscriberDetailsData`) — without modules, the generated `PushEngage-Swift.h`
+> only forward-declares types defined in the `PushEngageExtension` module.
+> Targets with modules enabled (the default) need nothing extra.
 
 Then run:
 
 ```bash
 pod install
+```
+
+> **Upgrading from 0.1.x with CocoaPods:** run `pod deintegrate && pod install`
+> (not `pod update`) so the cached single-module `PushEngage.swiftmodule` is
+> fully cleared. If your team uses binary caching for pods (XCRemoteCache,
+> Bazel, etc.), invalidate the cached PushEngage framework as well.
+
+### Configure the App Group
+
+The app and its notification extensions share SDK state (subscriber identity,
+the logging flag, server-configured endpoints) through an App Group container.
+Without it, extension processes start with a blank state on every delivery.
+
+1. In Xcode, add the **App Groups** capability with the same group ID (e.g.
+   `group.com.yourcompany.yourapp`) to your app target **and** every
+   notification extension target.
+2. Add the group ID to the `Info.plist` of the app target and of each
+   extension target:
+
+```xml
+<key>PushEngage_App_Group_Key</key>
+<string>group.com.yourcompany.yourapp</string>
 ```
 
 ---
@@ -132,8 +183,10 @@ PushEngage.requestNotificationPermission { granted, error in
 
 ```swift
 PushEngage.setNotificationOpenHandler { result in
-    // Handle deep link or notification data
-    print("Notification opened: \(result)")
+    // actionID is nil when the SDK already opened the URL itself
+    // (PushEngageAutoHandleDeeplinkURL = YES in Info.plist) — don't navigate then.
+    guard let deepLink = result.notificationAction.actionID else { return }
+    print("Notification opened with deep link: \(deepLink)")
 }
 ```
 
@@ -141,8 +194,11 @@ PushEngage.setNotificationOpenHandler { result in
 
 ```objc
 [PushEngage setNotificationOpenHandlerWithBlock:^(PENotificationOpenResult * _Nullable result) {
-    // Handle deep link or notification data
-    NSLog(@"Notification opened: %@", result);
+    // actionID is nil when the SDK already opened the URL itself
+    // (PushEngageAutoHandleDeeplinkURL = YES in Info.plist) — don't navigate then.
+    NSString *deepLink = result.notificationAction.actionID;
+    if (deepLink == nil) { return; }
+    NSLog(@"Notification opened with deep link: %@", deepLink);
 }];
 ```
 
@@ -162,8 +218,24 @@ PushEngage.setNotificationOpenHandler { result in
 | **Events** | `sendTriggerEvent`, `sendGoal`, `trackEvent`, `addAlert` |
 | **Campaigns** | `automatedNotification` (enable/disable) |
 | **Notification Handlers** | `setNotificationOpenHandler`, `setNotificationWillShowInForegroundHandler` |
-| **Extensions** | `getCustomUIPayLoad`, `didReceiveNotificationExtensionRequest`, `serviceExtensionTimeWillExpire` |
 | **AppDelegate Forwarding** | `registerDeviceToServer`, `receivedRemoteNotification`, `didReceiveRemoteNotification`, `willPresentNotification` (required when swizzling is disabled) |
+
+**Notification Service / Content Extension API** (call on `PushEngageExtension`, from your extension target):
+
+| Method | Where to call it |
+|--------|------------------|
+| `didReceiveNotificationExtensionRequest(_:bestContentHandler:)` | `UNNotificationServiceExtension.didReceive(_:withContentHandler:)` |
+| `serviceExtensionTimeWillExpire(_:content:)` | `UNNotificationServiceExtension.serviceExtensionTimeWillExpire()` |
+| `getCustomUIPayLoad(for:)` | `UNNotificationContentExtension.didReceive(_:)` |
+
+SDK logging inside extension processes follows the app's
+`PushEngage.enableLogging` setting automatically (persisted via the shared app
+group) — no extra call is needed in extension code.
+
+> **Threading:** completion handlers are not guaranteed to be invoked on the
+> main queue — network-backed calls (subscriber data, attributes, goals,
+> events) complete on a background queue. Dispatch to the main queue before
+> updating UI from a completion handler.
 
 Full API reference: [iOS SDK Public APIs](https://pushengage.com/api/mobile-sdk/iOS-sdk)
 
@@ -191,9 +263,9 @@ This repo includes two complete example apps:
 
 | Requirement | Minimum |
 |-------------|---------|
-| iOS | 10.0+ |
-| Xcode | 15+ (SPM) / 13+ (CocoaPods) |
-| Swift | 5.9+ (SPM) / 5.0+ (CocoaPods) |
+| iOS | 12.0+ |
+| Xcode | 15+ |
+| Swift | 5.9+ |
 | Objective-C | Supported |
 
 ---

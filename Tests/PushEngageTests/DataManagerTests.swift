@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 final class DataManagerTests: XCTestCase {
 
     private var userDefaults: MockUserDefaultsService!
@@ -79,6 +79,32 @@ final class DataManagerTests: XCTestCase {
 
         XCTAssertEqual(info.isNotificationEnable, 0,
                        "Denied + missing flag should default to 0 (keep subscriber)")
+    }
+
+    // MARK: - getSubscriptionData certEnv (APNs environment)
+
+    func test_getSubscriptionData_certEnv_developmentMapsToDev() {
+        sut = DataManager(userDefault: userDefaults,
+                          entitlementsProvider: { Entitlements(["aps-environment": "development"]) })
+        XCTAssertEqual(sut.getSubscriptionData().certEnv, "dev")
+    }
+
+    func test_getSubscriptionData_certEnv_productionMapsToProd() {
+        sut = DataManager(userDefault: userDefaults,
+                          entitlementsProvider: { Entitlements(["aps-environment": "production"]) })
+        XCTAssertEqual(sut.getSubscriptionData().certEnv, "prod")
+    }
+
+    func test_getSubscriptionData_certEnv_nilWhenEntitlementMissing() {
+        sut = DataManager(userDefault: userDefaults,
+                          entitlementsProvider: { .empty })
+        XCTAssertNil(sut.getSubscriptionData().certEnv)
+    }
+
+    func test_getSubscriptionData_certEnv_nilForUnknownValue() {
+        sut = DataManager(userDefault: userDefaults,
+                          entitlementsProvider: { Entitlements(["aps-environment": "staging"]) })
+        XCTAssertNil(sut.getSubscriptionData().certEnv)
     }
 
     // MARK: - getSubscriptionStatus

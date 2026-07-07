@@ -8,6 +8,7 @@
 import Foundation
 import UserNotifications
 import UIKit
+import PushEngageExtension
 
 protocol DeviceManagerType {
     func getDeviceToken() -> String
@@ -40,6 +41,7 @@ protocol AppInfoManagerType {
 protocol NotificationManagerType {
     var notificationPermissionStatus: NotificationServiceType { get }
     func setBadgeCount(count: Int)
+    func setLoggingEnabled(_ enabled: Bool)
     func handleNotificationPermission(completion: @escaping (_ response: Bool, _ error: Error?) -> Void)
     func setInitialInfo(for application: UIApplication, with launchOptions: [UIApplication.LaunchOptionsKey: Any]?)
     func getNotificationPermissionStatus() -> PermissionStatus
@@ -52,12 +54,6 @@ protocol NotificationManagerType {
                                                    completionHandler: @escaping PENotificationDisplayNotification)
     @available(iOS 10.0, *)
     func processiOS10Open(response: UNNotificationResponse)
-    @available(iOS 10.0, *)
-    func didReceiveNotificationExtensionRequest(_ request: UNNotificationRequest,
-                                                bestContentHandler: UNMutableNotificationContent)
-    @available(iOS 10.0, *)
-    func serviceExtensionTimeWillExpire(_ request: UNNotificationRequest,
-                                        content: UNMutableNotificationContent?) -> UNMutableNotificationContent?
     func receivedRemoteNotification(application: UIApplication,
                                    userInfo: [AnyHashable: Any],
                                    completionHandler: ((UIBackgroundFetchResult) -> Void)?) -> Bool
@@ -97,11 +93,6 @@ protocol GoalManagerType {
                                                    _ error: PEError?) -> Void)?)
 }
 
-protocol CustomUIManagerType {
-    @available(iOS 10.0, *)
-    func getCustomUIPayLoad(for request: UNNotificationRequest) -> CustomUIModel
-}
-
 protocol SwizzleManagerType {
     func updateSwizzledStatus(with status: Bool)
 }
@@ -122,7 +113,6 @@ protocol PEManagerType: DeviceManagerType,
                         AttributeManagerType,
                         SegmentManagerType,
                         CampaignManagerType,
-                        CustomUIManagerType,
                         SwizzleManagerType,
                         GoalManagerType,
                         EventManagerType {}
@@ -135,7 +125,6 @@ final class PEManager: PEManagerType {
     private let subscriberService: SubscriberServiceType
     private var userDefaultsService: UserDefaultsType
     private let notificationLifeCycleService: NotificationLifeCycleServiceType
-    private let notificationExtensionService: NotificationExtensionType
     private let triggerCampaignService: TriggerCampaignManagerType
     private var application: UIApplication?
     private var launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -156,7 +145,6 @@ final class PEManager: PEManagerType {
     
     init(applicationService: ApplicationServiceType,
          notificationService: NotificationServiceType,
-         notificationExtensionService: NotificationExtensionType,
          subscriberService: SubscriberServiceType,
          userDefaultService: UserDefaultsType,
          notificationLifeCycleService: NotificationLifeCycleServiceType,
@@ -166,11 +154,16 @@ final class PEManager: PEManagerType {
         self.subscriberService = subscriberService
         self.userDefaultsService = userDefaultService
         self.notificationLifeCycleService = notificationLifeCycleService
-        self.notificationExtensionService = notificationExtensionService
         self.triggerCampaignService = triggerCamapaiginService
+        self.userDefaultsService.isSdkLoggingEnabled = PELogger.isLoggingEnable
         self.applicationService.notifydelegate = self
         self.setupBindings()
         self.addObservers()
+    }
+
+    func setLoggingEnabled(_ enabled: Bool) {
+        PELogger.isLoggingEnable = enabled
+        userDefaultsService.isSdkLoggingEnabled = enabled
     }
     
     // MARK: - private func
@@ -409,7 +402,6 @@ final class PEManager: PEManagerType {
         if #available(iOS 16, *) {
             UNUserNotificationCenter.current().setBadgeCount(count)
         } else {
-            #if !APPLICATION_EXTENSION_API_ONLY
             if Thread.isMainThread {
                 UIApplication.shared.applicationIconBadgeNumber = count
             } else {
@@ -417,7 +409,6 @@ final class PEManager: PEManagerType {
                     UIApplication.shared.applicationIconBadgeNumber = count
                 }
             }
-            #endif
         }
     }
     
@@ -520,13 +511,6 @@ final class PEManager: PEManagerType {
         userDefaultsService.notificationPermissionState = status
     }
     
-    
-    @available(iOS 10.0, *)
-    func didReceiveNotificationExtensionRequest(_ request: UNNotificationRequest,
-                                                bestContentHandler: UNMutableNotificationContent) {
-        notificationExtensionService.didReceiveNotificationExtensionRequest(request,
-                                                                            bestContentHandler: bestContentHandler)
-    }
     
     // MARK: - add Subscriber Attributes
     
@@ -952,20 +936,6 @@ final class PEManager: PEManagerType {
         }
     }
     
-    // MARK: - best attempt handled
-    @available(iOS 10.0, *)
-    func serviceExtensionTimeWillExpire(_ request: UNNotificationRequest,
-                                        content: UNMutableNotificationContent?) -> UNMutableNotificationContent? {
-        return notificationExtensionService.serviceExtensionTimeWillExpire(request, content: content)
-    }
-    
-    // MARK: - Add subscriber
-    
-    @available(iOS 10.0, *)
-    func getCustomUIPayLoad(for request: UNNotificationRequest) -> CustomUIModel {
-        notificationExtensionService.getContentExtensionInfo(for: request)
-    }
-    
     deinit {
         disposeBag.disposedValue()
         Self.notificationOpenHandler = nil
@@ -1037,7 +1007,7 @@ extension PEManager {
         }
         
         let notification = PENotification(userInfo: payLoad)
-        if notification.isSponsered == 1 {
+        if notification.isSponsored == 1 {
             self.handleWillShowInForegoundHandler(for: notification) { _ in
                 completionHandler(notification)
             }
@@ -1092,7 +1062,7 @@ extension PEManager {
         
         let notification = PENotification(userInfo: lastNotificationPayload ?? [:])
         
-        if Utility.autoHandleDeeplinkURL, (notification.isSponsered == 0), let url = actionId, url.starts(with: NetworkConstants.https) || url.starts(with: NetworkConstants.http) {
+        if Utility.autoHandleDeeplinkURL, (notification.isSponsored == 0), let url = actionId, url.starts(with: NetworkConstants.https) || url.starts(with: NetworkConstants.http) {
             self.onClickRedirect(to: url)
             actionId = nil
         }
@@ -1104,7 +1074,7 @@ extension PEManager {
         let urlToHandle = deepLink ?? launchURL
         let notification = PENotification(userInfo: lastNotificationPayload ?? [:])
         
-        if Utility.autoHandleDeeplinkURL, (notification.isSponsered == 0), let url = urlToHandle, url.starts(with: NetworkConstants.https) || url.starts(with: NetworkConstants.http) {
+        if Utility.autoHandleDeeplinkURL, (notification.isSponsored == 0), let url = urlToHandle, url.starts(with: NetworkConstants.https) || url.starts(with: NetworkConstants.http) {
             self.onClickRedirect(to: url)
             return nil
         } else {
@@ -1117,7 +1087,7 @@ extension PEManager {
         let notification = PENotification(userInfo: lastNotificationPayload ?? [:])
         if let buttons = notification.actionButtons,
            let id = actionId,
-           notification.isSponsered == 0 {
+           notification.isSponsored == 0 {
             for (index, button) in buttons.enumerated()
                 where button.id == id {
                 clickedButton = "action\(index + 1)"
@@ -1128,7 +1098,7 @@ extension PEManager {
                                                                  notificationId: notification.tag,
                                                                  actionid: clickedButton,
                                                                  completionHandler: nil)
-        if notification.isSponsered == 1 {
+        if notification.isSponsored == 1 {
             self.onClickRedirect(to: notification.launchURL)
             PELogger.debug(className: String(describing: PEManager.self),
                            message: "Sponsered Notification.")
@@ -1137,7 +1107,7 @@ extension PEManager {
         
         let actionCreated = PENotificationAction(actionID: actionId, actionType: actionType)
         let notificationResult = PENotificationOpenResult(notification: notification,
-                                                          notficationAction: actionCreated)
+                                                          notificationAction: actionCreated)
         if notification.tag == lastNotificationIdFromAction {
             return
         }

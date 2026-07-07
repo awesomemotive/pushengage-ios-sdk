@@ -6,14 +6,13 @@
 //
 
 import UIKit
+import PushEngageExtension
 
 public typealias PENotificationOpenHandler = (PENotificationOpenResult) -> Void
 
 public typealias PEBackgroundTaskCompletionBlock =  ((UIBackgroundFetchResult) -> Void)
 
 public typealias PESilentPushBackgroundHandler = (PENotification, PEBackgroundTaskCompletionBlock?) -> Void
-
-public typealias PENotificationDisplayNotification = (_ notification: PENotification?) -> Void
 
 public typealias PENotificationWillShowInForeground
     = (PENotification, _ completion: PENotificationDisplayNotification) -> Void
@@ -46,13 +45,16 @@ public typealias PENotificationWillShowInForeground
     // MARK: - Public properties
     
     /// A boolean flag to enable or disable logging within the SDK for debugging and troubleshooting purposes.
+    /// Set this on each launch (e.g. in `didFinishLaunching`); the value is mirrored to the shared
+    /// app-group container for the current session so notification extension processes pick it up —
+    /// no separate call in extension code. It is not a durable cross-launch preference.
     /// It is recommended to disable logging when the host application is in production to improve performance.
     public static var enableLogging: Bool {
         get {
              PELogger.isLoggingEnable
         }
         set {
-            PELogger.isLoggingEnable = newValue
+            manager.setLoggingEnabled(newValue)
         }
     }
     
@@ -69,7 +71,7 @@ public typealias PENotificationWillShowInForeground
         manager.setBadgeCount(count: count)
     }
 
-    /// Returns the SDK's release version string (e.g. `"0.1.0"`).
+    /// Returns the SDK's release version string (e.g. `"1.0.0"`).
     ///
     /// Useful for surfacing the active SDK version in customer
     /// support / about screens. The value is stable for a given
@@ -361,6 +363,7 @@ public typealias PENotificationWillShowInForeground
     ///       }
     ///   }
     ///   ```
+    @available(*, deprecated, renamed: "addSubscriberAttributes(_:completionHandler:)")
     @objc public static func add(attributes: Parameters,
                                   completionHandler: ((_ response: Bool,
                                                           _ error: Error?) -> Void)?) {
@@ -391,6 +394,7 @@ public typealias PENotificationWillShowInForeground
     ///       }
     ///   }
     ///   ```
+    @available(*, deprecated, renamed: "setSubscriberAttributes(_:completionHandler:)")
     @objc public static func set(attributes: Parameters,
                                   completionHandler: ((_ response: Bool,
                                                           _ error: Error?) -> Void)?) {
@@ -828,51 +832,6 @@ public typealias PENotificationWillShowInForeground
     /// and perform necessary background tasks.
     @objc private static func silentPushHandler(_ completion: PESilentPushBackgroundHandler?) {
         manager.setbackGroundSilentPushHandler(block: completion)
-    }
-    
-    // MARK: Notification Content Extension methods
-    
-    /// Get Custom UI Payload for Notification
-    ///
-    /// Use this method to get the custom UI payload associated with a notification request.
-    ///
-    /// - Parameter request: The UNNotificationRequest object for which you want to retrieve the custom UI payload.
-    /// - Returns: A CustomUIModel object containing the custom UI payload for the given notification request.
-    @available(iOS 10.0, *)
-    @objc public static func getCustomUIPayLoad(for request: UNNotificationRequest) -> CustomUIModel {
-        manager.getCustomUIPayLoad(for: request)
-    }
-    
-    // MARK: Notification Service Extension methods
-    
-    /// Modify the notification content received from the parent application in the Notification Service Extension.
-    ///
-    /// - Parameters:
-    ///   - request: The UNNotificationRequest received from the parent application.
-    ///   - bestContentHandler: The UNMutableNotificationContent that can be modified to customize the notification.
-    @available(iOS 10.0, *)
-    @objc public static func didReceiveNotificationExtensionRequest(_ request: UNNotificationRequest,
-                                                                    bestContentHandler: UNMutableNotificationContent) {
-        manager.didReceiveNotificationExtensionRequest(request, bestContentHandler: bestContentHandler)
-    }
-    
-    /// Service Extension Time Will Expire Handler
-    ///
-    /// Use this method in the notification service extension to handle best attempts to deliver the notification to the device.
-    ///
-    /// - Parameters:
-    ///   - request: The original `UNNotificationRequest` received by the extension.
-    ///   - content: The mutable content for the notification. This content can be modified as needed before delivery.
-    ///
-    /// - Returns: The modified `UNMutableNotificationContent` that will be delivered to the user
-    ///
-    /// When the notification service extension time is about to expire, this method should be called to allow the SDK to modify the
-    /// notification content before delivery.
-    @available(iOS 10.0, *)
-    @objc public static func serviceExtensionTimeWillExpire(_ request: UNNotificationRequest,
-                                                            content: UNMutableNotificationContent?)
-                                                            -> UNMutableNotificationContent? {
-        return manager.serviceExtensionTimeWillExpire(request, content: content)
     }
     
     // MARK: - Remote Notification manual setup methods

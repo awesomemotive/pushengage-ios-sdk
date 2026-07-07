@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Pins the rename of the public `PEnotificationAction` type to the
 /// PE-prefix-convention-correct `PENotificationAction`. The Objective-C
 /// runtime name is intentionally preserved as `PEnotificationAction` via
@@ -36,7 +36,17 @@ final class PENotificationActionRenameTests: XCTestCase {
     func test_openResult_actionType_isPENotificationAction() {
         let action = PENotificationAction(actionID: "a", actionType: .opened)
         let notification = PENotification(userInfo: [:])
-        let result = PENotificationOpenResult(notification: notification, notficationAction: action)
+        let result = PENotificationOpenResult(notification: notification, notificationAction: action)
         XCTAssertTrue(type(of: result.notificationAction) == PENotificationAction.self)
+    }
+
+    // MARK: - Deprecated misspelled init label keeps compiling (PR #56 API review)
+
+    @available(*, deprecated)
+    func test_deprecatedNotficationActionInitLabel_stillCompiles() {
+        let action = PENotificationAction(actionID: "a", actionType: .opened)
+        let notification = PENotification(userInfo: [:])
+        let result = PENotificationOpenResult(notification: notification, notficationAction: action)
+        XCTAssertTrue(result.notificationAction === action)
     }
 }

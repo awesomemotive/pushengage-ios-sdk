@@ -1,6 +1,6 @@
 import XCTest
 @testable import PushEngage
-
+@testable import PushEngageExtension
 /// Tier 7 — `Router` behavior under stubbed URLSession responses.
 ///
 /// `Router.init(session:)` (added 2026-05-18) accepts an injectable URLSession so
@@ -157,6 +157,26 @@ final class RouterTests: XCTestCase {
             }
         }
         wait(for: [exp], timeout: 2.0)
+    }
+
+    // MARK: - Concurrency — no data race on `task` (run under `-enableThreadSanitizer YES`)
+
+    func test_router_concurrentRequestAndCancel_noDataRace() {
+        StubURLProtocol.requestHandler = { _ in (self.httpResponse(200), Data("{}".utf8)) }
+
+        let iterations = 100
+        let done = expectation(description: "all concurrent ops complete")
+        done.expectedFulfillmentCount = iterations * 2
+        for _ in 0..<iterations {
+            DispatchQueue.global().async {
+                self.sut.request(self.simpleRoute) { _ in done.fulfill() }
+            }
+            DispatchQueue.global().async {
+                self.sut.cancel()
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 60.0)
     }
 
     // MARK: - 5xx
