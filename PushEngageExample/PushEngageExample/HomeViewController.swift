@@ -28,6 +28,7 @@ enum APIAction {
     case setAttribute
     case sendGoal
     case triggerCampaigns
+    case inAppMessaging
     case getSubscriptionStatus
     case getSubscriptionNotificationStatus
     case checkPermissionStatus
@@ -52,6 +53,7 @@ enum APIAction {
         case .setAttribute: return "Set Subscriber Attributes"
         case .sendGoal: return "Send Goal"
         case .triggerCampaigns: return "Trigger Campaigns"
+        case .inAppMessaging: return "In-App Messaging"
         case .getSubscriptionStatus: return "Get Subscription Status"
         case .getSubscriptionNotificationStatus: return "Get Notification Status"
         case .checkPermissionStatus: return "Check Permission Status"
@@ -91,7 +93,7 @@ enum APIAction {
         case .getSubscriberId, .getAttribute,
              .getSubscriptionStatus, .getSubscriptionNotificationStatus,
              .checkPermissionStatus, .unsubscribe, .subscribe,
-             .sendGoal, .triggerCampaigns, .trackEvent,
+             .sendGoal, .triggerCampaigns, .inAppMessaging, .trackEvent,
              .requestNotificationPermission:
             return nil
         }
@@ -167,6 +169,9 @@ class HomeViewController: UIViewController {
         ]),
         ActionSection(title: "Triggers", actions: [
             .triggerCampaigns
+        ]),
+        ActionSection(title: "In-App Messaging", actions: [
+            .inAppMessaging
         ])
     ]
 
@@ -485,6 +490,9 @@ class HomeViewController: UIViewController {
         case .triggerCampaigns:
             hideLoader()
             navigationController?.pushViewController(TriggerViewController(), animated: true)
+        case .inAppMessaging:
+            hideLoader()
+            navigationController?.pushViewController(InAppMessagingTestViewController(), animated: true)
         case .trackEvent:
             hideLoader()
             navigationController?.pushViewController(TrackEventViewController(), animated: true)

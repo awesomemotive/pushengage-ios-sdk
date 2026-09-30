@@ -8,17 +8,12 @@ import PushEngageExtension
 
 extension Utility {
 
-    /// Returns the current key window using the modern scene-based lookup on iOS 13+,
-    /// falling back to the deprecated `windows.first` on iOS 12.
+    /// The current key window, via the scene-based lookup.
     static var keyWindow: UIWindow? {
-        if #available(iOS 13.0, *) {
-            return UIApplication.shared.connectedScenes
-                .compactMap { $0 as? UIWindowScene }
-                .flatMap { $0.windows }
-                .first { $0.isKeyWindow }
-        } else {
-            return UIApplication.shared.windows.first
-        }
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
     }
 
     static func loadWKWebView(with url: URL?) {

@@ -155,7 +155,7 @@ package final class NotificationLifeCycleManager: NotificationLifeCycleServiceTy
                                message: "retrying attempt count:- \(attempts)")
                 Utility.retryCheck(error: error) == .allow ?
                 attempts >= 1 ? DispatchQueue.global(qos: .utility).asyncAfter(deadline: DispatchTime.now() + delay) {
-                    self?.retry(typeOf: object, attempts - 1, delay: delay + Double(delay),
+                    self?.retry(typeOf: T.self, attempts - 1, delay: delay + Double(delay),
                                 task: task, completion: completion) }
                     : completion(.failure(error)) :  completion(.failure(error))
             }

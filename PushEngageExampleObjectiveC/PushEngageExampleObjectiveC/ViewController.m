@@ -7,6 +7,7 @@
 
 #import "ViewController.h"
 @import PushEngage;
+@import PushEngageExtension;
 
 @interface ViewController ()
 @property (strong, nonatomic) NSArray<NSString *> *datalist;

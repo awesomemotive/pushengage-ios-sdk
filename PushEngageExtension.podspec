@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "PushEngageExtension"
-  spec.version      = "1.0.0"
+  spec.version      = "1.1.0"
   spec.summary      = "Extension-safe core of the PushEngage iOS SDK."
   spec.description  = <<-DESC
     The extension-safe core of the PushEngage iOS SDK: notification payload
@@ -14,7 +14,7 @@ Pod::Spec.new do |spec|
   spec.license =  { :type => "MIT", :file => "LICENSE" }
   spec.author  = { "PushEngage" => "care@pushengage.com" }
   spec.platform = :ios
-  spec.ios.deployment_target  = '12.0'
+  spec.ios.deployment_target  = '15.0'
   spec.requires_arc = true
   spec.source = { :git => "https://github.com/awesomemotive/pushengage-ios-sdk.git",
                   :tag => "#{spec.version}"

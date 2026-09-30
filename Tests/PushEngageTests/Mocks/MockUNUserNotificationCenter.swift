@@ -29,7 +29,7 @@ final class MockUNUserNotificationCenter: UNUserNotificationCenterProtocol {
     private(set) var lastRequestedOptions: UNAuthorizationOptions?
 
     func requestAuthorization(options: UNAuthorizationOptions,
-                              completionHandler: @escaping (Bool, Error?) -> Void) {
+                              completionHandler: @escaping @Sendable (Bool, Error?) -> Void) {
         requestAuthorizationCallCount += 1
         lastRequestedOptions = options
         completionHandler(stubbedAuthorizationResult.0, stubbedAuthorizationResult.1)

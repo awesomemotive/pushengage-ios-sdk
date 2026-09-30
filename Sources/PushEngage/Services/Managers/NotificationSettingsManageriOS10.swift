@@ -18,7 +18,7 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
         case canCallForeground
     }
         
-    private (set) var notificationPermissionStatus = Variable<PermissionStatus>(.notYetRequested)
+    private(set) var notificationPermissionStatus = Variable<PermissionStatus>(.notYetRequested)
     
     // MARK: - Private varibles.
     private let notificationDefault = NotificationCenter.default
@@ -67,7 +67,7 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
             self?.nativeNotificattionInstance.peGetAuthorizationStatus { status in
                 let permission: PermissionStatus
                 switch status {
-                case .authorized, .provisional:
+                case .authorized, .provisional, .ephemeral:
                     permission = .granted
                 case .denied:
                     permission = .denied
@@ -85,7 +85,7 @@ final class NotificationSettingsManageriOS10: NotificationServiceType {
     /// to the enable to get notification's
     func promptAuthorizationForNotification(with application: UIApplication,
                                             completionHandler: ((_ accepted: Bool) -> Void)?) {
-        let responseBlock = { (granted: Bool, _ : Error?) in
+        let responseBlock: @Sendable (Bool, Error?) -> Void = { granted, _ in
             DispatchQueue.main.async {
                 if completionHandler != nil {
                     completionHandler?(granted)

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24D60" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="IAMAnalyticsEvent" representedClassName="IAMAnalyticsEvent" syncable="YES">
+        <attribute name="btnId" optional="YES" attributeType="String"/>
+        <attribute name="btnText" optional="YES" attributeType="String"/>
+        <attribute name="btnType" optional="YES" attributeType="String"/>
+        <attribute name="eventDate" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="eventType" attributeType="String"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="messageId" attributeType="String"/>
+        <attribute name="uploadAttempts" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="IAMDisplayRecord" representedClassName="IAMDisplayRecord" syncable="YES">
+        <attribute name="displayDate" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="messageId" optional="YES" attributeType="String"/>
+        <relationship name="message" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="IAMMessage" inverseName="displayRecords" inverseEntity="IAMMessage"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="IAMMessage" representedClassName="IAMMessage" syncable="YES">
+        <attribute name="actions" optional="YES" attributeType="Binary"/>
+        <attribute name="audience" optional="YES" attributeType="Binary"/>
+        <attribute name="displayDuration" optional="YES" attributeType="Integer 64" defaultValueString="3000" usesScalarValueType="YES"/>
+        <attribute name="endDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="frequency" optional="YES" attributeType="Binary"/>
+        <attribute name="htmlContent" optional="YES" attributeType="String"/>
+        <attribute name="id" attributeType="String"/>
+        <attribute name="position" attributeType="String"/>
+        <attribute name="priority" attributeType="Integer 16" defaultValueString="3" usesScalarValueType="YES"/>
+        <attribute name="shouldDismissOnTap" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="startDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="trigger" optional="YES" attributeType="Binary"/>
+        <relationship name="displayRecords" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IAMDisplayRecord" inverseName="message" inverseEntity="IAMDisplayRecord"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+</model>

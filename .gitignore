@@ -18,6 +18,11 @@ PushEngageExample/Pods
 # Build outputs directory
 build/
 DerivedData/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
 *.moved-aside
 *.pbxuser
 !default.pbxuser
@@ -28,8 +33,6 @@ DerivedData/
 *.perspectivev3
 !default.perspectivev3
 
-# Swift Package Manager
-.build/
-
 # Cursor editor files
 .cursor/
+*.cursor

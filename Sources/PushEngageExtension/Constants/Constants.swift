@@ -56,7 +56,7 @@ package struct NetworkConstants {
     // `X-Pe-Sdk-Version` HTTP header, in the User-Agent string, and in the
     // `swv` field of subscribe/sync/trackEvent payloads; a mismatch with the
     // actual shipped version corrupts server-side analytics.
-    package static let sdkVersion = "1.0.0"
+    package static let sdkVersion = "1.1.0"
 
     // MARK: - URL relative - path
     static let addSubscriberPath = "subscriber/add"
