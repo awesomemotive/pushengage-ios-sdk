@@ -171,7 +171,7 @@ public typealias PENotificationDisplayNotification = (_ notification: PENotifica
 @objcMembers
 @objc(PEnotificationAction) public class PENotificationAction: NSObject {
 
-    internal (set) public var actionID: String?
+    internal(set) public var actionID: String?
     public var actionType: ActionType
 
     public init(actionID: String?,

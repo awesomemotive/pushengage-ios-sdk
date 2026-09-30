@@ -16,7 +16,7 @@ protocol UNUserNotificationCenterProtocol: AnyObject {
     /// values — `UNNotificationSettings` has no public init.
     func peGetAuthorizationStatus(completionHandler: @escaping (UNAuthorizationStatus) -> Void)
     func requestAuthorization(options: UNAuthorizationOptions,
-                              completionHandler: @escaping (Bool, Error?) -> Void)
+                              completionHandler: @escaping @Sendable (Bool, Error?) -> Void)
 }
 
 @available(iOS 10.0, *)

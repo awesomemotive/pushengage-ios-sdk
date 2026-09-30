@@ -608,7 +608,7 @@ extension SubscriberServiceManager {
     
     func retryAddSubscriberProcess(completion: ((PEError?) -> Void)?) {
         BackgroundTaskExpirationHandler.run { [weak self] background in
-            retry(3, delay: 300) { [weak self] result in
+            self?.retry(3, delay: 300) { [weak self] result in
                 self?.addSubscriberToServer(completion: result)
             } completion: { error in
                 completion?(error)

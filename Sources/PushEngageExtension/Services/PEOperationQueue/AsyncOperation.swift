@@ -7,7 +7,7 @@
 
 import Foundation
 
-open class AsyncOperation: Operation {
+open class AsyncOperation: Operation, @unchecked Sendable {
     private let lockQueue = DispatchQueue(label: "com.pushengage.lock.queue", attributes: .concurrent)
 
     override open var isAsynchronous: Bool {

@@ -49,49 +49,48 @@
                                 <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="80g-jQ-E5B"/>
                                 <constraint firstAttribute="height" constant="40" id="HPO-VC-WMu"/>
                             </constraints>
+                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" title="Request Notification Permission"/>
-                            <buttonConfiguration key="configuration" style="plain" title="Request Notification Permission" cornerStyle="capsule"/>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                    <integer key="value" value="8"/>
+                                </userDefinedRuntimeAttribute>
+                            </userDefinedRuntimeAttributes>
+                            <connections>
+                                <action selector="requestNotificationPermissionTapped:" destination="-1" eventType="touchUpInside" id="Iqe-Ue-Iqe"/>
+                            </connections>
                         </button>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Actions" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fr1-xF-hHK">
-                            <rect key="frame" x="20" y="208" width="353" height="26.333333333333343"/>
-                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="22"/>
-                            <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <nil key="highlightedColor"/>
-                        </label>
                     </subviews>
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     <constraints>
-                        <constraint firstItem="goq-fV-gqO" firstAttribute="leading" secondItem="AEp-zS-K0T" secondAttribute="leading" constant="20" id="1Tb-dV-Dbs"/>
-                        <constraint firstItem="KvJ-AH-LZA" firstAttribute="height" secondItem="AEp-zS-K0T" secondAttribute="height" multiplier="0.2" id="2Ph-rE-qFU"/>
-                        <constraint firstItem="goq-fV-gqO" firstAttribute="top" secondItem="sbd-UC-hJU" secondAttribute="bottom" constant="28" id="5El-xy-Gyk"/>
-                        <constraint firstAttribute="trailing" secondItem="goq-fV-gqO" secondAttribute="trailing" constant="20" id="7js-hn-aRu"/>
-                        <constraint firstItem="KvJ-AH-LZA" firstAttribute="leading" secondItem="AEp-zS-K0T" secondAttribute="leading" constant="20" id="A1P-XZ-aFL"/>
-                        <constraint firstItem="Fey-hx-bKv" firstAttribute="top" secondItem="AEp-zS-K0T" secondAttribute="top" id="INv-Kq-RQP"/>
-                        <constraint firstItem="sbd-UC-hJU" firstAttribute="top" secondItem="fr1-xF-hHK" secondAttribute="bottom" constant="20" id="Q3e-3D-mjH"/>
-                        <constraint firstAttribute="bottom" secondItem="goq-fV-gqO" secondAttribute="bottom" constant="20" id="WAU-fa-mCb"/>
-                        <constraint firstItem="sbd-UC-hJU" firstAttribute="leading" secondItem="AEp-zS-K0T" secondAttribute="leading" constant="20" id="ZUK-TH-GDO"/>
-                        <constraint firstAttribute="trailing" secondItem="KvJ-AH-LZA" secondAttribute="trailing" constant="20" id="bh2-fZ-oRv"/>
-                        <constraint firstItem="Fey-hx-bKv" firstAttribute="leading" secondItem="AEp-zS-K0T" secondAttribute="leading" constant="20" id="e25-TT-Zzi"/>
-                        <constraint firstAttribute="trailing" secondItem="Fey-hx-bKv" secondAttribute="trailing" constant="20" id="hRX-iW-StQ"/>
-                        <constraint firstItem="KvJ-AH-LZA" firstAttribute="top" secondItem="Fey-hx-bKv" secondAttribute="bottom" constant="10" id="iVq-Fn-YOb"/>
-                        <constraint firstItem="fr1-xF-hHK" firstAttribute="leading" secondItem="AEp-zS-K0T" secondAttribute="leading" constant="20" id="lNG-vo-pcj"/>
-                        <constraint firstItem="fr1-xF-hHK" firstAttribute="top" secondItem="KvJ-AH-LZA" secondAttribute="bottom" constant="20" id="pRi-qI-3fX"/>
-                        <constraint firstAttribute="trailing" secondItem="sbd-UC-hJU" secondAttribute="trailing" constant="20" id="t2O-Hh-lfz"/>
-                        <constraint firstAttribute="trailing" secondItem="fr1-xF-hHK" secondAttribute="trailing" constant="20" id="v96-xM-9a6"/>
+                        <constraint firstItem="Fey-hx-bKv" firstAttribute="leading" secondItem="AEp-zS-K0T" secondAttribute="leading" constant="20" id="2Ue-Ue-Iqe"/>
+                        <constraint firstItem="KvJ-AH-LZA" firstAttribute="leading" secondItem="AEp-zS-K0T" secondAttribute="leading" constant="20" id="4Ue-Ue-Iqe"/>
+                        <constraint firstItem="sbd-UC-hJU" firstAttribute="leading" secondItem="AEp-zS-K0T" secondAttribute="leading" constant="20" id="6Ue-Ue-Iqe"/>
+                        <constraint firstItem="goq-fV-gqO" firstAttribute="leading" secondItem="AEp-zS-K0T" secondAttribute="leading" constant="20" id="8Ue-Ue-Iqe"/>
+                        <constraint firstAttribute="trailing" secondItem="Fey-hx-bKv" secondAttribute="trailing" constant="20" id="AUe-Ue-Iqe"/>
+                        <constraint firstAttribute="trailing" secondItem="KvJ-AH-LZA" secondAttribute="trailing" constant="20" id="CUe-Ue-Iqe"/>
+                        <constraint firstAttribute="trailing" secondItem="sbd-UC-hJU" secondAttribute="trailing" constant="20" id="EUe-Ue-Iqe"/>
+                        <constraint firstAttribute="trailing" secondItem="goq-fV-gqO" secondAttribute="trailing" constant="20" id="GUe-Ue-Iqe"/>
+                        <constraint firstItem="Fey-hx-bKv" firstAttribute="top" secondItem="AEp-zS-K0T" secondAttribute="top" id="IUe-Ue-Iqe"/>
+                        <constraint firstItem="KvJ-AH-LZA" firstAttribute="top" secondItem="Fey-hx-bKv" secondAttribute="bottom" constant="10" id="KUe-Ue-Iqe"/>
+                        <constraint firstItem="sbd-UC-hJU" firstAttribute="top" secondItem="KvJ-AH-LZA" secondAttribute="bottom" constant="66.333333333333314" id="MUe-Ue-Iqe"/>
+                        <constraint firstAttribute="bottom" secondItem="goq-fV-gqO" secondAttribute="bottom" constant="20" id="OUe-Ue-Iqe"/>
+                        <constraint firstItem="KvJ-AH-LZA" firstAttribute="height" secondItem="AEp-zS-K0T" secondAttribute="height" multiplier="0.2" id="QUe-Ue-Iqe"/>
+                        <constraint firstItem="sbd-UC-hJU" firstAttribute="height" secondItem="AEp-zS-K0T" secondAttribute="height" multiplier="0.55" id="SUe-Ue-Iqe"/>
                     </constraints>
                 </view>
             </subviews>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
             <constraints>
-                <constraint firstItem="AEp-zS-K0T" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="1NI-3L-QNu"/>
-                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="AEp-zS-K0T" secondAttribute="trailing" id="eqo-MS-CtT"/>
-                <constraint firstItem="AEp-zS-K0T" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="oF6-cg-V5P"/>
-                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="AEp-zS-K0T" secondAttribute="bottom" id="vqM-CX-sy3"/>
+                <constraint firstItem="AEp-zS-K0T" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="UUe-Ue-Iqe"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="AEp-zS-K0T" secondAttribute="trailing" id="WUe-Ue-Iqe"/>
+                <constraint firstItem="AEp-zS-K0T" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="YUe-Ue-Iqe"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="AEp-zS-K0T" secondAttribute="bottom" id="aUe-Ue-Iqe"/>
             </constraints>
-            <point key="canvasLocation" x="63" y="-11"/>
+            <point key="canvasLocation" x="139.69465648854961" y="20.422535211267608"/>
         </view>
     </objects>
     <resources>
@@ -102,7 +101,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray5Color">
-            <color red="0.89803921568627454" green="0.89803921568627454" blue="0.91764705882352937" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.89803921568627454" green="0.89803921568627454" blue="0.91764705882352937" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
     </resources>
 </document>

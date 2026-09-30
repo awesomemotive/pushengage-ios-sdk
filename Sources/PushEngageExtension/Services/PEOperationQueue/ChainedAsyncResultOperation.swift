@@ -11,7 +11,7 @@ protocol ChainedOperationOutputProviding {
     var output: Any? { get }
 }
 
-package class ChainedAsyncResultOperation<Input, Output, Failure>: AsyncResultOperation<Output, Failure>
+package class ChainedAsyncResultOperation<Input, Output, Failure>: AsyncResultOperation<Output, Failure>, @unchecked Sendable
                                                                     where Failure: Error {
 
     private(set) var input: Input?

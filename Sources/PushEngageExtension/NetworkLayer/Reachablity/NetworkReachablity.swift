@@ -14,28 +14,28 @@ class NetworkConnectivity {
     }
 }
 
-class NetworkReachabilityManager {
+package class NetworkReachabilityManager {
     
-    enum NetworkReachabilityStatus {
+    package enum NetworkReachabilityStatus {
         case unknown
         case notReachable
         case reachable(ConnectionType)
     }
 
-    enum ConnectionType {
+    package enum ConnectionType {
         case ethernetOrWiFi
         case wwan
     }
 
-    typealias Listener = (NetworkReachabilityStatus) -> Void
+    package typealias Listener = (NetworkReachabilityStatus) -> Void
 
     // MARK: - Properties
 
-    var isReachable: Bool { return isReachableOnWWAN || isReachableOnEthernetOrWiFi }
+    package var isReachable: Bool { return isReachableOnWWAN || isReachableOnEthernetOrWiFi }
 
-    var isReachableOnWWAN: Bool { return networkReachabilityStatus == .reachable(.wwan) }
+    package var isReachableOnWWAN: Bool { return networkReachabilityStatus == .reachable(.wwan) }
 
-    var isReachableOnEthernetOrWiFi: Bool { return networkReachabilityStatus == .reachable(.ethernetOrWiFi) }
+    package var isReachableOnEthernetOrWiFi: Bool { return networkReachabilityStatus == .reachable(.ethernetOrWiFi) }
 
     var networkReachabilityStatus: NetworkReachabilityStatus {
         guard let flags = self.flags else { return .unknown }
@@ -43,7 +43,7 @@ class NetworkReachabilityManager {
     }
     var listenerQueue: DispatchQueue = DispatchQueue.main
 
-    var listener: Listener?
+    package var listener: Listener?
 
     var flags: SCNetworkReachabilityFlags? {
         var flags = SCNetworkReachabilityFlags()
@@ -68,7 +68,7 @@ class NetworkReachabilityManager {
     /// Reachability treats the 0.0.0.0 address as a special token that causes it to monitor the general routing
     /// status of the device, both IPv4 and IPv6.
     /// - returns: The new `NetworkReachabilityManager` instance.
-    public convenience init?() {
+    package convenience init?() {
         var address = sockaddr_in()
         address.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
         address.sin_family = sa_family_t(AF_INET)
@@ -96,7 +96,7 @@ class NetworkReachabilityManager {
     // MARK: - Listening
 
     @discardableResult
-    open func startListening() -> Bool {
+    package func startListening() -> Bool {
         var context = SCNetworkReachabilityContext(version: 0,
                                                    info: nil,
                                                    retain: nil,
@@ -125,7 +125,7 @@ class NetworkReachabilityManager {
         return callbackEnabled && queueEnabled
     }
 
-    open func stopListening() {
+    package func stopListening() {
         SCNetworkReachabilitySetCallback(reachability, nil, nil)
         SCNetworkReachabilitySetDispatchQueue(reachability, nil)
     }
@@ -173,8 +173,8 @@ extension NetworkReachabilityManager.NetworkReachabilityStatus: Equatable {}
 /// - parameter rhs: The right-hand side value to compare.
 ///
 /// - returns: `true` if the two values are equal, `false` otherwise.
- func == (lhs: NetworkReachabilityManager.NetworkReachabilityStatus,
-          rhs: NetworkReachabilityManager.NetworkReachabilityStatus) -> Bool {
+package func == (lhs: NetworkReachabilityManager.NetworkReachabilityStatus,
+                 rhs: NetworkReachabilityManager.NetworkReachabilityStatus) -> Bool {
     switch (lhs, rhs) {
     case (.unknown, .unknown):
         return true

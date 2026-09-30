@@ -39,11 +39,7 @@ class WKWebViewController: UIViewController {
     }()
     
     private lazy var webView: WKWebView = {
-        let preferences = WKPreferences()
-        preferences.javaScriptEnabled = true
-        let configuration = WKWebViewConfiguration()
-        configuration.preferences = preferences
-        let webView = WKWebView(frame: .zero, configuration: configuration)
+        let webView = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
         webView.translatesAutoresizingMaskIntoConstraints = false
         webView.navigationDelegate = self
         return webView

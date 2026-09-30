@@ -7,7 +7,7 @@
 
 import Foundation
 
-package class AsyncResultOperation<Success, Failure>: AsyncOperation where Failure: Error {
+package class AsyncResultOperation<Success, Failure>: AsyncOperation, @unchecked Sendable where Failure: Error {
 
     private(set) var result: Result<Success, Failure>? {
         didSet {
@@ -47,7 +47,7 @@ extension AsyncResultOperation: ChainedOperationOutputProviding {
                 return nil
             }
             switch failureError {
-            case .sponseredfailWithContent(var attachmentString?, let networkService):
+            case .sponseredfailWithContent(let attachmentString?, let networkService):
                 return (attachmentString, networkService)
             default:
                 return nil

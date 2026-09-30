@@ -11,6 +11,7 @@
 
 @import UserNotifications;
 @import PushEngage;
+@import PushEngageExtension;
 
 @interface AppDelegate ()
 
@@ -49,7 +50,15 @@ typedef void (^_Nullable SilentPushHandler)(UIBackgroundFetchResult);
     PEnotificationOpenHandler actionHandler = ^void(PENotificationOpenResult *result) {
         if ([result.notificationAction.actionID isEqualToString: @"Deeplink"]) {
             DeeplinkViewController *controller = [DeeplinkViewController new];
-            UINavigationController *navigationController = (UINavigationController *) application.windows.firstObject.rootViewController;
+            UIWindow *keyWindow = nil;
+            for (UIScene *scene in application.connectedScenes) {
+                if (![scene isKindOfClass:[UIWindowScene class]]) { continue; }
+                for (UIWindow *window in ((UIWindowScene *)scene).windows) {
+                    if (window.isKeyWindow) { keyWindow = window; break; }
+                }
+                if (keyWindow) { break; }
+            }
+            UINavigationController *navigationController = (UINavigationController *) keyWindow.rootViewController;
             [navigationController popToRootViewControllerAnimated:YES];
             [navigationController pushViewController:controller animated:YES];
         }

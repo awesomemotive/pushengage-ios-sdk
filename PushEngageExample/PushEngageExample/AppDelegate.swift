@@ -11,9 +11,7 @@ import PushEngage
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-    
-    var window: UIWindow?
-    
+
     override init() {
         super.init()
         // enable method swizzling for the application.
@@ -22,23 +20,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
-        self.window = UIWindow()
-        // First-launch flow: no App ID configured yet → force the user into
-        // SettingsViewController. Once they save and force-quit, the next
-        // launch takes the normal Home root path below.
-        if !DemoPrefs.shared.isConfigured {
-            let settings = SettingsViewController()
-            settings.isInitialSetup = true
-            self.window?.rootViewController = UINavigationController(rootViewController: settings)
-            self.window?.makeKeyAndVisible()
+        // First-launch flow: no App ID configured yet → SceneDelegate shows
+        // SettingsViewController and the SDK stays uninitialised. Once the user
+        // saves and force-quits, the next launch takes the normal path below.
+        guard DemoPrefs.shared.isConfigured else {
             return true
         }
-        self.window?.rootViewController = UINavigationController(rootViewController: HomeViewController())
-        self.window?.makeKeyAndVisible()
 
-        if #available(iOSApplicationExtension 10.0, *) {
-            UNUserNotificationCenter.current().delegate = self
-        }
+        UNUserNotificationCenter.current().delegate = self
 
         PushEngage.setBadgeCount(count: 0)
 
@@ -63,7 +52,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         // Notification open handler.
         // deeplinking screen
-        PushEngage.setNotificationOpenHandler { (result) in
+        PushEngage.setNotificationOpenHandler { [weak self] (result) in
+            guard let self = self else { return }
             let additionData = result.notification.additionalData
             print(additionData ?? [:])
             // actionID is nil when the SDK already opened the URL itself
@@ -73,13 +63,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             }
             if actionId == "Trigger" {
                 let triggerViewController = TriggerViewController()
-                let navcontroller = application.windows.first?.rootViewController as? UINavigationController
-                navcontroller?.pushViewController(triggerViewController, animated: true)
+                self.rootNavigationController?.pushViewController(triggerViewController, animated: true)
             } else {
                 let landingViewController = LandingViewController()
                 landingViewController.linkText = actionId
-                let navcontroller = application.windows.first?.rootViewController as? UINavigationController
-                navcontroller?.pushViewController(landingViewController, animated: true)
+                self.rootNavigationController?.pushViewController(landingViewController, animated: true)
+            }
+        }
+        
+        // Set up custom action handler for in-app messages
+        PushEngage.setIAMCustomActionHandler { actionId, parameters in
+            print("Received custom action: \(actionId) with parameters: \(parameters)")
+            
+            switch actionId {
+                
+            case "accept_action":
+                print("Aceept action triggered: \(parameters)")
+                
+            default:
+                // Handle any custom actions not explicitly defined
+                if let url = parameters["url"], let urlObj = URL(string: url) {
+                    UIApplication.shared.open(urlObj, options: [:], completionHandler: nil)
+                }
             }
         }
         
@@ -88,6 +93,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         return true
     }
     
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+    }
+
+    private var rootNavigationController: UINavigationController? {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }?
+            .rootViewController as? UINavigationController
+    }
+
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
 //        Uncomment below line if swizzling is not used
 //        PushEngage.willPresentNotification(center: center, notification: notification, completionHandler: completionHandler)

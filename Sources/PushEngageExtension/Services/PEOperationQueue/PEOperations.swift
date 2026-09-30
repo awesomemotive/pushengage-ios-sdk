@@ -16,7 +16,7 @@ package typealias DownloadOperationInput = (attachmentString: String?,
                                            networkService: NetworkRouterType)
 
 @available(iOS 10.0, *)
-package final class DownloadAttachmentOperation: ChainedAsyncResultOperation<DownloadOperationInput, String, PEError> {
+package final class DownloadAttachmentOperation: ChainedAsyncResultOperation<DownloadOperationInput, String, PEError>, @unchecked Sendable {
     
     package init(inputValue: DownloadOperationInput? = nil) {
         super.init(input: inputValue)
@@ -105,7 +105,7 @@ package typealias SponseredNotificationInput = (previousAttachment: String?,
 @available(iOS 10.0, *)
 package final class SponseredNotifictaionOperation: ChainedAsyncResultOperation<SponseredNotificationInput,
                                                                          DownloadOperationInput,
-                                                                         PEError> {
+                                                                         PEError>, @unchecked Sendable {
     
     package init(input: SponseredNotificationInput) {
         super.init(input: input)

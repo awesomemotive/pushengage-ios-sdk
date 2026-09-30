@@ -106,6 +106,12 @@ protocol EventManagerType {
                     completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?)
 }
 
+protocol IAMTriggerManagerType {
+    func triggerEvent(name: String,
+                     parameters: [String: Any]?,
+                     completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?)
+}
+
 protocol PEManagerType: DeviceManagerType,
                         SubscriberManagerType,
                         AppInfoManagerType,
@@ -115,7 +121,9 @@ protocol PEManagerType: DeviceManagerType,
                         CampaignManagerType,
                         SwizzleManagerType,
                         GoalManagerType,
-                        EventManagerType {}
+                        EventManagerType,
+                        IAMTriggerManagerType,
+                        IAMCustomActionDelegate {}
 
 final class PEManager: PEManagerType {
     
@@ -138,6 +146,9 @@ final class PEManager: PEManagerType {
     private static var notificationWillShowInForeground: PENotificationWillShowInForeground?
     private static var notificationOpenHandler: PENotificationOpenHandler?
     private let disposeBag = DisposeBag()
+    
+    /// Handler for custom in-app message actions
+    var customActionHandler: PEIAMCustomActionHandler?
     
     var notificationPermissionStatus: NotificationServiceType {
         return notificationService
@@ -444,6 +455,17 @@ final class PEManager: PEManagerType {
     
     func setAppId(key: String) {
         userDefaultsService.siteKey = key
+
+        // IAM needs only the App ID (site_key) to fetch campaigns — not a push
+        // subscription — so configure and kick the IAM sync here, decoupled
+        // from the notification permission/subscribe flow.
+        IAMConfiguration.shared.siteKey = key
+        IAMConfiguration.shared.environment = userDefaultsService.environment
+        // App-open aware kick: wrappers call setAppId after the app is already
+        // active, where the didBecomeActive observer can never fire — this runs
+        // app-open (sync + auto-trigger display) directly in that case, and
+        // plain-syncs otherwise (the observer handles display moments later).
+        IAMController.shared.handleAppOpenOrSync()
     }
 
     func handleNotificationPermission(completion: @escaping (_ response: Bool, _ error: Error?) -> Void) {
@@ -464,6 +486,21 @@ final class PEManager: PEManagerType {
         self.application = application
         self.launchOptions = launchOptions
 
+        // Keep the IAM runtime configuration current (the App ID may have been
+        // persisted on a previous launch, before this process ever called
+        // setAppId).
+        IAMConfiguration.shared.siteKey = userDefaultsService.siteKey
+        IAMConfiguration.shared.environment = userDefaultsService.environment
+
+        // Registered from here rather than from IAMController's initialiser: this is the
+        // only entry point hosts call from didFinishLaunching, and BGTaskScheduler raises
+        // if a launch handler is registered after it returns.
+        IAMController.shared.registerBackgroundRefresh()
+
+        // Initialize and sync in-app messages during SDK initialization.
+        // App-open aware (see setAppId): displays on app open even when the SDK
+        // is configured after the app became active (React Native / Flutter).
+        IAMController.shared.handleAppOpenOrSync()
     }
     
     func onClickRedirect(to launchURL: String?) {
@@ -612,12 +649,9 @@ final class PEManager: PEManagerType {
             if key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 return PEError.custom("TrackEvent properties keys must be non-blank")
             }
-            // `NSNumber` covers Int, Double, Float, and (importantly) Bool when
-            // bridged from `Any`. Filter `NSDate` out explicitly because Date
-            // bridges to NSDate which is not in the allowlist.
             if value is String { continue }
             if value is Bool { continue }
-            if let number = value as? NSNumber, !(number is NSDate) {
+            if let number = value as? NSNumber {
                 let typeName = String(cString: number.objCType)
                 // CFBoolean bridges to NSNumber with objCType "c" — already handled by Bool branch.
                 // Allow integer, float, double types; reject everything else.
@@ -925,7 +959,7 @@ final class PEManager: PEManagerType {
             PELogger.debug(className: String(describing: PEManager.self),
                            message: "Permission not granted or no subscriber data - requesting notification permission. Permission: \(permissionStatus.rawValue), hasSubscriberHash: \(!subscriberHash.isEmpty)")
             
-            handleNotificationPermission { [weak self] permissionGranted, error in
+            handleNotificationPermission { permissionGranted, error in
                 if let error = error {
                     completionHandler?(false, error as? PEError ?? .permissionNotDetermined)
                     return
@@ -943,7 +977,14 @@ final class PEManager: PEManagerType {
         self.removeObservers()
     }
     
+    // MARK: - IAMCustomActionDelegate
+    
+    func handleCustomAction(actionId: String, parameters: [String: String]) {
+        customActionHandler?(actionId, parameters)
+    }
+
 }
+
 // MARK: - Swizzling and manually setup methods.
 
 extension PEManager {
@@ -1256,5 +1297,24 @@ extension PEManager {
     
     func updateSwizzledStatus(with status: Bool) {
         userDefaultsService.isSwizzled = status
+    }
+}
+
+// MARK: - IAMTriggerManagerType
+
+extension PEManager {
+    func triggerEvent(name: String, 
+                     parameters: [String: Any]?, 
+                     completionHandler: ((_ response: Bool, _ error: PEError?) -> Void)?) {
+        // A blank event name can only be a caller bug: it matches no campaign, so
+        // without this the call reported success and the typo stayed silent. Same
+        // message as trackEvent's guard above and as the Android SDK's, so every
+        // platform reports this failure identically.
+        if name.isEmpty {
+            completionHandler?(false, PEError.custom("Event name is required"))
+            return
+        }
+        IAMController.shared.processTrigger(name, parameters: parameters)
+        completionHandler?(true, nil)
     }
 }

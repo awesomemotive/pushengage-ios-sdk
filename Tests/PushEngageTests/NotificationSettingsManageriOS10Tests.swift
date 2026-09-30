@@ -84,6 +84,21 @@ final class NotificationSettingsManageriOS10Tests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
 
+    /// Apple's `.ephemeral` (iOS 14+, App Clips only) means the clip is
+    /// temporarily authorized to post notifications — delivery works, no prompt
+    /// is pending. Must be reported as `.granted`, matching the IAM controller's
+    /// reading, not as "not yet requested" (which would block subscriber
+    /// registration and trigger a system prompt).
+    func test_getNotificationPermissionState_async_mapsEphemeralToGranted() {
+        notificationCenter.stubbedAuthorizationStatus = .ephemeral
+        let exp = expectation(description: "callback")
+        sut.getNotificationPermissionState { status in
+            XCTAssertEqual(status, .granted)
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 1.0)
+    }
+
     /// Regression for the deadlock fix: the getter must return BEFORE the authorization
     /// callback runs — i.e. it must not block waiting on it. Delivery is gated behind a
     /// suspended queue so the ordering is deterministic: if the getter blocked on the
